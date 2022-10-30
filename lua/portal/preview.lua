@@ -1,34 +1,32 @@
 local M = {}
 
---- @class Grapple.Float
+--- @class Portal.Float
 --- @field buffer integer
 --- @field window integer
 --- @field extmark integer
 
---- @type Grapple.Float[]
+--- @type Portal.Float[]
 local floats = {}
 
 local float_namespace = vim.api.nvim_create_namespace("")
 
---- @param jump Grapple.Jump
---- @param decorations Grapple.Decorations
+--- @param jump Portal.Jump
 --- @return integer
-local function preview_buffer(jump, decorations)
+local function preview_buffer(jump)
     if not vim.api.nvim_buf_is_valid(jump.buffer) then
         return vim.api.nvim_create_buf(false, true)
     end
 
     if not vim.api.nvim_buf_is_loaded(jump.buffer) then
         vim.fn.bufload(jump.buffer)
-        return jump.buffer
     end
 
     return jump.buffer
 end
 
---- @param jump Grapple.Jump
+--- @param jump Portal.Jump
 --- @param buffer integer
---- @param decorations Grapple.Decorations
+--- @param decorations Portal.Decorations
 --- @return integer
 local function preview_window(jump, buffer, decorations)
     local cursor = {
@@ -47,9 +45,9 @@ local function preview_window(jump, buffer, decorations)
     return window
 end
 
---- @param jump Grapple.Jump
+--- @param jump Portal.Jump
 --- @param buffer integer
---- @param decorations Grapple.Decorations
+--- @param decorations Portal.Decorations
 --- @return integer
 local function preview_extmark(jump, buffer, decorations)
     local row = jump.row - 1
@@ -87,18 +85,19 @@ local function preview_extmark(jump, buffer, decorations)
     return extmark_id
 end
 
---- @param jumps Grapple.Jump[]
---- @param decorator Grapple.Decorator
-function M.preview_jumps(jumps, decorator)
+--- @param jumps Portal.Jump[]
+--- @param decorator Portal.Decorator
+--- @param labeller Portal.Labeller
+function M.preview_jumps(jumps, decorator, labeller)
     M.clear()
 
     for index, jump in pairs(jumps) do
-        local decorations = decorator(index, jump)
-        local buffer = preview_buffer(jump, decorations)
+        local decorations = decorator(index, jump, labeller)
+        local buffer = preview_buffer(jump)
         local window = preview_window(jump, buffer, decorations)
         local extmark = preview_extmark(jump, buffer, decorations)
 
-        --- @type Grapple.Float
+        --- @type Portal.Float
         local float = {
             buffer = buffer,
             window = window,

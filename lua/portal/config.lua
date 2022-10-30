@@ -1,7 +1,7 @@
---- @type Grapple.Config
+--- @type Portal.Config
 local M = {}
 
---- @enum Grapple.Keymap
+--- @enum Portal.Keymap
 M.Keymap = {
     ---
     ESCAPE = "escape",
@@ -13,7 +13,7 @@ M.Keymap = {
     BACKWARD = "backward",
 }
 
---- @enum Grapple.MarkScope
+--- @enum Portal.MarkScope
 M.MarkScope = {
     --- Use a global namespace for marks
     GLOBAL = "global",
@@ -26,14 +26,14 @@ M.MarkScope = {
 }
 
 
---- @class Grapple.Config
+--- @class Portal.Config
 local DEFAULT_CONFIG = {
     log_level = vim.log.levels.WARN,
 
     mark = {
         --- The default scope in which marks will be saved to
         --- todo(cbochs): implement
-        --- @type Grapple.MarkScope
+        --- @type Portal.MarkScope
         scope = M.MarkScope.GLOBAL,
 
         --- Marks will be scoped to a specific git commit
@@ -41,14 +41,7 @@ local DEFAULT_CONFIG = {
         git = false
     },
 
-    jump = {},
-
-    decorate = {
-        --- Labels that are used by the decorator
-        --- See: grapple.decorator.default
-        --- todo(cbochs): begin using these
-        labels = { "j", "k", "h", "l" }
-    },
+    jump = { },
 
     preview = {
         -- When a slot is empty, don't show it at all
@@ -58,6 +51,10 @@ local DEFAULT_CONFIG = {
         -- When there is more than one jump for a single row, collapse it
         -- todo(cbochs): implement
         collapse_extmarks = true,
+
+        --- Labels that are used by the decorator
+        --- See: portal.labeller.default
+        labels = { "j", "k", "h", "l" }
     },
 
     keymaps = {
@@ -91,8 +88,8 @@ local function validate(config, expected_config)
     return errors
 end
 
---- @param keymaps table<string, Grapple.Keymap>
---- @return table<Grapple.Keymap, string[]>
+--- @param keymaps table<string, Portal.Keymap>
+--- @return table<Portal.Keymap, string[]>
 local function resolve_keymaps(keymaps)
     local resolved_keymaps = {}
 
@@ -109,7 +106,7 @@ local function resolve_keymaps(keymaps)
     return resolved_keymaps
 end
 
---- @param opts Grapple.Config
+--- @param opts Portal.Config
 function M.load(opts)
     opts = opts or {}
 

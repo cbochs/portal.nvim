@@ -1,16 +1,43 @@
 local M = {}
 
---- @class Grapple.Decorations
+--- @class Portal.Decorations
+--- @field nui_popup fun(): table
 --- @field extmark fun(prev_details?: table): table
 --- @field window fun(): table
 
---- @alias Grapple.Decorator fun(index: integer, jump: Grapple.Jump): Grapple.Decorations
+--- @alias Portal.Decorator fun(index: integer, jump: Grapple.Jump, labeller: Grapple.Labeller): Grapple.Decorations
 
 --- @param index integer
---- @param jump Grapple.Jump
---- @return Grapple.Decorations
-function M.default(index, jump)
+--- @param jump Portal.Jump
+--- @param labeller Portal.Labeller
+--- @return Portal.Decorations
+function M.default(index, jump, labeller)
     return {
+        nui_popup = function()
+            return {
+                position = {
+                    row = (index - 1) * 5,
+                    col = 2,
+                },
+                size = {
+                    width = 80,
+                    height = 3,
+                },
+                enter = false,
+                focusable = false,
+                relative = "cursor",
+                border = {
+                    style = "rounded",
+                    text = {
+                        top = vim.api.nvim_buf_get_name(jump.buffer),
+                        top_align = "left"
+                    },
+                    win_options = {
+                        winblend = 10,
+                    }
+                }
+            }
+        end,
         window = function()
              return {
                 relative  = "cursor",
@@ -24,10 +51,9 @@ function M.default(index, jump)
             }
         end,
         extmark = function(prev_details)
-            local config = require("grapple.config")
-            local predicate = require("grapple.predicate")
+            local predicate = require("portal.predicate")
 
-            local virt_text = "[" .. config.decorate.labels[index] .. "]"
+            local virt_text = "[" .. labeller(index, jump) .. "]"
             if prev_details ~= nil then
                 virt_text = prev_details.virt_text[1][1] .. " " .. virt_text
             end

@@ -3,7 +3,7 @@ vim.api.nvim_create_user_command(
     function()
         -- Unload all packages
         for name, _ in pairs(package.loaded) do
-            if name:match("^grapple") then
+            if name:match("^portal") then
                 package.loaded[name] = nil
             end
         end

@@ -1,22 +1,22 @@
-local config = require("grapple.config")
+local config = require("portal.config")
 
 local M = {}
 
---- @class Grapple.Jump
+--- @class Portal.Jump
 --- @field buffer integer
---- @field direction Grapple.Direction
+--- @field direction Portal.Direction
 --- @field distance integer
 --- @field row integer
 --- @field col integer
 
---- @enum Grapple.Direction
+--- @enum Portal.Direction
 M.Direction = {
     BACKWARD = 0,
     FORWARD = 1,
     NONE = 2,
 }
 
---- @return Grapple.Jump
+--- @return Portal.Jump
 local function default()
     return  {
         buffer = -1,
@@ -27,8 +27,8 @@ local function default()
     }
 end
 
---- @param direction Grapple.Direction
---- @return fun(): Grapple.Jump
+--- @param direction Portal.Direction
+--- @return fun(): Portal.Jump
 local function jumplist_iter(direction)
     local jumplist_tuple = vim.fn.getjumplist()
 
@@ -59,7 +59,7 @@ local function jumplist_iter(direction)
 
         local vim_jump = vim_jumplist[current_pos]
 
-        --- @type Grapple.Jump
+        --- @type Portal.Jump
         local jump = {
             buffer = vim_jump.bufnr,
             distance = math.abs(displacement),
@@ -86,11 +86,11 @@ end
 --- * if the first jump was also `marked`, the third jump will also be
 ---   associated with the first item in the jumplist
 ---
---- @param desired_jumps Grapple.Predicate[]
---- @param direction Grapple.Direction
---- @return Grapple.Jump[]
+--- @param desired_jumps Portal.Predicate[]
+--- @param direction Portal.Direction
+--- @return Portal.Jump[]
 function M.generate(desired_jumps, direction)
-    --- @type Grapple.Jump[]
+    --- @type Portal.Jump[]
     local identified_jumps = {}
 
     for jump in jumplist_iter(direction) do
@@ -121,7 +121,7 @@ function M.generate(desired_jumps, direction)
     return identified_jumps
 end
 
---- @param jump Grapple.Jump
+--- @param jump Portal.Jump
 function M.select(jump)
     local jump_key = nil
     if jump.direction == M.Direction.BACKWARD then
@@ -151,8 +151,8 @@ local function get_input()
     return char
 end
 
---- @param jumps Grapple.Jump[]
---- @param labeller Grapple.Labeller
+--- @param jumps Portal.Jump[]
+--- @param labeller Portal.Labeller
 --- @return boolean
 function M.resolve(jumps, labeller)
     local input_char = get_input()
