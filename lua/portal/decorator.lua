@@ -5,7 +5,7 @@ local M = {}
 --- @field extmark fun(prev_details?: table): table
 --- @field window fun(): table
 
---- @alias Portal.Decorator fun(index: integer, jump: Grapple.Jump, labeller: Grapple.Labeller): Grapple.Decorations
+--- @alias Portal.Decorator fun(index: integer, jump: Portal.Jump, labeller: Portal.Labeller): Portal.Decorations
 
 --- @param index integer
 --- @param jump Portal.Jump
@@ -51,24 +51,15 @@ function M.default(index, jump, labeller)
             }
         end,
         extmark = function(prev_details)
-            local predicate = require("portal.predicate")
-
             local virt_text = "[" .. labeller(index, jump) .. "]"
             if prev_details ~= nil then
                 virt_text = prev_details.virt_text[1][1] .. " " .. virt_text
             end
 
-            local sign_text = ""
-            if predicate.is_marked(jump) then
-                sign_text = "MK"
-            elseif predicate.is_modified(jump) then
-                sign_text = "MD"
-            end
-
             return {
                 virt_text = {{ virt_text, "LeapLabelPrimary" }},
                 virt_text_pos = "overlay",
-                sign_text = sign_text,
+                sign_text = jump.query.name_short,
                 sign_hl_group = "LeapLabelPrimary",
             }
         end,

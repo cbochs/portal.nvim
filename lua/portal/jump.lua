@@ -8,6 +8,7 @@ local M = {}
 --- @field distance integer
 --- @field row integer
 --- @field col integer
+--- @field query Portal.Query
 
 --- @enum Portal.Direction
 M.Direction = {
@@ -73,46 +74,50 @@ local function jumplist_iter(direction)
 end
 
 --- Populate an ordered list of available jumps based on an input list of
---- predicates.
+--- queries.
 ---
 --- In order to generate unique jumps, an individual jump may only be
---- associated with a unique predicate _type_ once. However, a jump may be
---- associated with more than one predicate.
+--- associated with a unique query _predicate_ once. However, a jump may be
+--- associated with more than one query.
 ---
---- For example, given an list of jump predicates `{ is_jump, is_jump, is_mark }`,
+--- Example:
+---
+--- Given an list of jump queries: `{ "valid", "valid", "marked" }`,
 --- the resulting ordered list will be:
 --- * the first jump will be associated with the first item in the jumplist
 --- * the second jump will be associated with the second item in the jumplist
 --- * if the first jump was also `marked`, the third jump will also be
 ---   associated with the first item in the jumplist
 ---
---- @param desired_jumps Portal.Predicate[]
+--- @param queries Portal.Query[]
 --- @param direction Portal.Direction
 --- @return Portal.Jump[]
-function M.generate(desired_jumps, direction)
+function M.search(queries, direction)
     --- @type Portal.Jump[]
     local identified_jumps = {}
 
     for jump in jumplist_iter(direction) do
         local matched_predicates = {}
 
-        for i, predicate in pairs(desired_jumps) do
+        for i, query in pairs(queries) do
             if identified_jumps[i] then
                 goto continue
             end
-            if matched_predicates[predicate] then
+            if matched_predicates[query.predicate] then
                 goto continue
             end
-            if predicate(jump) then
-                matched_predicates[predicate] = true
-                identified_jumps[i] = jump
+            if query.predicate(jump) then
+                matched_predicates[query.predicate] = true
+                identified_jumps[i] = vim.tbl_extend("force", jump, {
+                    query = query
+                })
             end
             ::continue::
         end
     end
 
     -- HACK: give non-identified jumps a "no-op" jump
-    for i = 1, #desired_jumps do
+    for i = 1, #queries do
         if identified_jumps[i] == nil then
             identified_jumps[i] = default()
         end

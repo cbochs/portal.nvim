@@ -41,7 +41,14 @@ local DEFAULT_CONFIG = {
         git = false
     },
 
-    jump = { },
+    default = {
+        --- The default queries used when searching the jumplist
+        --- @type Portal.QueryLike
+        query = { "marked", "modified", "different", "valid" },
+
+        --- The default labels used when showing jumps
+        labels = { "j", "k", "h", "l" },
+    },
 
     preview = {
         -- When a slot is empty, don't show it at all
