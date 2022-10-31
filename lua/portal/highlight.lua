@@ -11,6 +11,9 @@ M.groups = {
 	border_forward = "PortalBorderForward",
 	border_none = "PortalBorderNone",
 	label = "PortalLabel",
+
+	leap_mark_active = "PortalLeapMarkActive",
+	leap_mark_inactive = "PortalLeapMarkInactive",
 }
 
 --- The default theme is based off of catppuccin
@@ -20,6 +23,9 @@ M.default_theme = {
 	PortalBorderForward = { link = M.groups.border },
 	PortalBorderNone = { fg = "#89b4fa" },
 	PortalLabel = { bg = "#a6e3a1", fg = "#1e1e2e" },
+
+	PortalLeapMarkActive = { fg = "#a6e3a1" },
+	PortalLeapMarkInactive = { fg = "#313244" },
 }
 
 --- @param border string | table
