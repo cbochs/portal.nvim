@@ -1,4 +1,5 @@
 local config = require("portal.config")
+local types = require("portal.types")
 
 local M = {}
 
@@ -10,18 +11,11 @@ local M = {}
 --- @field col integer
 --- @field query Portal.Query
 
---- @enum Portal.Direction
-M.Direction = {
-    BACKWARD = 0,
-    FORWARD = 1,
-    NONE = 2,
-}
-
 --- @return Portal.Jump
 local function default()
     return  {
         buffer = -1,
-        direction = M.Direction.NONE,
+        direction = types.Direction.NONE,
         distance = 0,
         row = 0,
         col = 0,
@@ -37,9 +31,9 @@ local function jumplist_iter(direction)
     local start_pos = jumplist_tuple[2] + 1
 
     local signed_step = 1
-    if direction == M.Direction.BACKWARD then
+    if direction == types.Direction.BACKWARD then
         signed_step = -1
-    elseif direction == M.Direction.FORWARD then
+    elseif direction == types.Direction.FORWARD then
         signed_step = 1
     end
 
@@ -119,7 +113,10 @@ function M.search(queries, direction)
     -- HACK: give non-identified jumps a "no-op" jump
     for i = 1, #queries do
         if identified_jumps[i] == nil then
-            identified_jumps[i] = default()
+            identified_jumps[i] = {
+                direction = types.Direction.NONE,
+                query = queries[i],
+            }
         end
     end
 
@@ -129,51 +126,15 @@ end
 --- @param jump Portal.Jump
 function M.select(jump)
     local jump_key = nil
-    if jump.direction == M.Direction.BACKWARD then
+    if jump.direction == types.Direction.BACKWARD then
         jump_key = config.keymaps.backward
-    elseif jump.direction == M.Direction.FORWARD then
+    elseif jump.direction == types.Direction.FORWARD then
         jump_key = config.keymaps.forward
-    elseif jump.direction == M.Direction.NONE then
+    elseif jump.direction == types.Direction.NONE then
         return
     end
 
     vim.api.nvim_feedkeys(jump.distance .. jump_key, "n", false)
-end
-
---- @return string | nil
-local function get_input()
-    local ok, char = pcall(vim.fn.getcharstr)
-    if not ok then
-        return nil
-    end
-
-    for _, keycode in pairs(config.keymaps.escape) do
-        if char == keycode then
-            return nil
-        end
-    end
-
-    return char
-end
-
---- @param jumps Portal.Jump[]
---- @param labeller Portal.Labeller
---- @return boolean
-function M.resolve(jumps, labeller)
-    local input_char = get_input()
-    if input_char == nil then
-        return true
-    end
-
-    for index, jump in pairs(jumps) do
-        local label = labeller(index, jump)
-        if input_char == label and jump.direction ~= M.Direction.NONE then
-            M.select(jump)
-            return true
-        end
-    end
-
-    return false
 end
 
 return M

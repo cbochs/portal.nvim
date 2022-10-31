@@ -53,13 +53,14 @@ function M.resolve(queries)
         end
     end
 
-    return {}
+    return query
 end
 
 --- @param jump Portal.Jump
 --- @return boolean
 local function is_valid(jump)
-    return vim.api.nvim_buf_is_valid(jump.buffer)
+    return jump.buffer ~= nil
+        and vim.api.nvim_buf_is_valid(jump.buffer)
 end
 
 --- @param jump Portal.Jump
@@ -72,21 +73,21 @@ end
 --- @return boolean
 local function is_marked(jump)
     local mark = require("portal.mark")
-    return M.is_valid(jump)
-        and M.is_not_same_buffer(jump)
+    return is_valid(jump)
+        and is_different_buffer(jump)
         and mark.exists(jump.buffer)
 end
 
 --- @param jump Portal.Jump
 --- @return boolean
 local function is_modified(jump)
-    return M.is_valid(jump)
-        and M.is_not_same_buffer(jump)
+    return is_valid(jump)
+        and is_different_buffer(jump)
         and vim.api.nvim_buf_get_option(jump.buffer, "modified")
 end
 
 M.register("valid", is_valid, { name = "Jump", name_short = "J" })
-M.register("different", is_different_buffer, { name = "Different", name_short = "~" })
+M.register("different", is_different_buffer, { name = "Different", name_short = "D" })
 M.register("marked", is_marked, { name = "Marked", name_short = "M" })
 M.register("modified", is_modified, { name = "Modified", name_short = "+" })
 

@@ -50,18 +50,50 @@ local DEFAULT_CONFIG = {
         labels = { "j", "k", "h", "l" },
     },
 
-    preview = {
-        -- When a slot is empty, don't show it at all
-        -- todo(cbochs): implement
-        preview_empty = true,
+    window = {
+        title = {
+            -- When a portal is empty, render an default portal title
+            -- todo(cbochs): implement
+            render_empty = true,
 
+            ---
+            options = {
+                relative  = "cursor",
+                width     = 80, -- implement as "min/mas width",
+                height    = 1,
+                col       = 2,
+                style     = "minimal",
+                focusable = false,
+                border    = "single",
+                noautocmd = true,
+                zindex = 98
+            },
+        },
+
+        portal = {
+            -- When a portal is empty, render an empty buffer body
+            -- todo(cbochs): implement
+            render_empty = false,
+
+            ---
+            options = {
+                relative  = "cursor",
+                width     = 80, -- implement as "min/mas width",
+                height    = 3,  -- implement as "context lines"
+                col       = 2,  -- implement as "offset"
+                focusable = false,
+                border    = "single",
+                noautocmd = true,
+                zindex = 99
+            },
+        },
+
+    },
+
+    preview = {
         -- When there is more than one jump for a single row, collapse it
         -- todo(cbochs): implement
-        collapse_extmarks = true,
-
-        --- Labels that are used by the decorator
-        --- See: portal.labeller.default
-        labels = { "j", "k", "h", "l" }
+        collapse = true,
     },
 
     keymaps = {
