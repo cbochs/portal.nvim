@@ -1,0 +1,187 @@
+M.load()                                                                *M.load*
+     @param opts Portal.Config
+
+
+M.setup()                                                              *M.setup*
+     @class Portal.Previewer
+     @field label Portal.Labeller
+     @field open Portal.Opener
+     @field close Portal.Closer
+     @alias Portal.Labeller fun(jumps: Portal.Jump[], namespace: Portal.Namespace): Portal.Label[]
+     @alias Portal.Opener fun(jumps: Portal.Jump[], labels: string[], namespace: Portal.Namespace): Portal.Portal[]
+     @alias Portal.Closer fun(portals: Portal.Portal[])
+     @alias Portal.Label string
+     @alias Portal.Namespace integer
+     @class Portal.Portal
+     @field jump Portal.Jump
+     @field label string
+     @field windows integer[]
+     @field namespace integer
+     @class Portal.Options
+     @field query Portal.QueryLike[]
+     @field previewer Portal.Previewer
+     @field namespace Portal.Namespace
+     @param opts? Portal.Config
+
+
+M.jump()                                                                *M.jump*
+     @param direction Portal.Direction
+     @param opts? Portal.Options
+
+
+M.jump_backward()                                              *M.jump_backward*
+     @param opts? Portal.Options
+
+
+M.jump_forward()                                                *M.jump_forward*
+     @param opts? Portal.Options
+
+
+M.open()                                                                *M.open*
+     @param jumps Portal.Jump[]
+     @param previewer Portal.Previewer
+     @param namespace? integer
+     @return Portal.Portal[]
+
+
+M.select()                                                            *M.select*
+     @param portals Portal.Portal[]
+
+
+M.close()                                                              *M.close*
+     @param portals Portal.Portal[]
+     @param previewer Portal.Previewer
+
+
+M.get_label()                                                      *M.get_label*
+     @return string | nil
+
+
+M.search()                                                            *M.search*
+     Populate an ordered list of available jumps based on an input list of
+     queries.
+
+     In order to generate unique jumps, an individual jump may only be
+     associated with a unique query _predicate_ once. However, a jump may be
+     associated with more than one query.
+
+     Example:
+
+     Given an list of jump queries: `{ "valid", "valid", "marked" }`,
+     the resulting ordered list will be:
+     * the first jump will be associated with the first item in the jumplist
+     * the second jump will be associated with the second item in the jumplist
+     * if the first jump was also `marked`, the third jump will also be
+       associated with the first item in the jumplist
+
+     @param queries Portal.Query[]
+     @param direction Portal.Direction
+     @return Portal.Jump[]
+
+
+M.select()                                                            *M.select*
+     @param jump Portal.Jump
+
+
+M.mark()                                                                *M.mark*
+
+
+M.unmark()                                                            *M.unmark*
+
+
+M.toggle()                                                            *M.toggle*
+
+
+M.exists()                                                            *M.exists*
+     @param buffer? integer
+
+
+M.reset()                                                              *M.reset*
+
+
+M.load()                                                                *M.load*
+
+
+M.save()                                                                *M.save*
+
+
+M.label()                                                              *M.label*
+     @param jumps Portal.Jump[]
+     @param namespace Portal.Namespace
+     @return Portal.Label[]
+
+
+M.open()                                                                *M.open*
+     @param jumps Portal.Jump[]
+     @param labels Portal.Label[]
+     @param namespace Portal.Namespace
+     @return Portal.Portal[]
+
+
+M.close()                                                              *M.close*
+     @param portals Portal.Portal[]
+
+
+M.register()                                                        *M.register*
+     @param key string
+     @param predicate Portal.Predicate
+     @param opts { name?: string, name_short?: string }
+
+
+M.resolve()                                                          *M.resolve*
+     @param queries Portal.QueryLike[]
+     @return Portal.Query[]
+
+
+M.serialize({state})                                               *M.serialize*
+    Serialize a lua table as json idempotently.
+
+    Parameters: ~
+        {state}  (table|string)
+
+    Returns: ~
+        {string}
+
+
+M.deserialize({serialized_state})                                *M.deserialize*
+    Deserialize a json blob into a lua table idempotently.
+
+    Parameters: ~
+        {serialized_state}  (table|string)
+
+    Returns: ~
+        {table}
+
+
+M.save({save_path}, {state})                                            *M.save*
+    Save a lua table to a given file.
+
+    Parameters: ~
+        {save_path}  (string)
+        {state}      (table)
+
+    Returns: ~
+        {nil}
+
+
+M.load({save_path})                                                     *M.load*
+    Load a lua table from a given file.
+
+    Parameters: ~
+        {save_path}  (string)
+
+    Returns: ~
+        {table}
+
+
+M.file_exists({file_path})                                       *M.file_exists*
+    Check whether a file exists.
+
+    Parameters: ~
+        {file_path}  (string)
+
+    Returns: ~
+        {boolean}
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:
