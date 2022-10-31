@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  PLUGIN_NAME: grapple
+  PLUGIN_NAME: portal
 
 jobs:
   style:
