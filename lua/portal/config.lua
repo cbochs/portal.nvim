@@ -1,30 +1,7 @@
+local types = require("portal.types")
+
 --- @type Portal.Config
 local M = {}
-
---- @enum Portal.Keymap
-M.Keymap = {
-    ---
-    ESCAPE = "escape",
-
-    ---
-    FORWARD = "forward",
-
-    ---
-    BACKWARD = "backward",
-}
-
---- @enum Portal.MarkScope
-M.MarkScope = {
-    --- Use a global namespace for marks
-    GLOBAL = "global",
-
-    --- Use the reported "root_dir" from LSP clients as the mark namespace
-    LSP = "lsp",
-
-    --- Use the current working directory as the mark namespace
-    DIRECTORY = "directory",
-}
-
 
 --- @class Portal.Config
 local DEFAULT_CONFIG = {
@@ -32,16 +9,18 @@ local DEFAULT_CONFIG = {
 
     mark = {
         --- The default scope in which marks will be saved to
-        --- todo(cbochs): implement
         --- @type Portal.MarkScope
-        scope = M.MarkScope.GLOBAL,
+        scope = types.MarkScope.GLOBAL,
+
+        ---
+        save_path = vim.fn.stdpath("data") .. "/" .. "portal.json",
 
         --- Marks will be scoped to a specific git commit
         --- todo(cbochs): implement
         git = false
     },
 
-    default = {
+    jump = {
         --- The default queries used when searching the jumplist
         --- @type Portal.QueryLike
         query = { "marked", "modified", "different", "valid" },
@@ -53,10 +32,9 @@ local DEFAULT_CONFIG = {
     window = {
         title = {
             -- When a portal is empty, render an default portal title
-            -- todo(cbochs): implement
             render_empty = true,
 
-            ---
+            --- The raw window options used for the title window
             options = {
                 relative  = "cursor",
                 width     = 80, -- implement as "min/mas width",
@@ -72,10 +50,9 @@ local DEFAULT_CONFIG = {
 
         portal = {
             -- When a portal is empty, render an empty buffer body
-            -- todo(cbochs): implement
             render_empty = false,
 
-            ---
+            --- The raw window options used for the portal window
             options = {
                 relative  = "cursor",
                 width     = 80, -- implement as "min/mas width",
@@ -90,17 +67,11 @@ local DEFAULT_CONFIG = {
 
     },
 
-    preview = {
-        -- When there is more than one jump for a single row, collapse it
-        -- todo(cbochs): implement
-        collapse = true,
-    },
-
     keymaps = {
-        ["<esc>"] = M.Keymap.ESCAPE,
-        ["<c-j>"] = M.Keymap.ESCAPE,
-        ["<c-i>"] = M.Keymap.FORWARD,
-        ["<c-o>"] = M.Keymap.BACKWARD,
+        ["<esc>"] = types.KeymapType.ESCAPE,
+        ["<c-j>"] = types.KeymapType.ESCAPE,
+        ["<c-i>"] = types.KeymapType.FORWARD,
+        ["<c-o>"] = types.KeymapType.BACKWARD,
     },
 }
 
@@ -139,8 +110,8 @@ local function resolve_keymaps(keymaps)
     end
 
     -- There can only be one "backward" and "forward" keymap
-    resolved_keymaps[M.Keymap.BACKWARD] = resolved_keymaps[M.Keymap.BACKWARD][1]
-    resolved_keymaps[M.Keymap.FORWARD] = resolved_keymaps[M.Keymap.FORWARD][1]
+    resolved_keymaps[types.KeymapType.BACKWARD] = resolved_keymaps[types.KeymapType.BACKWARD][1]
+    resolved_keymaps[types.KeymapType.FORWARD] = resolved_keymaps[types.KeymapType.FORWARD][1]
 
     return resolved_keymaps
 end

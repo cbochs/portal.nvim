@@ -1,3 +1,5 @@
+local config = require("portal.config")
+
 local M = {}
 
 --- @alias Portal.Predicate fun(jump: Portal.Jump): boolean

@@ -7,4 +7,31 @@ M.Direction = {
     NONE = 2,
 }
 
+--- @enum Portal.Keymap
+M.KeymapType = {
+    ---
+    ESCAPE = "escape",
+
+    ---
+    FORWARD = "forward",
+
+    ---
+    BACKWARD = "backward",
+}
+
+--- @enum Portal.MarkScope
+M.MarkScope = {
+    --- Marks are ephemeral and are deleted on exit
+    NONE = "none",
+
+    --- Use a global namespace for marks
+    GLOBAL = "global",
+
+    --- Use the current working directory as the mark namespace
+    DIRECTORY = "directory",
+
+    --- Use the reported "root_dir" from LSP clients as the mark namespace
+    LSP = "lsp",
+}
+
 return M

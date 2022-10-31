@@ -1,6 +1,7 @@
 local config = require("portal.config")
 local input = require("portal.input")
 local jump = require("portal.jump")
+local mark = require("portal.mark")
 local query = require("portal.query")
 local types = require("portal.types")
 
@@ -35,6 +36,7 @@ local _ns = vim.api.nvim_create_namespace("PortalNamespace")
 --- @param opts? Portal.Config
 function M.setup(opts)
     config.load(opts or {})
+    mark.load(config.mark.save_path)
 end
 
 --- @param direction Portal.Direction
@@ -42,7 +44,7 @@ end
 function M.jump(direction, opts)
     opts = opts or {}
 
-    local queries = query.resolve(opts.query or config.default.query)
+    local queries = query.resolve(opts.query or config.jump.query)
     local jumps = jump.search(queries, direction)
 
     local previewer = opts.previewer or require("portal.previewer")

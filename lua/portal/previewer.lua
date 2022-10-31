@@ -51,7 +51,7 @@ local function create_or_edit_extmark(extmark)
     if old_extmark ~= nil then
         local text = extmark.details.virt_text[1][1]
         local old_text = old_extmark.details.virt_text[1][1]
-        local combined = text .. " " .. old_text
+        local combined = old_text .. " " .. text
         extmark.details.virt_text[1][1] = combined
 
         extmark.details = vim.tbl_extend("force", old_extmark.details or {}, extmark.details)
@@ -74,7 +74,7 @@ function M.label(jumps, namespace)
             goto continue
         end
 
-        local label = config.default.labels[index]
+        local label = config.jump.labels[index]
         labels[index] = label
 
         local function clamp(value, min, max)
@@ -148,7 +148,7 @@ function M.open(jumps, labels, namespace)
 
         if render_portal then
             portal_options.row = offset
-            offset =  offset + portal_options.height
+            offset =  offset + portal_options.height + 1
 
             local portal_window = vim.api.nvim_open_win(jump.buffer, false, portal_options)
             table.insert(windows, portal_window)
@@ -159,7 +159,7 @@ function M.open(jumps, labels, namespace)
             })
         end
 
-        offset = offset + 2
+        offset = offset + 1
 
         local portal = {
             jump = jump,
