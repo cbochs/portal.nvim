@@ -2,6 +2,15 @@ M.load()                                                                *M.load*
      @param opts Portal.Config
 
 
+M.border()                                                            *M.border*
+     @param border string | table
+     @param direction Portal.Direction
+     @return table
+
+
+M.load()                                                                *M.load*
+
+
 M.setup()                                                              *M.setup*
      @class Portal.Previewer
      @field label Portal.Labeller
