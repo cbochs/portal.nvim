@@ -1,4 +1,5 @@
 local config = require("portal.config")
+local highlight = require("portal.highlight")
 local types = require("portal.types")
 
 local M = {}
@@ -87,7 +88,7 @@ function M.label(jumps, namespace)
 			row = clamp(jump.row, 1, vim.api.nvim_buf_line_count(jump.buffer)) - 1,
 			col = 0,
 			details = {
-				virt_text = { { "[" .. label .. "]", "LeapLabelPrimary" } },
+				virt_text = { { "[" .. label .. "]", highlight.groups.label } },
 				virt_text_pos = "overlay",
 			},
 		}
@@ -117,7 +118,10 @@ function M.open(jumps, labels, namespace)
 		local render_portal = not empty_portal or config.window.portal.render_empty
 
 		local title_options = vim.deepcopy(config.window.title.options)
+		title_options.border = highlight.border(title_options.border, jump.direction)
+
 		local portal_options = vim.deepcopy(config.window.portal.options)
+		portal_options.border = highlight.border(portal_options.border, jump.direction)
 
 		if not empty_portal then
 			if not ensure_loaded(jump.buffer) then

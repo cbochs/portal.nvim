@@ -4,11 +4,9 @@ local jump = require("portal.jump")
 local mark = require("portal.mark")
 local query = require("portal.query")
 local types = require("portal.types")
+local highlight = require("portal.highlight")
 
 local M = {}
-
---- @type Portal.Namespace
-local _ns = vim.api.nvim_create_namespace("PortalNamespace")
 
 --- @class Portal.Previewer
 --- @field label Portal.Labeller
@@ -37,6 +35,7 @@ local _ns = vim.api.nvim_create_namespace("PortalNamespace")
 function M.setup(opts)
 	config.load(opts or {})
 	mark.load(config.mark.save_path)
+	highlight.load(highlight.default_theme)
 end
 
 --- @param direction Portal.Direction
@@ -48,7 +47,7 @@ function M.jump(direction, opts)
 	local jumps = jump.search(queries, direction)
 
 	local previewer = opts.previewer or require("portal.previewer")
-	local namespace = opts.namespace or _ns
+	local namespace = opts.namespace or highlight.namespace
 	local portals = M.open(jumps, previewer, namespace)
 
 	M.select(portals)

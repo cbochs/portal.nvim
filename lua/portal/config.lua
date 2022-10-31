@@ -31,7 +31,7 @@ local DEFAULT_CONFIG = {
 
 	window = {
 		title = {
-			-- When a portal is empty, render an default portal title
+			--- When a portal is empty, render an default portal title
 			render_empty = true,
 
 			--- The raw window options used for the title window
@@ -75,27 +75,6 @@ local DEFAULT_CONFIG = {
 }
 
 local _config = DEFAULT_CONFIG
-
-local function validate(config, expected_config)
-	config = config or _config
-	expected_config = expected_config or DEFAULT_CONFIG
-
-	local errors = {}
-	for key, _ in pairs(config) do
-		if expected_config[key] == nil then
-			table.insert(key)
-		end
-		if type(config[key]) == "table" then
-			local nested_errors = validate(config[key], expected_config[key])
-			for i, error_key in pairs(nested_errors) do
-				nested_errors[i] = key .. "." .. error_key
-			end
-			errors = { unpack(errors), unpack(nested_errors) }
-		end
-	end
-
-	return errors
-end
 
 --- @param keymaps table<string, Portal.Keymap>
 --- @return table<Portal.Keymap, string[]>
