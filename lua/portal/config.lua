@@ -119,16 +119,7 @@ end
 --- @param opts Portal.Config
 function M.load(opts)
     opts = opts or {}
-
-    local merged_config = vim.tbl_deep_extend("force", DEFAULT_CONFIG, opts)
-    local errors = validate(merged_config, DEFAULT_CONFIG)
-
-    if #errors > 0 then
-        error("ValidationError - Invalid options: " .. vim.inspect(errors))
-        return
-    end
-
-    _config = merged_config
+    _config = vim.tbl_deep_extend("force", DEFAULT_CONFIG, opts)
     _config.keymaps = resolve_keymaps(_config.keymaps)
 end
 
