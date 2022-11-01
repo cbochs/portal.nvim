@@ -35,7 +35,6 @@ The following is the default configuration. All configuration options may be ove
 ```lua
 require("portal").setup({
     mark = {
-        ---
         save_path = vim.fn.stdpath("data") .. "/" .. "portal.json",
     },
 
@@ -52,13 +51,13 @@ require("portal").setup({
             --- `jump.query`
             select = { "j", "k", "h", "l" },
 
-            --- Keycodes that will exit portal selection
+            --- Keys which will exit portal selection
             escape = {
                 ["<esc>"] = true
             },
         },
 
-        --- The keys used for jumping forward and backward
+        --- Keys used for jumping forward and backward
         keys = {
             forward = "<c-i>",
             backward = "<c-o>"
