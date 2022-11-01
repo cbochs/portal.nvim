@@ -4,7 +4,8 @@
 
 -----
 
-<img width="1774" alt="Screen Shot 2022-10-31 at 20 53 10" src="https://user-images.githubusercontent.com/2467016/199148462-1eb28f75-16fa-4da3-9d8d-19f3d62ea51d.png">
+<img width="1774" alt="Screen Shot 2022-11-01 at 14 02 18" src="https://user-images.githubusercontent.com/2467016/199328505-ebd06a30-c931-4aa3-9828-d2970d811dfd.png">
+
 
 _Theme: [catppuccin](https://github.com/catppuccin/nvim)_
 
