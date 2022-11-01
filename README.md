@@ -240,15 +240,16 @@ require("portal").jump_backward({
 
 A `tag` is a persistent tag on a file or buffer. It is a means of indicating a file you want to return to. By itself, it has no function. It's use comes when `"tagged"` is used in a query.
 
-For example, the following will open a single portal to the first `tagged` file, searching backwards in the jumplist:
+For example, the following will select the first tagged buffer navigating backwards in the jumplist, without opening any portals.
 
 ```lua
-require("portal").jump_backward({
-    query = { "tagged" }
-})
+local types = require("portal.types")
+local query = require("portal.query").resolve({ "tagged" })
+local jumps = require("portal.jump").search(query, types.Direction.BACKWARD)
+if jumps[1].direction ~= types.Direction.NONE then
+    require("portal.jump").select(jumps[1])
+end
 ```
-
-[]()
 
 ### Suggested Keymaps
 
