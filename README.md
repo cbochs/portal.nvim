@@ -4,16 +4,18 @@
 
 ## Features
 
-**portal.nvim** is a lua plugin for Neovim which creates "portal" for you to jump through.
-
 * **Contextual** jumping with portals to view available jump locations
 * **Customizable** jump queries to allow you to go anywhere you'd like in the jumplist
 * **Persistent** jump markers to flag important file you want to be able to get back to
+* **Lualine** integration to indicate if a buffer has been marked
 
 ## Requirements
+
+* [Neovim 0.5](https://github.com/neovim/neovim/releases/tag/v0.5.0)
+
 ## Installation
 
-### [packer]()
+### [packer](https://github.com/wbthomason/packer.nvim)
 
 ```lua
 use {
@@ -26,6 +28,12 @@ use {
         })
     end
 }
+```
+
+### [Plug](https://github.com/junegunn/vim-plug)
+
+```
+Plug "cbochs/portal.nvim"
 ```
 
 ## Configuration
@@ -210,3 +218,5 @@ vim.keymap.set("n", "<leader>m", require("portal.mark").mark, {})
 ```
 
 ## Previewer
+
+**todo!(cbochs)**
