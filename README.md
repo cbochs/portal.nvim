@@ -17,7 +17,7 @@ _Theme: [catppuccin](https://github.com/catppuccin/nvim)_
 
 ## Requirements
 
-* [Neovim 0.5](https://github.com/neovim/neovim/releases/tag/v0.5.0)
+* [Neovim >= 0.5](https://github.com/neovim/neovim/releases/tag/v0.5.0)
 
 ## Installation
 
