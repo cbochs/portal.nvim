@@ -75,10 +75,10 @@ require("portal").setup({
     },
 
     tag = {
-		--- The default scope in which tags will be saved to
+        --- The default scope in which tags will be saved to
         --- Only "global" and "none" has been implemented for now
-		--- @type Portal.Scope
-		scope = types.Scope.GLOBAL,
+        --- @type Portal.Scope
+        scope = types.Scope.GLOBAL,
 
         save_path = vim.fn.stdpath("data") .. "/" .. "portal.json",
     },
