@@ -131,9 +131,27 @@ A **query** is a list of **query items** which are used to identify specifc jump
 
 For example, a query of `{ "modified", "different" }` will attempt to find two jump locations. The first is where a jump's buffer has been _modified_. The second is where a jump's buffer is _different_ than the current buffer.
 
+```lua
+local query = { "modified", "different" }
+
+-- A query can be used in the context of jumping and passed in as an option
+require("portal").jump_forward({ query = query })
+
+-- A list of query-like items must be resolved into proper Portal.QueryItem's
+local resolved_query = require("portal.query").resolve(query)
+
+-- A search can be explicitly searched for, returning a list of Portal.Jump.
+-- Invalid jumps will have their direction field set to types.Direction.NONE
+local available_jumps = require("portal.jump").search(query)
+```
+
 ### Available Query Items
 
-All query items are available from `portal.query` as `require("portal.query").{query_item}`.
+All registered query items are available as table values from `portal.query`. For example, the query item for `"valid"` would be:
+
+```lua
+require("portal.query").valid
+```
 
 #### `valid`
 
@@ -145,11 +163,11 @@ Matches jumps that have a buffer different than the current buffer.
 
 #### `marked`
 
-Matches jumps that are in a marked buffer (see [Marking](marking)).
+Matches jumps that are in a marked buffer (see [Marking](#marking)).
 
 #### `modified`
 
-Matched jumpst that are in a modified buffer (see `:h 'modified'`).
+Matched jumps that are in a modified buffer (see `:h 'modified'`).
 
 ### Custom Query Items
 
