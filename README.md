@@ -120,7 +120,7 @@ require("portal").setup({
 
 ## Portals
 
-A **portal** is a window that displays the jump location, the label required to get to that jump location, and any addition contextual information regarding the jump location (i.e. the jump's file name or matched query).
+A **portal** is a window that displays the jump location, the label required to get to that jump location, and any addition contextual information (i.e. the jump's file name or matched query).
 
 []()
 
@@ -133,7 +133,7 @@ vim.keymap.set("n", "<leader>i", require("portal").jump_forward, {})
 
 ## Queries
 
-A **query** is a list of **query items** which are used to identify specifc jump locations. Each **query item** will attempt to match with a jump location based on a given criteria about the jump's buffer.
+A **query** is a list of **query items** which are used to identify specifc jump locations in the jumplist. Each **query item** will attempt to match with a jump location based on a given criteria.
 
 For example, a query of `{ "modified", "different" }` will attempt to find two jump locations. The first is where a jump's buffer has been _modified_. The second is where a jump's buffer is _different_ than the current buffer.
 
@@ -141,6 +141,7 @@ For example, a query of `{ "modified", "different" }` will attempt to find two j
 local query = { "modified", "different" }
 
 -- A query can be used in the context of jumping and passed in as an option
+-- or through the configuration
 require("portal").jump_forward({ query = query })
 
 -- A list of query-like items must be resolved into proper Portal.QueryItem's
@@ -153,7 +154,7 @@ local available_jumps = require("portal.jump").search(query)
 
 ### Available Query Items
 
-All registered query items are available as table values from `portal.query`. For example, the query item for `"valid"` would be:
+All registered query items are available as table values from `query`. For example, the query item for `"valid"` would be:
 
 ```lua
 require("portal.query").valid
@@ -177,7 +178,7 @@ Matched jumps that are in a modified buffer (see `:h 'modified'`).
 
 ### Custom Query Items
 
-A **query item** is in fact a "query-like" item. It may be either a `string`, `Portal.Predicate`, or `Portal.QueryItem`. A string may be used to specify a query item that has been _registered_. To register a query, use `query.register` and pass in a key, predicate, and optional `name` and `name_short`.
+A **query item** found in the configuration is in fact a "query-like" item. It may be either a `string`, `Portal.Predicate`, or `Portal.QueryItem`. A string may be used to specify a query item that has been _registered_. To register a query, use `query.register` and pass in a key, predicate, and optional `name` and `name_short`.
 
 #### Registered query items
 
@@ -225,7 +226,9 @@ require("portal").jump_backward({
 
 ## Marking
 
-A `mark` is a persistent tag on a file or buffer. It is a means of indicating a file you want to return to. By itself, it has no function. It's use comes when the `"marked"` query item is used in a query. For example, the following will open a single portal to the first `marked` file, searching backwards in the jumplist:
+A `mark` is a persistent tag on a file or buffer. It is a means of indicating a file you want to return to. By itself, it has no function. It's use comes when `"marked"` is used in a query.
+
+For example, the following will open a single portal to the first `marked` file, searching backwards in the jumplist:
 
 ```lua
 require("portal").jump_backward({
@@ -238,9 +241,30 @@ require("portal").jump_backward({
 ### Suggested Keymaps
 
 ```lua
-vim.keymap.set("n", "<leader>m", require("portal.mark").mark, {})
+vim.keymap.set("n", "<leader>m", require("portal.mark").toggle, {})
+```
+
+### Removing Marks
+
+Marks may be cleared individually or for an entire project scope.
+
+#### Clear individual mark
+
+```lua
+require("portal.mark").unmark()
+```
+
+#### Clear all marks
+
+```lua
+require("portal.mark").reset()
 ```
 
 ## Previewer
 
 **todo!(cbochs)**
+
+## Inspiration
+
+* ThePrimeagen's [harpoon](https://github.com/ThePrimeagen/harpoon)
+* kwarlwang's [bufjump.nvim](https://github.com/kwkarlwang/bufjump.nvim)
