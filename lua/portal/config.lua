@@ -8,25 +8,12 @@ local DEFAULT_CONFIG = {
 	--- todo(cbochs): implement
 	log_level = vim.log.levels.WARN,
 
-	mark = {
-		--- The default scope in which marks will be saved to
-		--- @type Portal.MarkScope
-		scope = types.MarkScope.GLOBAL,
-
-		---
-		save_path = vim.fn.stdpath("data") .. "/" .. "portal.json",
-
-		--- Marks will be scoped to a specific git commit
-		--- todo(cbochs): implement
-		git = false,
-	},
-
 	jump = {
 		--- The default queries used when searching the jumplist. An entry can
 		--- be a name of a registered query item, an anonymous predicate, or
 		--- a well-formed query item. See Queries section for more information.
 		--- @type Portal.QueryLike[]
-		query = { "marked", "modified", "different", "valid" },
+		query = { "tagged", "modified", "different", "valid" },
 
 		labels = {
 			--- An ordered list of keys that will be used for labelling
@@ -45,6 +32,20 @@ local DEFAULT_CONFIG = {
 			forward = "<c-i>",
 			backward = "<c-o>",
 		},
+	},
+
+	tag = {
+		--- The default scope in which tags will be saved to
+		--- Only "global" and "none" has been implemented for now
+		--- @type Portal.Scope
+		scope = types.Scope.GLOBAL,
+
+		---
+		save_path = vim.fn.stdpath("data") .. "/" .. "portal.json",
+
+		--- Tags will be scoped to a specific git commit
+		--- todo(cbochs): implement
+		git = false,
 	},
 
 	preview = {

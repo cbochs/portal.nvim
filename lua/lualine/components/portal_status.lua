@@ -1,9 +1,9 @@
 return function()
 	local highlight = require("portal.highlight")
-	local mark = require("portal.mark")
-	if mark.exists() then
-		return "%#" .. highlight.groups.leap_mark_active .. "#" .. "[M]" .. "%*"
+	local tag = require("portal.tag")
+	if tag.exists() then
+		return "%#" .. highlight.groups.leap_tag_active .. "#" .. "[M]" .. "%*"
 	else
-		return "%#" .. highlight.groups.leap_mark_inactive .. "#" .. "[U]" .. "%*"
+		return "%#" .. highlight.groups.leap_tag_inactive .. "#" .. "[U]" .. "%*"
 	end
 end

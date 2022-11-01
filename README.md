@@ -12,7 +12,7 @@ _Theme: [catppuccin](https://github.com/catppuccin/nvim)_
 
 * **Contextual** jumping with portals to view available jump locations
 * **Customizable** jump queries to allow you to go anywhere you'd like in the jumplist
-* **Persistent** jump markers to flag important file you want to be able to get back to
+* **Persistent** jump tags to flag important file you want to be able to get back to
 * [**Lualine**](#lualine) integration to indicate if a buffer has been marked
 
 ## Requirements
@@ -48,16 +48,12 @@ The following is the default configuration. All configuration options may be ove
 
 ```lua
 require("portal").setup({
-    mark = {
-        save_path = vim.fn.stdpath("data") .. "/" .. "portal.json",
-    },
-
     jump = {
         --- The default queries used when searching the jumplist. An entry can
         --- be a name of a registered query item, an anonymous predicate, or
         --- a well-formed query item. See Queries section for more information.
         --- @type Portal.QueryLike[]
-        query = { "marked", "modified", "different", "valid" },
+        query = { "tagged", "modified", "different", "valid" },
 
         labels = {
             --- An ordered list of keys that will be used for labelling
@@ -76,6 +72,15 @@ require("portal").setup({
             forward = "<c-i>",
             backward = "<c-o>"
         }
+    },
+
+    tag = {
+		--- The default scope in which tags will be saved to
+        --- Only "global" and "none" has been implemented for now
+		--- @type Portal.Scope
+		scope = types.Scope.GLOBAL,
+
+        save_path = vim.fn.stdpath("data") .. "/" .. "portal.json",
     },
 
     window = {
@@ -168,13 +173,13 @@ Matches jumps that have a valid buffer (see: `:h nvim_buf_is_valid`).
 
 Matches jumps that have a buffer different than the current buffer.
 
-#### `marked`
-
-Matches jumps that are in a marked buffer (see [Marking](#marking)).
-
 #### `modified`
 
 Matched jumps that are in a modified buffer (see `:h 'modified'`).
+
+#### `tagged`
+
+Matches jumps that are in a tagged buffer (see [Tagging](#tagging)).
 
 ### Custom Query Items
 
@@ -224,15 +229,15 @@ require("portal").jump_backward({
 })
 ```
 
-## Marking
+## Tagging
 
-A `mark` is a persistent tag on a file or buffer. It is a means of indicating a file you want to return to. By itself, it has no function. It's use comes when `"marked"` is used in a query.
+A `tag` is a persistent tag on a file or buffer. It is a means of indicating a file you want to return to. By itself, it has no function. It's use comes when `"tagged"` is used in a query.
 
-For example, the following will open a single portal to the first `marked` file, searching backwards in the jumplist:
+For example, the following will open a single portal to the first `tagged` file, searching backwards in the jumplist:
 
 ```lua
 require("portal").jump_backward({
-    query = { "marked" }
+    query = { "tagged" }
 })
 ```
 
@@ -241,23 +246,23 @@ require("portal").jump_backward({
 ### Suggested Keymaps
 
 ```lua
-vim.keymap.set("n", "<leader>m", require("portal.mark").toggle, {})
+vim.keymap.set("n", "<leader>m", require("portal.tag").toggle, {})
 ```
 
-### Removing Marks
+### Removing Tags
 
-Marks may be cleared individually or for an entire project scope.
+Tags may be cleared individually or for an entire project scope.
 
-#### Clear individual mark
+#### Clear individual tags
 
 ```lua
-require("portal.mark").unmark()
+require("portal.tag").untag()
 ```
 
-#### Clear all marks
+#### Clear all tag
 
 ```lua
-require("portal.mark").reset()
+require("portal.tag").reset()
 ```
 
 ## Previewer

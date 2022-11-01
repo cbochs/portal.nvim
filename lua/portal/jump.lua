@@ -76,11 +76,11 @@ end
 ---
 --- Example:
 ---
---- Given an list of jump queries: `{ "valid", "valid", "marked" }`,
+--- Given an list of jump queries: `{ "valid", "valid", "tagged" }`,
 --- the resulting ordered list will be:
 --- * the first jump will be associated with the first item in the jumplist
 --- * the second jump will be associated with the second item in the jumplist
---- * if the first jump was also `marked`, the third jump will also be
+--- * if the first jump was also `tagged`, the third jump will also be
 ---   associated with the first item in the jumplist
 ---
 --- @param queries Portal.Query[]
