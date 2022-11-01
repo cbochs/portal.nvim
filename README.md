@@ -2,12 +2,18 @@
 
 > Look at you, sailing through the [jumplist] majestically, like an eagle... piloting a blimp.
 
------
+---
 
 <img width="1774" alt="Screen Shot 2022-11-01 at 14 02 18" src="https://user-images.githubusercontent.com/2467016/199328505-ebd06a30-c931-4aa3-9828-d2970d811dfd.png">
 
 
 _Theme: [catppuccin](https://github.com/catppuccin/nvim)_
+
+## Introduction
+
+Portal is a plugin that aims to build upon and enhance existing jumplist motions (i.e. `<c-o>` and `<c-i>`) by surfacing contextual information with the use of [portals](#portals) and [tags](#tagging), and providing multiple jump options by means of [queries](#queries).
+
+To get started, [install](#installation) the plugin using your preferred package manager, setup the plugin, add the suggested keybindings for portals and tagging, and give it a go! You can find the default configuration for the plugin in the secion [below](#configuration).
 
 ## Features
 
