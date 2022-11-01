@@ -264,6 +264,23 @@ require("portal.mark").reset()
 
 **todo!(cbochs)**
 
+## Highlight Groups
+
+A number of highlight groups have been exposed to let you style your portals. By default, a [catppuccin-like theme](./lua/portal/highlight.lua#L20) is applied. However, the following highlight groups are available to tune to your preference:
+
+```lua
+M.groups = {
+	border = "PortalBorder",
+	border_backward = "PortalBorderBackward",
+	border_forward = "PortalBorderForward",
+	border_none = "PortalBorderNone",
+	label = "PortalLabel",
+
+	leap_mark_active = "PortalLeapMarkActive",
+	leap_mark_inactive = "PortalLeapMarkInactive",
+}
+```
+
 ## Lualine
 
 A simple lualine component called `portal_status` is provided to show whether a buffer is marked or not.
