@@ -298,7 +298,7 @@ A simple lualine component called `portal_status` is provided to show whether a 
 ```lua
 require("lualine").setup({
     sections = {
-        lualine_b = { grapple_status }
+        lualine_b = { "portal_status" }
     }
 })
 ```
