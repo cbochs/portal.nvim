@@ -2,6 +2,10 @@
 
 > Look at you, sailing through the [jumplist] majestically, like an eagle... piloting a blimp.
 
+<img width="1774" alt="Screen Shot 2022-10-31 at 20 53 10" src="https://user-images.githubusercontent.com/2467016/199148462-1eb28f75-16fa-4da3-9d8d-19f3d62ea51d.png">
+
+_Theme: [catppuccin](https://github.com/catppuccin/nvim))_
+
 ## Features
 
 * **Contextual** jumping with portals to view available jump locations
