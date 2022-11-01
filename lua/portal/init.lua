@@ -69,7 +69,7 @@ end
 --- @param namespace? integer
 --- @return Portal.Portal[]
 function M.open(jumps, previewer, namespace)
-	namespace = namespace or _ns
+	namespace = namespace or highlight.namespace
 
 	local labels = previewer.label(jumps, namespace)
 	local portals = previewer.open(jumps, labels, namespace)

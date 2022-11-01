@@ -9,7 +9,7 @@ function M.get_label()
 		return nil
 	end
 
-	local escape_keys = config.keymaps.escape or {}
+	local escape_keys = config.jump.labels.escape or {}
 	for _, keycode in pairs(escape_keys) do
 		if char == keycode then
 			return nil

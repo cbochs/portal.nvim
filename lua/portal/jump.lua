@@ -127,9 +127,9 @@ end
 function M.select(jump)
 	local jump_key = nil
 	if jump.direction == types.Direction.BACKWARD then
-		jump_key = config.keymaps.backward
+		jump_key = config.jump.keys.backward
 	elseif jump.direction == types.Direction.FORWARD then
-		jump_key = config.keymaps.forward
+		jump_key = config.jump.keys.forward
 	elseif jump.direction == types.Direction.NONE then
 		return
 	end

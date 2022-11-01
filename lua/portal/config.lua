@@ -5,6 +5,7 @@ local M = {}
 
 --- @class Portal.Config
 local DEFAULT_CONFIG = {
+	--- todo(cbochs): implement
 	log_level = vim.log.levels.WARN,
 
 	mark = {
@@ -21,15 +22,32 @@ local DEFAULT_CONFIG = {
 	},
 
 	jump = {
-		--- The default queries used when searching the jumplist
-		--- @type Portal.QueryLike
+		--- The default queries used when searching the jumplist. An entry can
+		--- be a name of a registered query item, an anonymous predicate, or
+		--- a well-formed query item. See Queries section for more information.
+		--- @type Portal.QueryLike[]
 		query = { "marked", "modified", "different", "valid" },
 
-		--- The default labels used when showing jumps
-		labels = { "j", "k", "h", "l" },
+		labels = {
+			--- An ordered list of keys that will be used for labelling
+			--- available jumps. Labels will be applied in same order as
+			--- `jump.query`
+			select = { "j", "k", "h", "l" },
+
+			--- Keycodes that will exit portal selection
+			escape = {
+				["<esc>"] = true,
+			},
+		},
+
+		--- The keys used for jumping forward and backward
+		keys = {
+			forward = "<c-i>",
+			backward = "<c-o>",
+		},
 	},
 
-	window = {
+	preview = {
 		title = {
 			--- When a portal is empty, render an default portal title
 			render_empty = true,
@@ -65,40 +83,50 @@ local DEFAULT_CONFIG = {
 			},
 		},
 	},
-
-	keymaps = {
-		["<esc>"] = types.KeymapType.ESCAPE,
-		["<c-j>"] = types.KeymapType.ESCAPE,
-		["<c-i>"] = types.KeymapType.FORWARD,
-		["<c-o>"] = types.KeymapType.BACKWARD,
-	},
 }
 
+--- @type Portal.Config
 local _config = DEFAULT_CONFIG
 
---- @param keymaps table<string, Portal.Keymap>
---- @return table<Portal.Keymap, string[]>
-local function resolve_keymaps(keymaps)
-	local resolved_keymaps = {}
+local function resolve_key(key)
+	return vim.api.nvim_replace_termcodes(key, true, false, true)
+end
 
-	for lhs, keymap in pairs(keymaps) do
-		resolved_keymaps[keymap] = resolved_keymaps[keymap] or {}
-		local keycode = vim.api.nvim_replace_termcodes(lhs, true, false, true)
-		table.insert(resolved_keymaps[keymap], keycode)
+--- @param keys table
+local function resolve_keys(keys)
+	local resolved_keys = {}
+
+	for key_or_index, key_or_flag in pairs(keys) do
+		-- Table style: { "a", "b", "c" }. In this case, key_or_flag is the key
+		if type(key_or_index) == "number" then
+			table.insert(resolved_keys, resolve_key(key_or_flag))
+			goto continue
+		end
+
+		-- Table style: { ["<esc>"] = true }. In this case, key_or_index is the key
+		if type(key_or_index) == "string" and key_or_flag == true then
+			table.insert(resolved_keys, resolve_key(key_or_index))
+			goto continue
+		end
+
+		::continue::
 	end
 
-	-- There can only be one "backward" and "forward" keymap
-	resolved_keymaps[types.KeymapType.BACKWARD] = resolved_keymaps[types.KeymapType.BACKWARD][1]
-	resolved_keymaps[types.KeymapType.FORWARD] = resolved_keymaps[types.KeymapType.FORWARD][1]
-
-	return resolved_keymaps
+	return resolved_keys
 end
 
 --- @param opts Portal.Config
 function M.load(opts)
 	opts = opts or {}
+
+	--- @type Portal.Config
 	_config = vim.tbl_deep_extend("force", DEFAULT_CONFIG, opts)
-	_config.keymaps = resolve_keymaps(_config.keymaps)
+
+	-- Resolve label keycodes
+	_config.jump.labels.select = resolve_keys(_config.jump.labels.select)
+	_config.jump.labels.escape = resolve_keys(_config.jump.labels.escape)
+	_config.jump.keys.backward = resolve_key(_config.jump.keys.backward)
+	_config.jump.keys.forward = resolve_key(_config.jump.keys.forward)
 end
 
 setmetatable(M, {

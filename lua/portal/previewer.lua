@@ -75,7 +75,7 @@ function M.label(jumps, namespace)
 			goto continue
 		end
 
-		local label = config.jump.labels[index]
+		local label = config.jump.labels.select[index]
 		labels[index] = label
 
 		local function clamp(value, min, max)
@@ -114,13 +114,13 @@ function M.open(jumps, labels, namespace)
 		local windows = {}
 
 		local empty_portal = jump.direction == types.Direction.NONE
-		local render_title = not empty_portal or config.window.title.render_empty
-		local render_portal = not empty_portal or config.window.portal.render_empty
+		local render_title = not empty_portal or config.preview.title.render_empty
+		local render_portal = not empty_portal or config.preview.portal.render_empty
 
-		local title_options = vim.deepcopy(config.window.title.options)
+		local title_options = vim.deepcopy(config.preview.title.options)
 		title_options.border = highlight.border(title_options.border, jump.direction)
 
-		local portal_options = vim.deepcopy(config.window.portal.options)
+		local portal_options = vim.deepcopy(config.preview.portal.options)
 		portal_options.border = highlight.border(portal_options.border, jump.direction)
 
 		if not empty_portal then

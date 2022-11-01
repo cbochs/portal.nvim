@@ -7,18 +7,6 @@ M.Direction = {
 	NONE = 2,
 }
 
---- @enum Portal.Keymap
-M.KeymapType = {
-	---
-	ESCAPE = "escape",
-
-	---
-	FORWARD = "forward",
-
-	---
-	BACKWARD = "backward",
-}
-
 --- @enum Portal.MarkScope
 M.MarkScope = {
 	--- Marks are ephemeral and are deleted on exit
