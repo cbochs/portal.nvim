@@ -122,7 +122,7 @@ require("portal").setup({
 
 A **portal** is a window that displays the jump location, the label required to get to that jump location, and any addition contextual information (i.e. the jump's file name or matched query).
 
-[]()
+![portal_jump mov](https://user-images.githubusercontent.com/2467016/199164298-1083fdae-4d9c-480c-9962-41a853127e80.gif)
 
 ### Suggested Keymaps
 
