@@ -34,17 +34,17 @@ The following is the default configuration. All configuration options may be ove
 
 ```lua
 require("portal").setup({
-	mark = {
+    mark = {
         ---
-		save_path = vim.fn.stdpath("data") .. "/" .. "portal.json",
-	},
+        save_path = vim.fn.stdpath("data") .. "/" .. "portal.json",
+    },
 
-	jump = {
-		--- The default queries used when searching the jumplist. An entry can
+    jump = {
+        --- The default queries used when searching the jumplist. An entry can
         --- be a name of a registered query item, an anonymous predicate, or
         --- a well-formed query item. See Queries section for more information.
-		--- @type Portal.QueryLike[]
-		query = { "marked", "modified", "different", "valid" },
+        --- @type Portal.QueryLike[]
+        query = { "marked", "modified", "different", "valid" },
 
         labels = {
             --- An ordered list of keys that will be used for labelling
@@ -63,44 +63,44 @@ require("portal").setup({
             forward = "<c-i>",
             backward = "<c-o>"
         }
-	},
+    },
 
-	window = {
-		title = {
-			--- When a portal is empty, render an default portal title
-			render_empty = true,
+    window = {
+        title = {
+            --- When a portal is empty, render an default portal title
+            render_empty = true,
 
-			--- The raw window options used for the title window
-			options = {
-				relative = "cursor",
-				width = 80,
-				height = 1,
-				col = 2,
-				style = "minimal",
-				focusable = false,
-				border = "single",
-				noautocmd = true,
-				zindex = 98,
-			},
-		},
+            --- The raw window options used for the title window
+            options = {
+                relative = "cursor",
+                width = 80,
+                height = 1,
+                col = 2,
+                style = "minimal",
+                focusable = false,
+                border = "single",
+                noautocmd = true,
+                zindex = 98,
+            },
+        },
 
-		portal = {
-			-- When a portal is empty, render an empty buffer body
-			render_empty = false,
+        portal = {
+            -- When a portal is empty, render an empty buffer body
+            render_empty = false,
 
-			--- The raw window options used for the portal window
-			options = {
-				relative = "cursor",
-				width = 80,
-				height = 3,
-				col = 2,
-				focusable = false,
-				border = "single",
-				noautocmd = true,
-				zindex = 99,
-			},
-		},
-	},
+            --- The raw window options used for the portal window
+            options = {
+                relative = "cursor",
+                width = 80,
+                height = 3,
+                col = 2,
+                focusable = false,
+                border = "single",
+                noautocmd = true,
+                zindex = 99,
+            },
+        },
+    },
 
 })
 ```
