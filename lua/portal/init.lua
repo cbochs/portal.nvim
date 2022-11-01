@@ -1,7 +1,7 @@
 local config = require("portal.config")
 local input = require("portal.input")
 local jump = require("portal.jump")
-local mark = require("portal.mark")
+local tag = require("portal.tag")
 local query = require("portal.query")
 local types = require("portal.types")
 local highlight = require("portal.highlight")
@@ -34,7 +34,7 @@ local M = {}
 --- @param opts? Portal.Config
 function M.setup(opts)
 	config.load(opts or {})
-	mark.load(config.mark.save_path)
+	tag.load(config.tag.save_path)
 	highlight.load(highlight.default_theme)
 end
 
