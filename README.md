@@ -13,7 +13,7 @@ _Theme: [catppuccin](https://github.com/catppuccin/nvim)_
 * **Contextual** jumping with portals to view available jump locations
 * **Customizable** jump queries to allow you to go anywhere you'd like in the jumplist
 * **Persistent** jump markers to flag important file you want to be able to get back to
-* **Lualine** integration to indicate if a buffer has been marked
+* [**Lualine**](#lualine) integration to indicate if a buffer has been marked
 
 ## Requirements
 
@@ -263,6 +263,28 @@ require("portal.mark").reset()
 ## Previewer
 
 **todo!(cbochs)**
+
+## Lualine
+
+A simple lualine component called `portal_status` is provided to show whether a buffer is marked or not.
+
+**Mark inactive**
+
+<img width="276" alt="Screen Shot 2022-11-01 at 07 02 09" src="https://user-images.githubusercontent.com/2467016/199238779-955bd8f3-f406-4a61-b027-ac64d049481a.png">
+
+**Mark active**
+
+<img width="276" alt="Screen Shot 2022-11-01 at 07 02 38" src="https://user-images.githubusercontent.com/2467016/199238764-96678f97-8603-45d9-ba2e-9a512ce93727.png">
+
+**Usage**
+
+```lua
+require("lualine").setup({
+    sections = {
+        lualine_b = { grapple_status }
+    }
+})
+```
 
 ## Inspiration
 
