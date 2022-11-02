@@ -16,18 +16,6 @@ M.groups = {
 	leap_tag_inactive = "PortalLeapTagInactive",
 }
 
---- The default theme is based off of catppuccin
-M.default_theme = {
-	PortalBorder = { fg = "#fab387" },
-	PortalBorderBackward = { link = M.groups.border },
-	PortalBorderForward = { link = M.groups.border },
-	PortalBorderNone = { fg = "#89b4fa" },
-	PortalLabel = { bg = "#a6e3a1", fg = "#1e1e2e" },
-
-	PortalLeapTagActive = { fg = "#a6e3a1" },
-	PortalLeapTagInactive = { fg = "#313244" },
-}
-
 --- @param border string | table
 --- @param direction Portal.Direction
 --- @return table
@@ -59,11 +47,21 @@ function M.border(border, direction)
 	return border_chars
 end
 
-function M.load(theme)
+function M.load()
+	--- The default theme is based off of catppuccin
+	local default_theme = {
+		PortalBorder = { fg = "#fab387" },
+		PortalBorderBackward = { link = M.groups.border },
+		PortalBorderForward = { link = M.groups.border },
+		PortalBorderNone = { fg = "#89b4fa" },
+		PortalLabel = { bg = "#a6e3a1", fg = "#1e1e2e" },
+
+		PortalLeapTagActive = { fg = "#a6e3a1" },
+		PortalLeapTagInactive = { fg = "#313244" },
+	}
+
 	for _, group in pairs(M.groups) do
-		if theme[group] ~= nil then
-			vim.api.nvim_set_hl(0, group, theme[group])
-		end
+		vim.api.nvim_set_hl(0, group, default_theme[group] or {})
 	end
 end
 

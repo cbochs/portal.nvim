@@ -93,7 +93,7 @@ function M.label(jumps, namespace)
 			goto continue
 		end
 
-		local label = config.jump.labels.select[index]
+		local label = config.labels[index]
 		labels[index] = label
 
 		local function clamp(value, min, max)
@@ -132,14 +132,14 @@ function M.open(jumps, labels, namespace)
 		local windows = {}
 
 		local empty_portal = jump.direction == types.Direction.NONE
-		local render_title = not empty_portal or config.preview.title.render_empty
-		local render_portal = not empty_portal or config.preview.portal.render_empty
+		local render_title = not empty_portal or config.portal.title.render_empty
+		local render_body = not empty_portal or config.portal.body.render_empty
 
-		local title_options = vim.deepcopy(config.preview.title.options)
+		local title_options = vim.deepcopy(config.portal.title.options)
 		title_options.border = highlight.border(title_options.border, jump.direction)
 
-		local portal_options = vim.deepcopy(config.preview.portal.options)
-		portal_options.border = highlight.border(portal_options.border, jump.direction)
+		local body_options = vim.deepcopy(config.portal.portal.options)
+		body_options.border = highlight.border(body_options.border, jump.direction)
 
 		if not empty_portal then
 			if not ensure_loaded(jump.buffer) then
@@ -151,8 +151,8 @@ function M.open(jumps, labels, namespace)
 			title_options.row = offset
 			offset = offset + title_options.height + 1
 
-			if render_portal then
-				title_options.height = title_options.height + portal_options.height
+			if render_body then
+				title_options.height = title_options.height + body_options.height
 			end
 
 			local title = jump.query.name
@@ -168,14 +168,14 @@ function M.open(jumps, labels, namespace)
 			table.insert(windows, title_window)
 		end
 
-		if render_portal then
-			portal_options.row = offset
-			offset = offset + portal_options.height + 1
+		if render_body then
+			body_options.row = offset
+			offset = offset + body_options.height + 1
 
-			local portal_window = vim.api.nvim_open_win(jump.buffer, false, portal_options)
-			table.insert(windows, portal_window)
+			local body_window = vim.api.nvim_open_win(jump.buffer, false, body_options)
+			table.insert(windows, body_window)
 
-			vim.api.nvim_win_set_cursor(portal_window, {
+			vim.api.nvim_win_set_cursor(body_window, {
 				math.min(jump.row, vim.api.nvim_buf_line_count(jump.buffer)),
 				jump.col,
 			})

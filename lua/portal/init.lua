@@ -2,8 +2,8 @@ local config = require("portal.config")
 local highlight = require("portal.highlight")
 local input = require("portal.input")
 local jump = require("portal.jump")
+local log = require("portal.log")
 local query = require("portal.query")
-local tag = require("portal.tag")
 local types = require("portal.types")
 
 local M = {}
@@ -16,9 +16,15 @@ local M = {}
 --- @param opts? Portal.Config
 function M.setup(opts)
 	config.load(opts or {})
+	log.new({ level = config.log_level })
+	highlight.load()
 
-	tag.load(config.tag.save_path)
-	highlight.load(highlight.default_theme)
+	if config.integrations.grapple then
+		local ok, _ = pcall(require, "grapple")
+		if not ok then
+			error("Unable to load integration: grapple")
+		end
+	end
 end
 
 --- @param direction Portal.Direction
@@ -26,7 +32,7 @@ end
 function M.jump(direction, opts)
 	opts = opts or {}
 
-	local queries = query.resolve(opts.query or config.jump.query)
+	local queries = query.resolve(opts.query or config.query)
 	local jumps = jump.search(queries, direction)
 
 	local previewer = opts.previewer or require("portal.previewer")

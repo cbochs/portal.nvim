@@ -1,5 +1,3 @@
-local types = require("portal.types")
-
 --- @type Portal.Config
 local M = {}
 
@@ -8,52 +6,43 @@ local DEFAULT_CONFIG = {
 	--- todo(cbochs): implement
 	log_level = vim.log.levels.WARN,
 
-	jump = {
-		--- The default queries used when searching the jumplist. An entry can
-		--- be a name of a registered query item, an anonymous predicate, or
-		--- a well-formed query item. See Queries section for more information.
-		--- @type Portal.QueryLike[]
-		query = { "tagged", "modified", "different", "valid" },
+	--- The default queries used when searching the jumplist. An entry can
+	--- be a name of a registered query item, an anonymous predicate, or
+	--- a well-formed query item. See Queries section for more information.
+	--- @type Portal.QueryLike[]
+	query = { "modified", "different", "valid" },
 
-		labels = {
-			--- An ordered list of keys that will be used for labelling
-			--- available jumps. Labels will be applied in same order as
-			--- `jump.query`
-			select = { "j", "k", "h", "l" },
+	--- An ordered list of keys that will be used for labelling
+	--- available jumps. Labels will be applied in same order as
+	--- `jump.query`
+	labels = { "j", "k", "h", "l" },
 
-			--- Keys that will exit portal selection
-			escape = {
-				["<esc>"] = true,
-			},
-		},
-
-		--- Keys used for jumping forward and backward
-		keys = {
-			forward = "<c-i>",
-			backward = "<c-o>",
-		},
+	--- Keys used for exiting portal selection
+	escape = {
+		["<esc>"] = true,
 	},
 
-	tag = {
-		--- The default scope in which tags will be saved to
-		--- Only "global" and "none" has been implemented for now
-		--- @type Portal.Scope
-		scope = types.Scope.GLOBAL,
+	--- Keycodes used internally for jumping forward and backward. These are
+	--- not overrides of the current keymaps, but instead will be used
+	--- internally when a jump is selected.
+	backward = "<c-o>",
+	forward = "<c-i>",
 
-		---
-		save_path = vim.fn.stdpath("data") .. "/" .. "portal.json",
+	---
+	deprecations = true,
 
-		--- Tags will be scoped to a specific git commit
+	---
+	integrations = {
 		--- todo(cbochs): implement
-		git = false,
+		grapple = false,
 	},
 
-	preview = {
+	portal = {
 		title = {
 			--- When a portal is empty, render an default portal title
 			render_empty = true,
 
-			--- The raw window options used for the title window
+			--- The raw window options used for the portal title window
 			options = {
 				relative = "cursor",
 				width = 80, -- implement as "min/mas width",
@@ -67,11 +56,11 @@ local DEFAULT_CONFIG = {
 			},
 		},
 
-		portal = {
+		body = {
 			-- When a portal is empty, render an empty buffer body
 			render_empty = false,
 
-			--- The raw window options used for the portal window
+			--- The raw window options used for the portal body window
 			options = {
 				relative = "cursor",
 				width = 80, -- implement as "min/mas width",
@@ -116,7 +105,7 @@ local function resolve_keys(keys)
 	return resolved_keys
 end
 
---- @param opts Portal.Config
+--- @param opts? Portal.Config
 function M.load(opts)
 	opts = opts or {}
 
@@ -124,10 +113,10 @@ function M.load(opts)
 	_config = vim.tbl_deep_extend("force", DEFAULT_CONFIG, opts)
 
 	-- Resolve label keycodes
-	_config.jump.labels.select = resolve_keys(_config.jump.labels.select)
-	_config.jump.labels.escape = resolve_keys(_config.jump.labels.escape)
-	_config.jump.keys.backward = resolve_key(_config.jump.keys.backward)
-	_config.jump.keys.forward = resolve_key(_config.jump.keys.forward)
+	_config.labels = resolve_keys(_config.labels)
+	_config.escape = resolve_keys(_config.escape)
+	_config.backward = resolve_key(_config.backward)
+	_config.forward = resolve_key(_config.forward)
 end
 
 setmetatable(M, {

@@ -6,12 +6,11 @@
 
 <img width="1774" alt="Screen Shot 2022-11-01 at 14 02 18" src="https://user-images.githubusercontent.com/2467016/199328505-ebd06a30-c931-4aa3-9828-d2970d811dfd.png">
 
-
 _Theme: [catppuccin](https://github.com/catppuccin/nvim)_
 
 ## Introduction
 
-Portal is a plugin that aims to build upon and enhance existing jumplist motions (i.e. `<c-o>` and `<c-i>`) by surfacing contextual information with the use of [portals](#portals) and [tags](#tagging), and providing multiple jump options by means of [queries](#queries).
+Portal is a plugin that aims to build upon and enhance existing jumplist motions (i.e. `<c-o>` and `<c-i>`) by surfacing contextual information with the use of [portals](#portals), and providing multiple jump options by means of [queries](#queries).
 
 To get started, [install](#installation) the plugin using your preferred package manager, setup the plugin, add the suggested keybindings for portals and tagging, and give it a go! You can find the default configuration for the plugin in the secion [below](#configuration).
 
@@ -33,6 +32,10 @@ To get started, [install](#installation) the plugin using your preferred package
 ```lua
 use {
     "cbochs/portal.nvim",
+    requires = {
+        -- Optional: provides file tagging
+        "cbochs/grapple.nvim",
+    },
     config = function()
         require("portal").setup({
             -- Your configuration goes here
@@ -55,78 +58,73 @@ The following is the default configuration. All configuration options may be ove
 
 ```lua
 require("portal").setup({
-    jump = {
-        --- The default queries used when searching the jumplist. An entry can
-        --- be a name of a registered query item, an anonymous predicate, or
-        --- a well-formed query item. See Queries section for more information.
-        --- @type Portal.QueryLike[]
-        query = { "tagged", "modified", "different", "valid" },
+    --- The default queries used when searching the jumplist. An entry can
+    --- be a name of a registered query item, an anonymous predicate, or
+    --- a well-formed query item. See Queries section for more information.
+    --- @type Portal.QueryLike[]
+    query = { "tagged", "modified", "different", "valid" },
 
-        labels = {
-            --- An ordered list of keys that will be used for labelling
-            --- available jumps. Labels will be applied in same order as
-            --- `jump.query`
-            select = { "j", "k", "h", "l" },
+    --- An ordered list of keys that will be used for labelling
+    --- available jumps. Labels will be applied in same order as
+    --- `jump.query`
+    labels = { "j", "k", "h", "l" },
 
-            --- Keys which will exit portal selection
-            escape = {
-                ["<esc>"] = true
-            },
-        },
-
-        --- Keys used for jumping forward and backward
-        keys = {
-            forward = "<c-i>",
-            backward = "<c-o>"
-        }
+    --- Keys used for exiting portal selection
+    escape = {
+        ["<esc>"] = true,
     },
 
-    tag = {
-        --- The default scope in which tags will be saved to
-        --- Only "global" and "none" has been implemented for now
-        --- @type Portal.Scope
-        scope = types.Scope.GLOBAL,
+    --- Keycodes used internally for jumping forward and backward. These are
+    --- not overrides of the current keymaps, but instead will be used
+    --- internally when a jump is selected.
+    backward = "<c-o>",
+    forward = "<c-i>",
 
-        save_path = vim.fn.stdpath("data") .. "/" .. "portal.json",
+    ---
+    deprecations = true,
+
+    ---
+    integrations = {
+        --- todo(cbochs): implement
+        grapple = false,
     },
 
-    window = {
-        title = {
-            --- When a portal is empty, render an default portal title
-            render_empty = true,
+	portal = {
+		title = {
+			--- When a portal is empty, render an default portal title
+			render_empty = true,
 
-            --- The raw window options used for the title window
-            options = {
-                relative = "cursor",
-                width = 80,
-                height = 1,
-                col = 2,
-                style = "minimal",
-                focusable = false,
-                border = "single",
-                noautocmd = true,
-                zindex = 98,
-            },
-        },
+			--- The raw window options used for the portal title window
+			options = {
+				relative = "cursor",
+				width = 80, -- implement as "min/mas width",
+				height = 1,
+				col = 2,
+				style = "minimal",
+				focusable = false,
+				border = "single",
+				noautocmd = true,
+				zindex = 98,
+			},
+		},
 
-        portal = {
-            -- When a portal is empty, render an empty buffer body
-            render_empty = false,
+		body = {
+			-- When a portal is empty, render an empty buffer body
+			render_empty = false,
 
-            --- The raw window options used for the portal window
-            options = {
-                relative = "cursor",
-                width = 80,
-                height = 3,
-                col = 2,
-                focusable = false,
-                border = "single",
-                noautocmd = true,
-                zindex = 99,
-            },
-        },
-    },
-
+			--- The raw window options used for the portal body window
+			options = {
+				relative = "cursor",
+				width = 80, -- implement as "min/mas width",
+				height = 3, -- implement as "context lines"
+				col = 2, -- implement as "offset"
+				focusable = false,
+				border = "single",
+				noautocmd = true,
+				zindex = 99,
+			},
+		},
+	},
 })
 ```
 
@@ -186,13 +184,13 @@ Matched jumps that are in a modified buffer (see `:h 'modified'`).
 
 #### `tagged`
 
-Matches jumps that are in a tagged buffer (see [Tagging](#tagging)).
+Matches jumps that are in a tagged buffer (see [grapple.nvim integration](#grapple))
 
 ### Custom Query Items
 
 A **query item** found in the configuration is in fact a "query-like" item. It may be either a `string`, `Portal.Predicate`, or `Portal.QueryItem`. A string may be used to specify a query item that has been _registered_. To register a query, use `query.register` and pass in a key, predicate, and optional `name` and `name_short`.
 
-#### Registered query items
+#### Registering query items
 
 ```lua
 --- Define the predicate
@@ -236,11 +234,64 @@ require("portal").jump_backward({
 })
 ```
 
-## Tagging
+## Previewer
 
-A `tag` is a persistent tag on a file or buffer. It is a means of indicating a file you want to return to. By itself, it has no function. It's use comes when `"tagged"` is used in a query.
+**todo!(cbochs)**
 
-For example, the following will select the first tagged buffer navigating backwards in the jumplist, without opening any portals.
+## Highlight Groups
+
+A number of highlight groups have been exposed to let you style your portals. By default, a [catppuccin-like theme](./lua/portal/highlight.lua#L53) is applied. However, the following highlight groups are available to tune to your preference:
+
+```lua
+M.groups = {
+	border = "PortalBorder",
+	border_backward = "PortalBorderBackward",
+	border_forward = "PortalBorderForward",
+	border_none = "PortalBorderNone",
+	label = "PortalLabel",
+}
+```
+
+## Integrations
+
+### [Grapple.nvim](https://github.com/cbochs/grapple.nvim)
+
+Tagging with Portal has been deprecated in favour of file tags offered by [grapple.nvim](https://github.com/cbochs/grapple.nvim). The original implementation of Portal's tags is still available in Grapple with:
+
+```lua
+-- Tag a buffer
+require("grapple").tag()
+
+-- Untag a buffer
+require("grapple").untag()
+
+-- Toggle a tag on a buffer
+require("grapple").toggle()
+```
+
+#### The `"tagged"` query item
+
+Grapple also registers the `"tagged"` query item for users to use in any [query](#queries). This replaces previous `"tagged"` query item provided by Portal.
+
+**Used during plugin setup**
+
+Add to the `query` configuration option during plugin setup.
+
+```lua
+require("portal").setup({
+    query = { "tagged", ... },
+})
+```
+
+**Used in a single query**
+
+```lua
+require("portal").open({ query = { "tagged" } })
+```
+
+#### Jump to tagged buffer
+
+The following example will select the first tagged buffer navigating backwards in the jumplist, without opening any portals.
 
 ```lua
 local types = require("portal.types")
@@ -251,72 +302,8 @@ if jumps[1].direction ~= types.Direction.NONE then
 end
 ```
 
-### Suggested Keymaps
-
-```lua
-vim.keymap.set("n", "<leader>m", require("portal.tag").toggle, {})
-```
-
-### Removing Tags
-
-Tags may be cleared individually or for an entire project scope.
-
-#### Clear individual tags
-
-```lua
-require("portal.tag").untag()
-```
-
-#### Clear all tag
-
-```lua
-require("portal.tag").reset()
-```
-
-## Previewer
-
-**todo!(cbochs)**
-
-## Highlight Groups
-
-A number of highlight groups have been exposed to let you style your portals. By default, a [catppuccin-like theme](./lua/portal/highlight.lua#L20) is applied. However, the following highlight groups are available to tune to your preference:
-
-```lua
-M.groups = {
-	border = "PortalBorder",
-	border_backward = "PortalBorderBackward",
-	border_forward = "PortalBorderForward",
-	border_none = "PortalBorderNone",
-	label = "PortalLabel",
-
-	leap_mark_active = "PortalLeapMarkActive",
-	leap_mark_inactive = "PortalLeapMarkInactive",
-}
-```
-
-## Lualine
-
-A simple lualine component called `portal_status` is provided to show whether a buffer is marked or not.
-
-**Mark inactive**
-
-<img width="276" alt="Screen Shot 2022-11-01 at 07 02 09" src="https://user-images.githubusercontent.com/2467016/199238779-955bd8f3-f406-4a61-b027-ac64d049481a.png">
-
-**Mark active**
-
-<img width="276" alt="Screen Shot 2022-11-01 at 07 02 38" src="https://user-images.githubusercontent.com/2467016/199238764-96678f97-8603-45d9-ba2e-9a512ce93727.png">
-
-**Usage**
-
-```lua
-require("lualine").setup({
-    sections = {
-        lualine_b = { "portal_status" }
-    }
-})
-```
-
 ## Inspiration
 
+* tjdevries [vlog.nvim](https://github.com/tjdevries/vlog.nvim)
 * ThePrimeagen's [harpoon](https://github.com/ThePrimeagen/harpoon)
 * kwarlwang's [bufjump.nvim](https://github.com/kwkarlwang/bufjump.nvim)
