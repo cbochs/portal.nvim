@@ -19,7 +19,7 @@ To get started, [install](#installation) the plugin using your preferred package
 * **Contextual** jumping with portals to view available jump locations
 * **Customizable** jump queries to allow you to go anywhere you'd like in the jumplist
 * **Persistent** jump tags to flag important file you want to be able to get back to
-* [**Lualine**](#lualine) integration to indicate if a buffer has been marked
+* **Integration** with [grapple.nvim](#grapple.nvim) grapple to provide jumping to tagged files
 
 ## Requirements
 
@@ -58,25 +58,27 @@ The following is the default configuration. All configuration options may be ove
 
 ```lua
 require("portal").setup({
-    --- The default queries used when searching the jumplist. An entry can
-    --- be a name of a registered query item, an anonymous predicate, or
-    --- a well-formed query item. See Queries section for more information.
-    --- @type Portal.QueryLike[]
-    query = { "tagged", "modified", "different", "valid" },
+    ---The default queries used when searching the jumplist. An entry can
+    ---be a name of a registered query item, an anonymous predicate, or
+    ---a well-formed query item. See Queries section for more information.
+    ---@type Portal.QueryLike[]
+    query = { "modified", "different", "valid" },
 
-    --- An ordered list of keys that will be used for labelling
-    --- available jumps. Labels will be applied in same order as
-    --- `jump.query`
+    ---An ordered list of keys that will be used for labelling available jumps.
+    ---Labels will be applied in same order as `query`
+    ---@type string[]
     labels = { "j", "k", "h", "l" },
 
-    --- Keys used for exiting portal selection
+    ---Keys used for exiting portal selection. To disable a key, set its value
+    ---to `nil` or `false`
+    ---@type table<string, boolean | nil>
     escape = {
         ["<esc>"] = true,
     },
 
-    --- Keycodes used internally for jumping forward and backward. These are
-    --- not overrides of the current keymaps, but instead will be used
-    --- internally when a jump is selected.
+    ---Keycodes used internally for jumping forward and backward. These are
+    ---not overrides of the current keymaps, but instead will be used
+    ---internally when a jump is selected.
     backward = "<c-o>",
     forward = "<c-i>",
 
@@ -85,46 +87,45 @@ require("portal").setup({
 
     ---
     integrations = {
-        --- todo(cbochs): implement
         grapple = false,
     },
 
-	portal = {
-		title = {
-			--- When a portal is empty, render an default portal title
-			render_empty = true,
+    portal = {
+        title = {
+            --- When a portal is empty, render an default portal title
+            render_empty = true,
 
-			--- The raw window options used for the portal title window
-			options = {
-				relative = "cursor",
-				width = 80, -- implement as "min/mas width",
-				height = 1,
-				col = 2,
-				style = "minimal",
-				focusable = false,
-				border = "single",
-				noautocmd = true,
-				zindex = 98,
-			},
-		},
+            --- The raw window options used for the portal title window
+            options = {
+                relative = "cursor",
+                width = 80,
+                height = 1,
+                col = 2,
+                style = "minimal",
+                focusable = false,
+                border = "single",
+                noautocmd = true,
+                zindex = 98,
+            },
+        },
 
-		body = {
-			-- When a portal is empty, render an empty buffer body
-			render_empty = false,
+        body = {
+            -- When a portal is empty, render an empty buffer body
+            render_empty = false,
 
-			--- The raw window options used for the portal body window
-			options = {
-				relative = "cursor",
-				width = 80, -- implement as "min/mas width",
-				height = 3, -- implement as "context lines"
-				col = 2, -- implement as "offset"
-				focusable = false,
-				border = "single",
-				noautocmd = true,
-				zindex = 99,
-			},
-		},
-	},
+            --- The raw window options used for the portal body window
+            options = {
+                relative = "cursor",
+                width = 80,
+                height = 3,
+                col = 2,
+                focusable = false,
+                border = "single",
+                noautocmd = true,
+                zindex = 99,
+            },
+        },
+    },
 })
 ```
 
@@ -184,7 +185,7 @@ Matched jumps that are in a modified buffer (see `:h 'modified'`).
 
 #### `tagged`
 
-Matches jumps that are in a tagged buffer (see [grapple.nvim integration](#grapple))
+Matches jumps that are in a tagged buffer (see [grapple.nvim integration](#grapple)).
 
 ### Custom Query Items
 
@@ -193,9 +194,9 @@ A **query item** found in the configuration is in fact a "query-like" item. It m
 #### Registering query items
 
 ```lua
---- Define the predicate
---- @param jump Portal.Jump
---- @return boolean
+---Define the predicate
+---@param jump Portal.Jump
+---@return boolean
 local function is_listed(jump)
     return require("portal.query").valid(jump)
         and vim.fn.buflisted(jump.buffer)
@@ -207,7 +208,7 @@ require("portal.query").register("listed", is_listed, {
     name_short = "L",
 })
 
---- Use the registered query item
+-- Use the registered query item
 require("portal").jump_backward({
     query = { "listed" }
 })
@@ -244,17 +245,17 @@ A number of highlight groups have been exposed to let you style your portals. By
 
 ```lua
 M.groups = {
-	border = "PortalBorder",
-	border_backward = "PortalBorderBackward",
-	border_forward = "PortalBorderForward",
-	border_none = "PortalBorderNone",
-	label = "PortalLabel",
+    border = "PortalBorder",
+    border_backward = "PortalBorderBackward",
+    border_forward = "PortalBorderForward",
+    border_none = "PortalBorderNone",
+    label = "PortalLabel",
 }
 ```
 
 ## Integrations
 
-### [Grapple.nvim](https://github.com/cbochs/grapple.nvim)
+### Grapple.nvim
 
 Tagging with Portal has been deprecated in favour of file tags offered by [grapple.nvim](https://github.com/cbochs/grapple.nvim). The original implementation of Portal's tags is still available in Grapple with:
 

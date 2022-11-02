@@ -1,30 +1,32 @@
---- @type Portal.Config
+---@type Portal.Config
 local M = {}
 
---- @class Portal.Config
+---@class Portal.Config
 local DEFAULT_CONFIG = {
-	--- todo(cbochs): implement
+	-- todo(cbochs): implement
 	log_level = vim.log.levels.WARN,
 
-	--- The default queries used when searching the jumplist. An entry can
-	--- be a name of a registered query item, an anonymous predicate, or
-	--- a well-formed query item. See Queries section for more information.
-	--- @type Portal.QueryLike[]
+	---The default queries used when searching the jumplist. An entry can
+	---be a name of a registered query item, an anonymous predicate, or
+	---a well-formed query item. See Queries section for more information.
+	---@type Portal.QueryLike[]
 	query = { "modified", "different", "valid" },
 
-	--- An ordered list of keys that will be used for labelling
-	--- available jumps. Labels will be applied in same order as
-	--- `jump.query`
+	---An ordered list of keys that will be used for labelling available jumps.
+	---Labels will be applied in same order as `query`
+	---@type string[]
 	labels = { "j", "k", "h", "l" },
 
-	--- Keys used for exiting portal selection
+	---Keys used for exiting portal selection. To disable a key, set its value
+	---to `nil` or `false`
+	---@type table<string, boolean | nil>
 	escape = {
 		["<esc>"] = true,
 	},
 
-	--- Keycodes used internally for jumping forward and backward. These are
-	--- not overrides of the current keymaps, but instead will be used
-	--- internally when a jump is selected.
+	---Keycodes used internally for jumping forward and backward. These are
+	---not overrides of the current keymaps, but instead will be used
+	---internally when a jump is selected.
 	backward = "<c-o>",
 	forward = "<c-i>",
 
@@ -33,16 +35,17 @@ local DEFAULT_CONFIG = {
 
 	---
 	integrations = {
-		--- todo(cbochs): implement
+		-- todo(cbochs): implement
 		grapple = false,
 	},
 
+	---
 	portal = {
 		title = {
-			--- When a portal is empty, render an default portal title
+			---When a portal is empty, render an default portal title
 			render_empty = true,
 
-			--- The raw window options used for the portal title window
+			---The raw window options used for the portal title window
 			options = {
 				relative = "cursor",
 				width = 80, -- implement as "min/mas width",
@@ -63,7 +66,7 @@ local DEFAULT_CONFIG = {
 			--- The raw window options used for the portal body window
 			options = {
 				relative = "cursor",
-				width = 80, -- implement as "min/mas width",
+				width = 80, -- implement as "min/max width",
 				height = 3, -- implement as "context lines"
 				col = 2, -- implement as "offset"
 				focusable = false,
