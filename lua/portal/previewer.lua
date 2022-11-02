@@ -4,6 +4,24 @@ local types = require("portal.types")
 
 local M = {}
 
+--- @class Portal.Previewer
+--- @field label Portal.Labeller
+--- @field open Portal.Opener
+--- @field close Portal.Closer
+
+--- @alias Portal.Labeller fun(jumps: Portal.Jump[], namespace: Portal.Namespace): Portal.Label[]
+--- @alias Portal.Opener fun(jumps: Portal.Jump[], labels: string[], namespace: Portal.Namespace): Portal.Portal[]
+--- @alias Portal.Closer fun(portals: Portal.Portal[])
+
+--- @alias Portal.Label string
+--- @alias Portal.Namespace integer
+
+--- @class Portal.Portal
+--- @field jump Portal.Jump
+--- @field label string
+--- @field windows integer[]
+--- @field namespace integer
+--
 --- @class Portal.Extmark
 --- @field buffer integer
 --- @field namespace integer

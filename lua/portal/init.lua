@@ -1,30 +1,12 @@
 local config = require("portal.config")
+local highlight = require("portal.highlight")
 local input = require("portal.input")
 local jump = require("portal.jump")
-local tag = require("portal.tag")
 local query = require("portal.query")
+local tag = require("portal.tag")
 local types = require("portal.types")
-local highlight = require("portal.highlight")
 
 local M = {}
-
---- @class Portal.Previewer
---- @field label Portal.Labeller
---- @field open Portal.Opener
---- @field close Portal.Closer
-
---- @alias Portal.Labeller fun(jumps: Portal.Jump[], namespace: Portal.Namespace): Portal.Label[]
---- @alias Portal.Opener fun(jumps: Portal.Jump[], labels: string[], namespace: Portal.Namespace): Portal.Portal[]
---- @alias Portal.Closer fun(portals: Portal.Portal[])
-
---- @alias Portal.Label string
---- @alias Portal.Namespace integer
-
---- @class Portal.Portal
---- @field jump Portal.Jump
---- @field label string
---- @field windows integer[]
---- @field namespace integer
 
 --- @class Portal.Options
 --- @field query Portal.QueryLike[]
@@ -34,6 +16,7 @@ local M = {}
 --- @param opts? Portal.Config
 function M.setup(opts)
 	config.load(opts or {})
+
 	tag.load(config.tag.save_path)
 	highlight.load(highlight.default_theme)
 end
