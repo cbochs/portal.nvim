@@ -137,6 +137,8 @@ log.new = function(config, standalone)
 			end)
 		end
 	end
+
+	return obj
 end
 
 log.new(default_config, true)
