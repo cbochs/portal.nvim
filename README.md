@@ -33,7 +33,7 @@ To get started, [install](#installation) the plugin using your preferred package
 use {
     "cbochs/portal.nvim",
     requires = {
-        -- Optional: provides file tagging
+        -- Optional: provides tagged file jumping
         "cbochs/grapple.nvim",
     },
     config = function()
@@ -65,30 +65,22 @@ require("portal").setup({
     query = { "modified", "different", "valid" },
 
     ---An ordered list of keys that will be used for labelling available jumps.
-    ---Labels will be applied in same order as `query`
+    ---Labels will be applied in same order as `query`.
     ---@type string[]
     labels = { "j", "k", "h", "l" },
 
     ---Keys used for exiting portal selection. To disable a key, set its value
-    ---to `nil` or `false`
+    ---to `nil` or `false`.
     ---@type table<string, boolean | nil>
     escape = {
         ["<esc>"] = true,
     },
 
-    ---Keycodes used internally for jumping forward and backward. These are
-    ---not overrides of the current keymaps, but instead will be used
-    ---internally when a jump is selected.
+    ---Keycodes used for jumping forward and backward. These are not overrides
+    ---of the current keymaps, but instead will be used internally when a jump
+    ---is selected.
     backward = "<c-o>",
     forward = "<c-i>",
-
-    ---
-    deprecations = true,
-
-    ---
-    integrations = {
-        grapple = false,
-    },
 
     portal = {
         title = {

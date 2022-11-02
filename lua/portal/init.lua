@@ -18,13 +18,6 @@ function M.setup(opts)
 	config.load(opts or {})
 	log.new({ level = config.log_level })
 	highlight.load()
-
-	if config.integrations.grapple then
-		local ok, _ = pcall(require, "grapple")
-		if not ok then
-			error("Unable to load integration: grapple")
-		end
-	end
 end
 
 --- @param direction Portal.Direction
