@@ -7,7 +7,7 @@ local log = require("portal.log").new({
 }, false)
 
 setmetatable(M, {
-	__call = function(...)
+	__call = function(_, ...)
 		if log == nil then
 			return
 		end

@@ -138,7 +138,7 @@ function M.open(jumps, labels, namespace)
 		local title_options = vim.deepcopy(config.portal.title.options)
 		title_options.border = highlight.border(title_options.border, jump.direction)
 
-		local body_options = vim.deepcopy(config.portal.portal.options)
+		local body_options = vim.deepcopy(config.portal.body.options)
 		body_options.border = highlight.border(body_options.border, jump.direction)
 
 		if not empty_portal then
@@ -155,7 +155,7 @@ function M.open(jumps, labels, namespace)
 				title_options.height = title_options.height + body_options.height
 			end
 
-			local title = jump.query.name
+			local title = jump.query.name or ""
 			if not empty_portal then
 				title = title .. " | " .. vim.fs.basename(vim.api.nvim_buf_get_name(jump.buffer))
 			end

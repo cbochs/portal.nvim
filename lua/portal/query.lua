@@ -40,7 +40,11 @@ function M.resolve(queries)
 
 	for _, query_item in pairs(queries) do
 		if type(query_item) == "string" then
-			table.insert(query, M[query_item])
+			if M[query_item] == nil then
+				error("Unable to find registered query item: " .. query_item)
+			else
+				table.insert(query, M[query_item])
+			end
 		elseif type(query_item) == "function" then
 			table.insert(query, {
 				predicate = query_item,
@@ -49,7 +53,11 @@ function M.resolve(queries)
 				name_short = "",
 			})
 		elseif type(query_item) == "table" then
-			table.insert(query, query_item)
+			if query_item.predicate == nil then
+				error("Query item must have a predicate.")
+			else
+				table.insert(query, query_item)
+			end
 		end
 	end
 
@@ -74,16 +82,8 @@ local function is_modified(jump)
 	return is_valid(jump) and is_different_buffer(jump) and vim.api.nvim_buf_get_option(jump.buffer, "modified")
 end
 
---- @param jump Portal.Jump
---- @return boolean
-local function is_tagged(jump)
-	local tag = require("portal.tag")
-	return is_valid(jump) and is_different_buffer(jump) and tag.exists(jump.buffer)
-end
-
 M.register("valid", is_valid, { name = "Jump", name_short = "J" })
 M.register("different", is_different_buffer, { name = "Different", name_short = "D" })
 M.register("modified", is_modified, { name = "Modified", name_short = "+" })
-M.register("tagged", is_tagged, { name = "Tagged", name_short = "T" })
 
 return M

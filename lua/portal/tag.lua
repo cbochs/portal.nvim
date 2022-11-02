@@ -5,7 +5,7 @@ local M = {}
 
 function M.tag()
 	deprecated(
-		'This method has been deprecated in favour of grapple.nvim integration. Please use require("grapple").tag instead.'
+		'tag.tag has been deprecated in favour of grapple.nvim integration. Please use require("grapple").tag instead.'
 	)
 	if config.integrations.grapple then
 		require("grapple").tag()
@@ -14,7 +14,7 @@ end
 
 function M.untag()
 	deprecated(
-		'This method has been deprecated in favour of grapple.nvim integration. Please use require("grapple").untag instead.'
+		'tag.untag has been deprecated in favour of grapple.nvim integration. Please use require("grapple").untag instead.'
 	)
 	if config.integrations.grapple then
 		require("grapple").untag()
@@ -23,7 +23,7 @@ end
 
 function M.toggle()
 	deprecated(
-		'This method has been deprecated in favour of grapple.nvim integration. Please use require("grapple").toggle instead.'
+		'tag.toggle has been deprecated in favour of grapple.nvim integration. Please use require("grapple").toggle instead.'
 	)
 	if config.integrations.grapple then
 		require("grapple").toggle()
@@ -33,7 +33,7 @@ end
 --- @param buffer? integer
 function M.exists(buffer)
 	deprecated(
-		'This method has been deprecated in favour of grapple.nvim integration. Please use require("grapple").exists instead.'
+		'tag.exists has been deprecated in favour of grapple.nvim integration. Please use require("grapple").exists instead.'
 	)
 	if config.integrations.grapple then
 		return require("grapple").exists({ buffer = (buffer or 0) })
@@ -42,7 +42,7 @@ end
 
 function M.reset()
 	deprecated(
-		'This method has been deprecated in favour of grapple.nvim integration. Please use require("grapple").reset instead.'
+		'tag.reset has been deprecated in favour of grapple.nvim integration. Please use require("grapple").reset instead.'
 	)
 	if config.integrations.grapple then
 		require("grapple").reset()

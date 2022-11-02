@@ -11,17 +11,6 @@ local M = {}
 --- @field col integer
 --- @field query Portal.Query
 
---- @return Portal.Jump
-local function default()
-	return {
-		buffer = -1,
-		direction = types.Direction.NONE,
-		distance = 0,
-		row = 0,
-		col = 0,
-	}
-end
-
 --- @param direction Portal.Direction
 --- @return fun(): Portal.Jump
 local function jumplist_iter(direction)
@@ -76,11 +65,11 @@ end
 ---
 --- Example:
 ---
---- Given an list of jump queries: `{ "valid", "valid", "tagged" }`,
+--- Given an list of jump queries: `{ "valid", "valid", "modified" }`,
 --- the resulting ordered list will be:
 --- * the first jump will be associated with the first item in the jumplist
 --- * the second jump will be associated with the second item in the jumplist
---- * if the first jump was also `tagged`, the third jump will also be
+--- * if the first jump was also modified, the third jump will also be
 ---   associated with the first item in the jumplist
 ---
 --- @param queries Portal.Query[]
@@ -127,9 +116,9 @@ end
 function M.select(jump)
 	local jump_key = nil
 	if jump.direction == types.Direction.BACKWARD then
-		jump_key = config.jump.keys.backward
+		jump_key = config.backward
 	elseif jump.direction == types.Direction.FORWARD then
-		jump_key = config.jump.keys.forward
+		jump_key = config.forward
 	elseif jump.direction == types.Direction.NONE then
 		return
 	end
