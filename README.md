@@ -19,7 +19,7 @@ To get started, [install](#installation) the plugin using your preferred package
 * **Contextual** jumping with portals to view available jump locations
 * **Customizable** jump queries to allow you to go anywhere you'd like in the jumplist
 * **Persistent** jump tags to flag important file you want to be able to get back to
-* **Integration** with [grapple.nvim](#grapple.nvim) grapple to provide jumping to tagged files
+* **Integration** with [grapple.nvim](#grapple) to provide jumping to tagged files
 
 ## Requirements
 
@@ -255,7 +255,7 @@ M.groups = {
 
 ## Integrations
 
-### Grapple.nvim
+### Grapple
 
 Tagging with Portal has been deprecated in favour of file tags offered by [grapple.nvim](https://github.com/cbochs/grapple.nvim). The original implementation of Portal's tags is still available in Grapple with:
 
