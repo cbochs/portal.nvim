@@ -4,7 +4,7 @@
 
 ---
 
-<img width="1774" alt="Screen Shot 2022-11-01 at 14 02 18" src="https://user-images.githubusercontent.com/2467016/199328505-ebd06a30-c931-4aa3-9828-d2970d811dfd.png">
+![portal_jump mov](https://user-images.githubusercontent.com/2467016/199164298-1083fdae-4d9c-480c-9962-41a853127e80.gif)
 
 _Theme: [catppuccin](https://github.com/catppuccin/nvim)_
 
@@ -125,7 +125,7 @@ require("portal").setup({
 
 A **portal** is a window that displays the jump location, the label required to get to that jump location, and any addition contextual information (i.e. the jump's file name or matched query).
 
-![portal_jump mov](https://user-images.githubusercontent.com/2467016/199164298-1083fdae-4d9c-480c-9962-41a853127e80.gif)
+<img width="1774" alt="Screen Shot 2022-11-01 at 14 02 18" src="https://user-images.githubusercontent.com/2467016/199328505-ebd06a30-c931-4aa3-9828-d2970d811dfd.png">
 
 ### Suggested Keymaps
 
