@@ -18,6 +18,12 @@ function M.setup(opts)
     config.load(opts or {})
     log.new({ level = config.log_level })
     highlight.load()
+
+    for plugin_name, is_enabled in pairs(config.integrations) do
+        if is_enabled then
+            require("portal.integrations." .. plugin_name).register()
+        end
+    end
 end
 
 --- @param direction Portal.Direction
