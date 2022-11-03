@@ -1,60 +1,52 @@
 local config = require("portal.config")
-local state = require("portal.state")
-local types = require("portal.types")
+local deprecated = require("portal.deprecated")
 
 local M = {}
 
-local tags = {}
-
 function M.tag()
-	local buffer_name = vim.api.nvim_buf_get_name(0)
-	tags[buffer_name] = true
+    deprecated(
+        'tag.tag has been deprecated in favour of grapple.nvim integration. Please use require("grapple").tag instead.'
+    )
+    if config.integrations.grapple then
+        require("grapple").tag()
+    end
 end
 
 function M.untag()
-	local buffer_name = vim.api.nvim_buf_get_name(0)
-	tags[buffer_name] = nil
+    deprecated(
+        'tag.untag has been deprecated in favour of grapple.nvim integration. Please use require("grapple").untag instead.'
+    )
+    if config.integrations.grapple then
+        require("grapple").untag()
+    end
 end
 
 function M.toggle()
-	if M.exists() then
-		M.untag()
-	else
-		M.tag()
-	end
+    deprecated(
+        'tag.toggle has been deprecated in favour of grapple.nvim integration. Please use require("grapple").toggle instead.'
+    )
+    if config.integrations.grapple then
+        require("grapple").toggle()
+    end
 end
 
 --- @param buffer? integer
 function M.exists(buffer)
-	local buffer_name = vim.api.nvim_buf_get_name(buffer or 0)
-	return tags[buffer_name] or false
+    deprecated(
+        'tag.exists has been deprecated in favour of grapple.nvim integration. Please use require("grapple").exists instead.'
+    )
+    if config.integrations.grapple then
+        return require("grapple").exists({ buffer = (buffer or 0) })
+    end
 end
 
 function M.reset()
-	tags = {}
-end
-
-function M.load(save_path)
-	if state.file_exists(save_path) then
-		tags = state.load(save_path)
-	end
-
-	if config.tag.scope ~= types.Scope.NONE then
-		vim.api.nvim_create_augroup("PortalSave", { clear = true })
-		vim.api.nvim_create_autocmd({ "VimLeave" }, {
-			group = "PortalSave",
-			callback = function()
-				require("portal.tag").save(config.tag.save_path)
-			end,
-		})
-	end
-end
-
-function M.save(save_path)
-	if config.tag.scope == types.Scope.NONE then
-		return
-	end
-	state.save(save_path, tags)
+    deprecated(
+        'tag.reset has been deprecated in favour of grapple.nvim integration. Please use require("grapple").reset instead.'
+    )
+    if config.integrations.grapple then
+        require("grapple").reset()
+    end
 end
 
 return M
