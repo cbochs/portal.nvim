@@ -19,7 +19,7 @@ To get started, [install](#installation) the plugin using your preferred package
 * **Contextual** jumping with portals to view available jump locations
 * **Customizable** jump queries to allow you to go anywhere you'd like in the jumplist
 * **Persistent** jump tags to flag important file you want to be able to get back to
-* **Integration** with [grapple.nvim](#grapple) to provide jumping to tagged files
+* **Integration** with [grapple.nvim](#grapple) and [harpoon](#harpoon) to provide additional queries
 
 ## Requirements
 
@@ -32,17 +32,17 @@ To get started, [install](#installation) the plugin using your preferred package
 ```lua
 use {
     "cbochs/portal.nvim",
-    requires = {
-        -- Optional: provides tagged file jumping
-        "cbochs/grapple.nvim",
-    },
     config = function()
         require("portal").setup({
             -- Your configuration goes here
             -- Leave empty to use the default configuration
             -- Please see the Configuration section below for more information
         })
-    end
+    end,
+    requires = {
+        "cbochs/grapple.nvim",  -- Optional: provides the "grapple" query item
+        "ThePrimeagen/harpoon", -- Optional: provides the "harpoon" query item
+    },
 }
 ```
 
@@ -118,6 +118,14 @@ require("portal").setup({
             },
         },
     },
+
+    integrations = {
+        ---cbochs/grapple.nvim: registers the "grapple" query item
+        grapple = false,
+
+        ---ThePrimeagen/harpoon: registers the "harpoon" query item
+        harpoon = false,
+    }
 })
 ```
 
@@ -175,9 +183,9 @@ Matches jumps that have a buffer different than the current buffer.
 
 Matched jumps that are in a modified buffer (see `:h 'modified'`).
 
-#### `tagged`
+#### `custom`
 
-Matches jumps that are in a tagged buffer (see [grapple.nvim integration](#grapple)).
+See available [integrations](#integrations) for additional query items.
 
 ### Custom Query Items
 
@@ -249,6 +257,28 @@ M.groups = {
 
 ### Grapple
 
+**Query item**: `"grapple"`
+
+Matches jumps that are in a buffer that has been tagged grapple.nvim.
+
+```lua
+require("portal").setup({
+    integrations = {
+        grapple = true
+    }
+])
+```
+
+#### Usage
+
+```lua
+require("portal").setup({
+    query = { "grapple", ... }
+})
+```
+
+#### Tagging
+
 Tagging with Portal has been deprecated in favour of file tags offered by [grapple.nvim](https://github.com/cbochs/grapple.nvim). The original implementation of Portal's tags is still available in Grapple with:
 
 ```lua
@@ -262,27 +292,7 @@ require("grapple").untag()
 require("grapple").toggle()
 ```
 
-#### The `"tagged"` query item
-
-Grapple also registers the `"tagged"` query item for users to use in any [query](#queries). This replaces previous `"tagged"` query item provided by Portal.
-
-**Used during plugin setup**
-
-Add to the `query` configuration option during plugin setup.
-
-```lua
-require("portal").setup({
-    query = { "tagged", ... },
-})
-```
-
-**Used in a single query**
-
-```lua
-require("portal").open({ query = { "tagged" } })
-```
-
-#### Jump to tagged buffer
+#### Jump to last tagged buffer
 
 The following example will select the first tagged buffer navigating backwards in the jumplist, without opening any portals.
 
@@ -291,6 +301,28 @@ local types = require("portal.types")
 local query = require("portal.query").resolve({ "tagged" })
 local jumps = require("portal.jump").search(query, types.Direction.BACKWARD)
 require("portal.jump").select(jumps[1])
+```
+
+### Harpoon
+
+**Query item**: `"harpoon"`
+
+Matches jumps that are in a buffer that has been marked by harpoon.
+
+```lua
+require("portal").setup({
+    integrations = {
+        harpoon = true
+    }
+})
+```
+
+#### Usage
+
+```lua
+require("portal").setup({
+    query = { "harpoon", ... }
+})
 ```
 
 ## Inspiration
