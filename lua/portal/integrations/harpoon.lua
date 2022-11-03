@@ -4,9 +4,9 @@ local M = {}
 ---@return boolean
 local function is_marked(jump)
     local query = require("portal.query")
-    local util = require("harpoon.util")
+    local utils = require("harpoon.utils")
     local mark = require("harpoon.mark")
-    local buffer_name = util.normalize_path(vim.api.nvim_buf_get_name(jump.buffer))
+    local buffer_name = utils.normalize_path(vim.api.nvim_buf_get_name(jump.buffer))
     return query.valid.predicate(jump) and query.different.predicate(jump) and mark.mark_exists(buffer_name)
 end
 
