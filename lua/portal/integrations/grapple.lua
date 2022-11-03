@@ -7,7 +7,7 @@ local M = {}
 local function is_tagged(jump)
     local query = require("portal.query")
     local grapple = require("grapple")
-    return query.valid.predicate(jump) and query.different.predicate(jump) and grapple.exists({ buffer = 0 })
+    return query.valid.predicate(jump) and query.different.predicate(jump) and grapple.exists({ buffer = jump.buffer })
 end
 
 function M.register()
