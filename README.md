@@ -290,9 +290,7 @@ The following example will select the first tagged buffer navigating backwards i
 local types = require("portal.types")
 local query = require("portal.query").resolve({ "tagged" })
 local jumps = require("portal.jump").search(query, types.Direction.BACKWARD)
-if jumps[1].direction ~= types.Direction.NONE then
-    require("portal.jump").select(jumps[1])
-end
+require("portal.jump").select(jumps[1])
 ```
 
 ## Inspiration
