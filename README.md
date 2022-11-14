@@ -19,7 +19,7 @@ To get started, [install](#installation) the plugin using your preferred package
 * **Contextual** jumping with portals to view available jump locations
 * **Customizable** jump queries to allow you to go anywhere you'd like in the jumplist
 * **Persistent** jump tags to flag important file you want to be able to get back to
-* **Integration** with [grapple.nvim](#grapple) and [harpoon](#harpoon) to provide additional queries
+* **Integration** with [grapple.nvim](https://github.com/cbochs/grapple.nvim) and [harpoon](https://github.com/ThePrimeagen/harpoon) to provide additional queries
 
 ## Requirements
 
@@ -185,7 +185,7 @@ Matched jumps that are in a modified buffer (see `:h 'modified'`).
 
 #### `custom`
 
-See available [integrations](#integrations) for additional query items.
+See how to create your own [custom query items](#custom-query-items) and available [integrations](#integrations) for more information.
 
 ### Custom Query Items
 
@@ -255,11 +255,11 @@ M.groups = {
 
 ## Integrations
 
-### Grapple
+### [grapple.nvim](https://github.com/cbochs/grapple.nvim)
 
 **Query item**: `"grapple"`
 
-Matches jumps that are in a buffer that has been tagged grapple.nvim.
+Matches jumps that are in a buffer that has been tagged [grapple.nvim](https://github.com/cbochs/grapple.nvim).
 
 ```lua
 require("portal").setup({
@@ -269,7 +269,7 @@ require("portal").setup({
 ])
 ```
 
-#### Usage
+**Usage**
 
 ```lua
 require("portal").setup({
@@ -277,37 +277,22 @@ require("portal").setup({
 })
 ```
 
-#### Tagging
+#### Jump to the first tagged buffer in the jumplist
 
-Tagging with Portal has been deprecated in favour of file tags offered by [grapple.nvim](https://github.com/cbochs/grapple.nvim). The original implementation of Portal's tags is still available in Grapple with:
-
-```lua
--- Tag a buffer
-require("grapple").tag()
-
--- Untag a buffer
-require("grapple").untag()
-
--- Toggle a tag on a buffer
-require("grapple").toggle()
-```
-
-#### Jump to last tagged buffer
-
-The following example will select the first tagged buffer navigating backwards in the jumplist, without opening any portals.
+Use Portal and Grapple to jump directly to the first tagged buffer navigating backwards in the jumplist, without opening any portals.
 
 ```lua
 local types = require("portal.types")
-local query = require("portal.query").resolve({ "tagged" })
+local query = require("portal.query").resolve({ "grapple" })
 local jumps = require("portal.jump").search(query, types.Direction.BACKWARD)
 require("portal.jump").select(jumps[1])
 ```
 
-### Harpoon
+### [harpoon](https://github.com/ThePrimeagen/harpoon)
 
 **Query item**: `"harpoon"`
 
-Matches jumps that are in a buffer that has been marked by harpoon.
+Matches jumps that are in a buffer that has been marked by [harpoon](https://github.com/ThePrimeagen/harpoon).
 
 ```lua
 require("portal").setup({
@@ -317,7 +302,7 @@ require("portal").setup({
 })
 ```
 
-#### Usage
+**Usage**
 
 ```lua
 require("portal").setup({
