@@ -1,5 +1,3 @@
-local deprecated = require("portal.deprecated")
-
 local M = {}
 
 ---@param jump Portal.Jump
@@ -19,12 +17,6 @@ function M.register()
 
     local query = require("portal.query")
     query.register("grapple", is_tagged, { name = "Tagged", name_short = "T" })
-    query.register("tagged", function(jump)
-        deprecated(
-            'The "tagged" query item has been deprecated and will be removed. Please use the "grapple" query item instead.'
-        )
-        return is_tagged(jump)
-    end, { name = "Tagged", name_short = "T" })
 end
 
 return M
