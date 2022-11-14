@@ -2,62 +2,42 @@ local types = require("portal.types")
 
 local M = {}
 
---- @type Portal.Namespace
+---@type Portal.Namespace
 M.namespace = vim.api.nvim_create_namespace("PortalNamespace")
 
+---@enum Portal.HighlightGroup
 M.groups = {
     border = "PortalBorder",
     border_backward = "PortalBorderBackward",
     border_forward = "PortalBorderForward",
     border_none = "PortalBorderNone",
     label = "PortalLabel",
-
-    leap_tag_active = "PortalLeapTagActive",
-    leap_tag_inactive = "PortalLeapTagInactive",
 }
 
---- @param border string | table
---- @param direction Portal.Direction
---- @return table
-function M.border(border, direction)
-    local BORDER_CHARS = {
-        none = { "", "", "", "", "", "", "", "" },
-        single = { "┌", "─", "┐", "│", "┘", "─", "└", "│" },
-    }
-
-    border = border or "none"
-    if type(border) == "string" then
-        border = BORDER_CHARS[border]
-    end
-
-    local highlight_group = nil
+---@param window integer
+---@param direction Portal.Direction
+---@return Portal.HighlightGroup
+function M.set_border(window, direction)
+    local highlight_group
     if direction == types.Direction.BACKWARD then
         highlight_group = M.groups.border_backward
     elseif direction == types.Direction.FORWARD then
         highlight_group = M.groups.border_forward
     elseif direction == types.Direction.NONE then
         highlight_group = M.groups.border_none
+    else
+        error("Invalid jump direction")
     end
-
-    local border_chars = {}
-    for i, char in pairs(border) do
-        border_chars[i] = { char, highlight_group }
-    end
-
-    return border_chars
+    vim.api.nvim_win_set_option(window, "winhl", "FloatBorder:" .. highlight_group .. ",Title:" .. highlight_group)
 end
 
 function M.load()
-    --- The default theme is based off of catppuccin
     local default_theme = {
-        PortalBorder = { fg = "#fab387" },
-        PortalBorderBackward = { link = M.groups.border },
-        PortalBorderForward = { link = M.groups.border },
-        PortalBorderNone = { fg = "#89b4fa" },
-        PortalLabel = { bg = "#a6e3a1", fg = "#1e1e2e" },
-
-        PortalLeapTagActive = { fg = "#a6e3a1" },
-        PortalLeapTagInactive = { fg = "#313244" },
+        [M.groups.border] = { link = "FloatBorder" },
+        [M.groups.border_backward] = { link = M.groups.border },
+        [M.groups.border_forward] = { link = M.groups.border },
+        [M.groups.border_none] = { link = M.groups.border },
+        [M.groups.label] = { bg = "#a6e3a1", fg = "#1e1e2e" },
     }
 
     for _, group in pairs(M.groups) do

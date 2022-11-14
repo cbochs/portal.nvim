@@ -136,10 +136,7 @@ function M.open(jumps, labels, namespace)
         local render_body = not empty_portal or config.portal.body.render_empty
 
         local title_options = vim.deepcopy(config.portal.title.options)
-        title_options.border = highlight.border(title_options.border, jump.direction)
-
         local body_options = vim.deepcopy(config.portal.body.options)
-        body_options.border = highlight.border(body_options.border, jump.direction)
 
         if not empty_portal then
             if not ensure_loaded(jump.buffer) then
@@ -147,38 +144,73 @@ function M.open(jumps, labels, namespace)
             end
         end
 
-        if render_title then
-            title_options.row = offset
-            offset = offset + title_options.height + 1
+        if vim.fn.has("nvim-0.9") == 1 then
+            if render_body then
+                local title = jump.query.name or ""
+                if empty_portal then
+                    body_options.style = "minimal"
+                    body_options.height = 1
+                else
+                    title = title .. " | " .. vim.fs.basename(vim.api.nvim_buf_get_name(jump.buffer))
+                end
+
+                body_options.title = title
+                body_options.row = offset
+                offset = offset + body_options.height + 1
+
+                local buffer = jump.buffer
+                if empty_portal then
+                    buffer = vim.api.nvim_create_buf(false, true)
+                    vim.api.nvim_buf_set_option(buffer, "bufhidden", "wipe")
+                end
+
+                local window = vim.api.nvim_open_win(buffer, false, body_options)
+                highlight.set_border(window, jump.direction)
+                table.insert(windows, window)
+
+                if not empty_portal then
+                    vim.api.nvim_win_set_cursor(window, {
+                        math.min(jump.row, vim.api.nvim_buf_line_count(jump.buffer)),
+                        jump.col,
+                    })
+                end
+            end
+        else
+            if render_title then
+                title_options.row = offset
+                offset = offset + title_options.height + 1
+
+                if render_body then
+                    title_options.height = title_options.height + body_options.height
+                end
+
+                local title = jump.query.name or ""
+                if not empty_portal then
+                    title = title .. " | " .. vim.fs.basename(vim.api.nvim_buf_get_name(jump.buffer))
+                end
+
+                local title_buffer = vim.api.nvim_create_buf(false, true)
+                vim.api.nvim_buf_set_option(title_buffer, "bufhidden", "wipe")
+                vim.api.nvim_buf_set_lines(title_buffer, 0, -1, false, { title })
+
+                local title_window = vim.api.nvim_open_win(title_buffer, false, title_options)
+                highlight.set_border(title_window, jump.direction)
+                table.insert(windows, title_window)
+            end
 
             if render_body then
-                title_options.height = title_options.height + body_options.height
+                body_options.row = offset
+                offset = offset + body_options.height + 1
+
+                local body_window = vim.api.nvim_open_win(jump.buffer, false, body_options)
+                highlight.set_border(body_window, jump.direction)
+                table.insert(windows, body_window)
+
+                vim.api.nvim_win_set_cursor(body_window, {
+                    math.min(jump.row, vim.api.nvim_buf_line_count(jump.buffer)),
+                    jump.col,
+                })
             end
-
-            local title = jump.query.name or ""
-            if not empty_portal then
-                title = title .. " | " .. vim.fs.basename(vim.api.nvim_buf_get_name(jump.buffer))
-            end
-
-            local title_buffer = vim.api.nvim_create_buf(false, true)
-            vim.api.nvim_buf_set_option(title_buffer, "bufhidden", "wipe")
-            vim.api.nvim_buf_set_lines(title_buffer, 0, -1, false, { title })
-
-            local title_window = vim.api.nvim_open_win(title_buffer, false, title_options)
-            table.insert(windows, title_window)
-        end
-
-        if render_body then
-            body_options.row = offset
-            offset = offset + body_options.height + 1
-
-            local body_window = vim.api.nvim_open_win(jump.buffer, false, body_options)
-            table.insert(windows, body_window)
-
-            vim.api.nvim_win_set_cursor(body_window, {
-                math.min(jump.row, vim.api.nvim_buf_line_count(jump.buffer)),
-                jump.col,
-            })
         end
 
         offset = offset + 1
