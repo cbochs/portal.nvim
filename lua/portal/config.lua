@@ -51,10 +51,10 @@ local DEFAULT_CONFIG = {
         },
 
         body = {
-            -- When a portal is empty, render an empty buffer body
+            ---When a portal is empty, render an empty buffer body
             render_empty = false,
 
-            --- The raw window options used for the portal body window
+            ---The raw window options used for the portal body window
             options = {
                 relative = "cursor",
                 width = 80, -- implement as "min/max width",
@@ -70,10 +70,10 @@ local DEFAULT_CONFIG = {
 
     integrations = {
         ---cbochs/grapple.nvim: registers the "grapple" query item
-        grapple = false,
+        grapple = true,
 
         ---ThePrimeagen/harpoon: registers the "harpoon" query item
-        harpoon = false,
+        harpoon = true,
     },
 }
 

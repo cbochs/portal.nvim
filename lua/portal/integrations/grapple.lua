@@ -5,13 +5,13 @@ local M = {}
 local function is_tagged(jump)
     local query = require("portal.query")
     local grapple = require("grapple")
-    return query.valid.predicate(jump) and query.different.predicate(jump) and grapple.exists({ buffer = jump.buffer })
+    return query.valid(jump) and query.different(jump) and grapple.exists({ buffer = jump.buffer })
 end
 
 function M.register()
     local ok, _ = pcall(require, "grapple")
     if not ok then
-        require("portal.log").warn("Unable to register query item for grapple.nvim. Please ensure plugin is installed.")
+        require("portal.log").warn("Unable to register query item. Please check that grapple.nvim is installed.")
         return
     end
 

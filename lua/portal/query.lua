@@ -20,16 +20,25 @@ setmetatable(M, {
     end,
 })
 
+local function as_callable(table_)
+    setmetatable(table_, {
+        __call = function(table, ...)
+            return table.predicate(...)
+        end,
+    })
+    return table_
+end
+
 --- @param key string
 --- @param predicate Portal.Predicate
 --- @param opts { name?: string, name_short?: string }
 function M.register(key, predicate, opts)
-    _queries[key] = {
+    _queries[key] = as_callable({
         predicate = predicate,
         type = key,
         name = opts.name or "",
         name_short = opts.name_short or "",
-    }
+    })
 end
 
 --- @param queries Portal.QueryLike[]
@@ -46,17 +55,20 @@ function M.resolve(queries)
                 table.insert(query, M[query_item])
             end
         elseif type(query_item) == "function" then
-            table.insert(query, {
-                predicate = query_item,
-                type = "",
-                name = "",
-                name_short = "",
-            })
+            table.insert(
+                query,
+                as_callable({
+                    predicate = query_item,
+                    type = "",
+                    name = "",
+                    name_short = "",
+                })
+            )
         elseif type(query_item) == "table" then
             if query_item.predicate == nil then
                 error("Query item must have a predicate.")
             else
-                table.insert(query, query_item)
+                table.insert(query, as_callable(query_item))
             end
         end
     end

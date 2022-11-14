@@ -89,7 +89,7 @@ function M.search(queries, direction)
             if matched_predicates[query.predicate] then
                 goto continue
             end
-            if query.predicate(jump) then
+            if query(jump) then
                 matched_predicates[query.predicate] = true
                 identified_jumps[i] = vim.tbl_extend("force", jump, {
                     query = query,
