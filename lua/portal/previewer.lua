@@ -44,13 +44,13 @@ end
 --- @param buffer integer
 --- @param namespace integer
 --- @param start integer[]
---- @param _end integer[]
+--- @param end_ integer[]
 --- @return Portal.Extmark
-local function get_extmarks(buffer, namespace, start, _end)
+local function get_extmarks(buffer, namespace, start, end_)
     -- See :h vim.api.nvim_buf_get_extmarks
     -- Parameters: {buffer}, {namespace}, {start}, {end}, {opts}
     -- Returns: list of ( {id}, {row}, {col}, {details} )
-    local result = vim.api.nvim_buf_get_extmarks(buffer, namespace, start, _end, { details = true })
+    local result = vim.api.nvim_buf_get_extmarks(buffer, namespace, start, end_, { details = true })
 
     local extmarks = {}
     for _, extmark in pairs(result) do
