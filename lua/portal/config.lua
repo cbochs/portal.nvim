@@ -37,10 +37,10 @@ local DEFAULT_CONFIG = {
 
     ---
     portal = {
-        ---When a portal is empty, render an default portal title
+        ---feat(nvim-0.9) When a portal is empty, render an default portal title
         render_empty = true,
 
-        ---The raw window options used for the portal window
+        ---feat(nvim-0.9) The raw window options used for the portal window
         options = {
             relative = "cursor",
             width = 80, -- implement as "min/max width",
