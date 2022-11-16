@@ -119,22 +119,22 @@ function M.label(jumps, namespace)
 end
 
 --- @param jumps Portal.Jump[]
---- @param labels Portal.Label[]
 --- @param namespace Portal.Namespace
 --- @return Portal.Portal[]
-function M.open(jumps, labels, namespace)
+function M.open(jumps, namespace)
     if vim.fn.has("nvim-0.9") == 1 then
-        return M.open_0_9(jumps, labels, namespace)
+        return M.open_0_9(jumps, namespace)
     else
-        return M.open_0_8(jumps, labels, namespace)
+        return M.open_0_8(jumps, namespace)
     end
 end
 
 --- @param jumps Portal.Jump[]
---- @param labels Portal.Label[]
 --- @param namespace Portal.Namespace
 --- @return Portal.Portal[]
-function M.open_0_8(jumps, labels, namespace)
+function M.open_0_8(jumps, namespace)
+    local labels = M.label(jumps, namespace)
+
     --- @type Portal.Portal
     local portals = {}
 
@@ -216,10 +216,11 @@ function M.open_0_8(jumps, labels, namespace)
 end
 
 --- @param jumps Portal.Jump[]
---- @param labels Portal.Label[]
 --- @param namespace Portal.Namespace
 --- @return Portal.Portal[]
-function M.open_0_9(jumps, labels, namespace)
+function M.open_0_9(jumps, namespace)
+    local labels = M.label(jumps, namespace)
+
     --- @type Portal.Portal
     local portals = {}
 

@@ -35,13 +35,10 @@ function M.jump(direction, opts)
     local jumps = jump.search(queries, direction, { lookback = config.lookback })
 
     local previewer = opts.previewer or require("portal.previewer")
-    local namespace = opts.namespace or highlight.namespace
-    local portals = M.open(jumps, previewer, namespace)
+    local portals = M.open(jumps, previewer, opts.namespace)
 
-    if #portals > 0 then
-        M.select(portals)
-        M.close(portals, previewer)
-    end
+    M.select(portals)
+    M.close(portals, previewer)
 end
 
 --- @param opts? Portal.Options
@@ -61,8 +58,7 @@ end
 function M.open(jumps, previewer, namespace)
     namespace = namespace or highlight.namespace
 
-    local labels = previewer.label(jumps, namespace)
-    local portals = previewer.open(jumps, labels, namespace)
+    local portals = previewer.open(jumps, namespace)
 
     -- Force UI to redraw to avoid user input blocking preview windows from
     -- showing up.
@@ -73,6 +69,14 @@ end
 
 --- @param portals Portal.Portal[]
 function M.select(portals)
+    local available_labels = vim.tbl_map(function(portal)
+        return portal.label
+    end, portals)
+
+    if #available_labels == 0 then
+        return
+    end
+
     while true do
         local input_label = input.get_label()
         if input_label == nil then
