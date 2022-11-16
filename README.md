@@ -24,6 +24,7 @@ To get started, [install](#installation) the plugin using your preferred package
 ## Requirements
 
 * [Neovim >= 0.5](https://github.com/neovim/neovim/releases/tag/v0.5.0)
+* Neovim >= 0.9 - (Optional, for [floating window title](https://github.com/neovim/neovim/issues/17458))
 
 ## Installation
 
