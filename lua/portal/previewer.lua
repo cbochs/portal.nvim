@@ -124,9 +124,9 @@ end
 --- @return Portal.Portal[]
 function M.open(jumps, labels, namespace)
     if vim.fn.has("nvim-0.9") == 1 then
-        M.open_0_9(jumps, labels, namespace)
+        return M.open_0_9(jumps, labels, namespace)
     else
-        M.open_0_8(jumps, labels, namespace)
+        return M.open_0_8(jumps, labels, namespace)
     end
 end
 
