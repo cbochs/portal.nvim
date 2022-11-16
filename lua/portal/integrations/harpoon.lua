@@ -4,9 +4,12 @@ local M = {}
 ---@return boolean
 local function is_marked(jump)
     local query = require("portal.query")
+    if not query.valid(jump) then
+        return
+    end
     local buffer_name = require("harpoon.utils").normalize_path(vim.api.nvim_buf_get_name(jump.buffer))
     local mark = require("harpoon.mark").get_marked_file(buffer_name)
-    return query.valid(jump) and query.different(jump) and mark ~= nil
+    return query.different(jump) and mark ~= nil
 end
 
 function M.register()
