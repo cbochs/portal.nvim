@@ -12,8 +12,9 @@ local M = {}
 --- @field query Portal.Query
 
 --- @param direction Portal.Direction
+--- @param lookback integer | nil
 --- @return fun(): Portal.Jump
-local function jumplist_iter(direction)
+local function jumplist_iter(direction, lookback)
     local jumplist_tuple = vim.fn.getjumplist()
 
     local vim_jumplist = jumplist_tuple[1]
@@ -27,17 +28,19 @@ local function jumplist_iter(direction)
     end
 
     local displacement = 0
+    local distance = 0
     local current_pos = start_pos + displacement
-    local max_lookback = #vim_jumplist
+    local max_lookback = lookback or #vim_jumplist
 
     return function()
         displacement = displacement + signed_step
+        distance = math.abs(displacement)
         current_pos = start_pos + displacement
 
         if current_pos < 1 or current_pos > #vim_jumplist then
             return
         end
-        if displacement > max_lookback then
+        if distance > max_lookback then
             return
         end
 
@@ -46,7 +49,7 @@ local function jumplist_iter(direction)
         --- @type Portal.Jump
         local jump = {
             buffer = vim_jump.bufnr,
-            distance = math.abs(displacement),
+            distance = distance,
             direction = direction,
             row = vim_jump.lnum,
             col = vim_jump.col,
@@ -74,12 +77,15 @@ end
 ---
 --- @param queries Portal.Query[]
 --- @param direction Portal.Direction
+--- @param opts? { lookback?: integer }
 --- @return Portal.Jump[]
-function M.search(queries, direction)
+function M.search(queries, direction, opts)
+    opts = opts or {}
+
     --- @type Portal.Jump[]
     local identified_jumps = {}
 
-    for jump in jumplist_iter(direction) do
+    for jump in jumplist_iter(direction, opts.lookback) do
         local matched_predicates = {}
 
         for i, query in pairs(queries) do

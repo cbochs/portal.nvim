@@ -32,14 +32,16 @@ function M.jump(direction, opts)
     opts = opts or {}
 
     local queries = query.resolve(opts.query or config.query)
-    local jumps = jump.search(queries, direction)
+    local jumps = jump.search(queries, direction, { lookback = config.lookback })
 
     local previewer = opts.previewer or require("portal.previewer")
     local namespace = opts.namespace or highlight.namespace
     local portals = M.open(jumps, previewer, namespace)
 
-    M.select(portals)
-    M.close(portals, previewer)
+    if #portals > 0 then
+        M.select(portals)
+        M.close(portals, previewer)
+    end
 end
 
 --- @param opts? Portal.Options
