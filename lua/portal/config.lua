@@ -37,6 +37,22 @@ local DEFAULT_CONFIG = {
 
     ---
     portal = {
+        ---When a portal is empty, render an default portal title
+        render_empty = true,
+
+        ---The raw window options used for the portal window
+        options = {
+            relative = "cursor",
+            width = 80,
+            height = 1,
+            col = 2,
+            style = "minimal",
+            focusable = false,
+            border = "single",
+            noautocmd = true,
+            zindex = 98,
+        },
+
         title = {
             ---When a portal is empty, render an default portal title
             render_empty = true,
