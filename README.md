@@ -259,7 +259,7 @@ M.groups = {
 
 **Query item**: `"grapple"`
 
-Matches jumps that are in a buffer that has been tagged [grapple.nvim](https://github.com/cbochs/grapple.nvim).
+Matches jumps that are tagged by [grapple.nvim](https://github.com/cbochs/grapple.nvim).
 
 ```lua
 require("portal").setup({
@@ -292,7 +292,7 @@ require("portal.jump").select(jumps[1])
 
 **Query item**: `"harpoon"`
 
-Matches jumps that are in a buffer that has been marked by [harpoon](https://github.com/ThePrimeagen/harpoon).
+Matches jumps that are in a buffer marked by [harpoon](https://github.com/ThePrimeagen/harpoon).
 
 ```lua
 require("portal").setup({
