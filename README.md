@@ -24,6 +24,7 @@ To get started, [install](#installation) the plugin using your preferred package
 ## Requirements
 
 * [Neovim >= 0.5](https://github.com/neovim/neovim/releases/tag/v0.5.0)
+* Neovim >= 0.9 - (Optional, for [floating window title](https://github.com/neovim/neovim/issues/17458))
 
 ## Installation
 
@@ -246,16 +247,44 @@ require("portal").jump_backward({
 
 ## Highlight Groups
 
-A number of highlight groups have been exposed to let you style your portals. By default, a [catppuccin-like theme](./lua/portal/highlight.lua#L53) is applied. However, the following highlight groups are available to tune to your preference:
+A number of highlight groups are available to let you style your portals:
+
+### `PortalBorder`
+
+The default window border placed around any open portal.
+
+**Default**: `FloatBorder`
+
+### `PortalBorderBackward`
+
+The window border placed around an open portal when the jump direction is backward.
+
+**Default**: `PortalBorder`
+
+### `PortalBorderForward`
+
+The window border placed around an open portal when the jump direction is forward.
+
+**Default**: `PortalBorder`
+
+### `PortalBorderNone`
+
+The window border placed around an open portal when the jump direction is forward.
+
+**Default**: `PortalBorder`
+
+### `PortalLabel`
+
+The label (extmark) placed next to a portal jump location.
+
+**Default**: `{ bg = "#a6e3a1", fg = "#1e1e2e" }`
+
+**Example**
 
 ```lua
-M.groups = {
-    border = "PortalBorder",
-    border_backward = "PortalBorderBackward",
-    border_forward = "PortalBorderForward",
-    border_none = "PortalBorderNone",
-    label = "PortalLabel",
-}
+-- Give window borders a "portal" feel
+vim.api.nvim_set_hl(0, "PortalBorder", { fg = "#fab387" })
+vim.api.nvim_set_hl(0, "PortalBorderNone", { fg = "#89b4fa" })
 ```
 
 ## Integrations

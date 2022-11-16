@@ -119,10 +119,22 @@ function M.label(jumps, namespace)
 end
 
 --- @param jumps Portal.Jump[]
---- @param labels Portal.Label[]
 --- @param namespace Portal.Namespace
 --- @return Portal.Portal[]
-function M.open(jumps, labels, namespace)
+function M.open(jumps, namespace)
+    if vim.fn.has("nvim-0.9") == 1 then
+        return M.open_0_9(jumps, namespace)
+    else
+        return M.open_0_8(jumps, namespace)
+    end
+end
+
+--- @param jumps Portal.Jump[]
+--- @param namespace Portal.Namespace
+--- @return Portal.Portal[]
+function M.open_0_8(jumps, namespace)
+    local labels = M.label(jumps, namespace)
+
     --- @type Portal.Portal
     local portals = {}
 
@@ -132,20 +144,15 @@ function M.open(jumps, labels, namespace)
         local windows = {}
 
         local empty_portal = jump.direction == types.Direction.NONE
+        if not empty_portal and not ensure_loaded(jump.buffer) then
+            goto continue
+        end
+
         local render_title = not empty_portal or config.portal.title.render_empty
         local render_body = not empty_portal or config.portal.body.render_empty
 
         local title_options = vim.deepcopy(config.portal.title.options)
-        title_options.border = highlight.border(title_options.border, jump.direction)
-
         local body_options = vim.deepcopy(config.portal.body.options)
-        body_options.border = highlight.border(body_options.border, jump.direction)
-
-        if not empty_portal then
-            if not ensure_loaded(jump.buffer) then
-                goto continue
-            end
-        end
 
         if render_title then
             title_options.row = offset
@@ -165,6 +172,7 @@ function M.open(jumps, labels, namespace)
             vim.api.nvim_buf_set_lines(title_buffer, 0, -1, false, { title })
 
             local title_window = vim.api.nvim_open_win(title_buffer, false, title_options)
+            highlight.set_border(title_window, jump.direction)
             table.insert(windows, title_window)
         end
 
@@ -172,13 +180,92 @@ function M.open(jumps, labels, namespace)
             body_options.row = offset
             offset = offset + body_options.height + 1
 
-            local body_window = vim.api.nvim_open_win(jump.buffer, false, body_options)
+            local buffer = jump.buffer
+            if empty_portal then
+                buffer = vim.api.nvim_create_buf(false, true)
+                vim.api.nvim_buf_set_option(buffer, "bufhidden", "wipe")
+            end
+
+            local body_window = vim.api.nvim_open_win(buffer, false, body_options)
+            highlight.set_border(body_window, jump.direction)
             table.insert(windows, body_window)
 
-            vim.api.nvim_win_set_cursor(body_window, {
-                math.min(jump.row, vim.api.nvim_buf_line_count(jump.buffer)),
-                jump.col,
-            })
+            if not empty_portal then
+                vim.api.nvim_win_set_cursor(body_window, {
+                    math.min(jump.row, vim.api.nvim_buf_line_count(jump.buffer)),
+                    jump.col,
+                })
+            end
+        end
+
+        offset = offset + 1
+
+        local portal = {
+            jump = jump,
+            label = labels[index],
+            windows = windows,
+            namespace = namespace,
+        }
+
+        table.insert(portals, portal)
+
+        ::continue::
+    end
+
+    return portals
+end
+
+--- @param jumps Portal.Jump[]
+--- @param namespace Portal.Namespace
+--- @return Portal.Portal[]
+function M.open_0_9(jumps, namespace)
+    local labels = M.label(jumps, namespace)
+
+    --- @type Portal.Portal
+    local portals = {}
+
+    local offset = 0
+
+    for index, jump in pairs(jumps) do
+        local windows = {}
+
+        local empty_portal = jump.direction == types.Direction.NONE
+        if not empty_portal and not ensure_loaded(jump.buffer) then
+            goto continue
+        end
+
+        local render_portal = not empty_portal or config.portal.render_empty
+        local window_options = vim.deepcopy(config.portal.options)
+
+        if render_portal then
+            local title = jump.query.name or ""
+            if empty_portal then
+                window_options.style = "minimal"
+                window_options.height = 1
+            else
+                title = title .. " | " .. vim.fs.basename(vim.api.nvim_buf_get_name(jump.buffer))
+            end
+
+            window_options.title = title
+            window_options.row = offset
+            offset = offset + window_options.height + 1
+
+            local buffer = jump.buffer
+            if empty_portal then
+                buffer = vim.api.nvim_create_buf(false, true)
+                vim.api.nvim_buf_set_option(buffer, "bufhidden", "wipe")
+            end
+
+            local window = vim.api.nvim_open_win(buffer, false, window_options)
+            highlight.set_border(window, jump.direction)
+            table.insert(windows, window)
+
+            if not empty_portal then
+                vim.api.nvim_win_set_cursor(window, {
+                    math.min(jump.row, vim.api.nvim_buf_line_count(jump.buffer)),
+                    jump.col,
+                })
+            end
         end
 
         offset = offset + 1
