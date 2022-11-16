@@ -28,17 +28,19 @@ local function jumplist_iter(direction, lookback)
     end
 
     local displacement = 0
+    local distance = 0
     local current_pos = start_pos + displacement
     local max_lookback = lookback or #vim_jumplist
 
     return function()
         displacement = displacement + signed_step
+        distance = math.abs(displacement)
         current_pos = start_pos + displacement
 
         if current_pos < 1 or current_pos > #vim_jumplist then
             return
         end
-        if displacement > max_lookback then
+        if distance > max_lookback then
             return
         end
 
@@ -47,7 +49,7 @@ local function jumplist_iter(direction, lookback)
         --- @type Portal.Jump
         local jump = {
             buffer = vim_jump.bufnr,
-            distance = math.abs(displacement),
+            distance = distance,
             direction = direction,
             row = vim_jump.lnum,
             col = vim_jump.col,
