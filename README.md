@@ -259,7 +259,7 @@ M.groups = {
 
 **Query item**: `"grapple"`
 
-Matches jumps that are tagged by [grapple.nvim](https://github.com/cbochs/grapple.nvim).
+Matches jumps that are in a buffer tagged by [grapple.nvim](https://github.com/cbochs/grapple.nvim).
 
 ```lua
 require("portal").setup({
