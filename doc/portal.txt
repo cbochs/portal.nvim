@@ -1,0 +1,139 @@
+Portal.Config                                                    *Portal.Config*
+
+
+M.load()                                                                *M.load*
+     @param opts? Portal.Config
+
+
+M.namespace                                                        *M.namespace*
+
+    Type: ~
+        (Portal.Namespace)
+
+
+M.set_border({window}, {direction})                               *M.set_border*
+
+    Parameters: ~
+        {window}     (integer)
+        {direction}  (Portal.Direction)
+
+    Returns: ~
+        {Portal.HighlightGroup}
+
+
+M.load()                                                                *M.load*
+
+
+M.setup()                                                              *M.setup*
+     @class Portal.Options
+     @field query Portal.QueryLike[]
+     @field previewer Portal.Previewer
+     @field namespace Portal.Namespace
+     @param opts? Portal.Config
+
+
+M.jump()                                                                *M.jump*
+     @param direction Portal.Direction
+     @param opts? Portal.Options
+
+
+M.jump_backward()                                              *M.jump_backward*
+     @param opts? Portal.Options
+
+
+M.jump_forward()                                                *M.jump_forward*
+     @param opts? Portal.Options
+
+
+M.open()                                                                *M.open*
+     @param jumps Portal.Jump[]
+     @param previewer Portal.Previewer
+     @param namespace? integer
+     @return Portal.Portal[]
+
+
+M.select()                                                            *M.select*
+     @param portals Portal.Portal[]
+
+
+M.close()                                                              *M.close*
+     @param portals Portal.Portal[]
+     @param previewer Portal.Previewer
+
+
+M.get_label()                                                      *M.get_label*
+     @return string | nil
+
+
+M.search()                                                            *M.search*
+     Populate an ordered list of available jumps based on an input list of
+     queries.
+
+     In order to generate unique jumps, an individual jump may only be
+     associated with a unique query _predicate_ once. However, a jump may be
+     associated with more than one query.
+
+     Example:
+
+     Given an list of jump queries: `{ "valid", "valid", "modified" }`,
+     the resulting ordered list will be:
+     * the first jump will be associated with the first item in the jumplist
+     * the second jump will be associated with the second item in the jumplist
+     * if the first jump was also modified, the third jump will also be
+       associated with the first item in the jumplist
+
+     @param queries Portal.Query[]
+     @param direction Portal.Direction
+     @return Portal.Jump[]
+
+
+M.select()                                                            *M.select*
+     @param jump Portal.Jump
+
+
+log.new()                                                              *log.new*
+
+
+M.label()                                                              *M.label*
+     @param jumps Portal.Jump[]
+     @param namespace Portal.Namespace
+     @return Portal.Label[]
+
+
+M.open()                                                                *M.open*
+     @param jumps Portal.Jump[]
+     @param labels Portal.Label[]
+     @param namespace Portal.Namespace
+     @return Portal.Portal[]
+
+
+M.open_0_8()                                                        *M.open_0_8*
+     @param jumps Portal.Jump[]
+     @param labels Portal.Label[]
+     @param namespace Portal.Namespace
+     @return Portal.Portal[]
+
+
+M.open_0_9()                                                        *M.open_0_9*
+     @param jumps Portal.Jump[]
+     @param labels Portal.Label[]
+     @param namespace Portal.Namespace
+     @return Portal.Portal[]
+
+
+M.close()                                                              *M.close*
+     @param portals Portal.Portal[]
+
+
+M.register()                                                        *M.register*
+     @param key string
+     @param predicate Portal.Predicate
+     @param opts { name?: string, name_short?: string }
+
+
+M.resolve()                                                          *M.resolve*
+     @param queries Portal.QueryLike[]
+     @return Portal.Query[]
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:
