@@ -144,15 +144,15 @@ function M.open_0_8(jumps, labels, namespace)
         local windows = {}
 
         local empty_portal = jump.direction == types.Direction.NONE
+        if not empty_portal and not ensure_loaded(jump.buffer) then
+            goto continue
+        end
+
         local render_title = not empty_portal or config.portal.title.render_empty
         local render_body = not empty_portal or config.portal.body.render_empty
 
         local title_options = vim.deepcopy(config.portal.title.options)
         local body_options = vim.deepcopy(config.portal.body.options)
-
-        if not empty_portal and not ensure_loaded(jump.buffer) then
-            goto continue
-        end
 
         if render_title then
             title_options.row = offset
@@ -180,14 +180,22 @@ function M.open_0_8(jumps, labels, namespace)
             body_options.row = offset
             offset = offset + body_options.height + 1
 
-            local body_window = vim.api.nvim_open_win(jump.buffer, false, body_options)
+            local buffer = jump.buffer
+            if empty_portal then
+                buffer = vim.api.nvim_create_buf(false, true)
+                vim.api.nvim_buf_set_option(buffer, "bufhidden", "wipe")
+            end
+
+            local body_window = vim.api.nvim_open_win(buffer, false, body_options)
             highlight.set_border(body_window, jump.direction)
             table.insert(windows, body_window)
 
-            vim.api.nvim_win_set_cursor(body_window, {
-                math.min(jump.row, vim.api.nvim_buf_line_count(jump.buffer)),
-                jump.col,
-            })
+            if not empty_portal then
+                vim.api.nvim_win_set_cursor(body_window, {
+                    math.min(jump.row, vim.api.nvim_buf_line_count(jump.buffer)),
+                    jump.col,
+                })
+            end
         end
 
         offset = offset + 1
@@ -221,13 +229,12 @@ function M.open_0_9(jumps, labels, namespace)
         local windows = {}
 
         local empty_portal = jump.direction == types.Direction.NONE
-        -- nvim 0.9 specific
-        local render_portal = not empty_portal or config.portal.render_empty
-        local window_options = vim.deepcopy(config.portal.options)
-
         if not empty_portal and not ensure_loaded(jump.buffer) then
             goto continue
         end
+
+        local render_portal = not empty_portal or config.portal.render_empty
+        local window_options = vim.deepcopy(config.portal.options)
 
         if render_portal then
             local title = jump.query.name or ""

@@ -14,6 +14,14 @@ M.groups = {
     label = "PortalLabel",
 }
 
+M.default = {
+    [M.groups.border] = { link = "FloatBorder" },
+    [M.groups.border_backward] = { link = M.groups.border },
+    [M.groups.border_forward] = { link = M.groups.border },
+    [M.groups.border_none] = { link = M.groups.border },
+    [M.groups.label] = { bg = "#a6e3a1", fg = "#1e1e2e" },
+}
+
 ---@param window integer
 ---@param direction Portal.Direction
 ---@return Portal.HighlightGroup
@@ -32,16 +40,8 @@ function M.set_border(window, direction)
 end
 
 function M.load()
-    local default_theme = {
-        [M.groups.border] = { link = "FloatBorder" },
-        [M.groups.border_backward] = { link = M.groups.border },
-        [M.groups.border_forward] = { link = M.groups.border },
-        [M.groups.border_none] = { link = M.groups.border },
-        [M.groups.label] = { bg = "#a6e3a1", fg = "#1e1e2e" },
-    }
-
     for _, group in pairs(M.groups) do
-        vim.api.nvim_set_hl(0, group, default_theme[group] or {})
+        vim.api.nvim_set_hl(0, group, M.default[group] or {})
     end
 end
 
