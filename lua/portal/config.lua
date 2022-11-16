@@ -43,14 +43,12 @@ local DEFAULT_CONFIG = {
         ---The raw window options used for the portal window
         options = {
             relative = "cursor",
-            width = 80,
-            height = 1,
-            col = 2,
-            style = "minimal",
+            width = 80, -- implement as "min/max width",
+            height = 3, -- implement as "context lines"
+            col = 2, -- implement as "offset"
             focusable = false,
             border = "single",
             noautocmd = true,
-            zindex = 98,
         },
 
         title = {
