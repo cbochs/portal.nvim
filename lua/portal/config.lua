@@ -25,8 +25,8 @@ local DEFAULT_CONFIG = {
     },
 
     ---The jumplist is fixed at 100 items, which has the possibility to impact
-    ---portal performance. Set this value (less than 100) to limit the number
-    ---of jumps that will be queried.
+    ---portal performance. Set this to a value less than 100 to limit the number
+    ---of jumps in the jumplist that will be queried.
     lookback = 100,
 
     ---Keycodes used for jumping forward and backward. These are not overrides

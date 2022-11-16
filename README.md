@@ -77,7 +77,7 @@ require("portal").setup({
     },
 
     ---The jumplist is fixed at 100 items, which has the possibility to impact
-    ---portal performance. Set this value (less than 100) to limit the number
+    ---portal performance. Set this to a value less than 100 to limit the number
     ---of jumps in the jumplist that will be queried.
     lookback = 100,
 
