@@ -206,7 +206,7 @@ second is where a jump’s buffer is _different_ than the current buffer.
     local resolved_query = require("portal.query").resolve(query)
     
     -- A search can be explicitly searched for, returning a list of Portal.Jump.
-    -- Invalid jumps will have their direction field set to types.Direction.NONE
+    -- Invalid jumps will have their direction field set to types.direction.none
     local available_jumps = require("portal.jump").search(query)
 <
 
@@ -390,9 +390,8 @@ Jump to the first tagged buffer in the jumplist Use Portal and Grapple to jump
 
 
 >
-    local types = require("portal.types")
     local query = require("portal.query").resolve({ "grapple" })
-    local jumps = require("portal.jump").search(query, types.Direction.BACKWARD)
+    local jumps = require("portal.jump").search(query, "backward")
     require("portal.jump").select(jumps[1])
 <
 
