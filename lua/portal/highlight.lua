@@ -2,9 +2,6 @@ local types = require("portal.types")
 
 local M = {}
 
----@type Portal.Namespace
-M.namespace = vim.api.nvim_create_namespace("PortalNamespace")
-
 ---@enum Portal.HighlightGroup
 M.groups = {
     border = "PortalBorder",
