@@ -29,7 +29,7 @@ end
 --- @param opts? Portal.Config
 function M.setup(opts)
     config.load(opts or {})
-    require("portal.log").global({ level = config.log_level })
+    require("portal.log").global({ log_level = config.log_level })
     M.initialize()
 end
 
