@@ -10,8 +10,10 @@ function input.get_label(escape_keys)
         return nil
     end
 
-    if vim.tbl_contains(escape_keys, char) then
-        return nil
+    for _, keycode in pairs(escape_keys) do
+        if char == keycode then
+            return nil
+        end
     end
 
     return char
