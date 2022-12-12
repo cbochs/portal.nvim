@@ -16,7 +16,7 @@ local M = {}
 --- @param opts? Portal.Config
 function M.setup(opts)
     config.load(opts or {})
-    log.new({ level = config.log_level })
+    log.global({ level = config.log_level })
     highlight.load()
 
     for plugin_name, is_enabled in pairs(config.integrations) do
