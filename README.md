@@ -12,7 +12,7 @@ _Theme: [catppuccin](https://github.com/catppuccin/nvim)_
 
 Portal is a plugin that aims to build upon and enhance existing jumplist motions (i.e. `<c-o>` and `<c-i>`) by surfacing contextual information with the use of [portals](#portals), and providing multiple jump options by means of [queries](#queries).
 
-To get started, [install](#installation) the plugin using your preferred package manager, setup the plugin, add the suggested keybindings for portals and tagging, and give it a go! You can find the default configuration for the plugin in the secion [below](#configuration).
+To get started, [install](#installation) the plugin using your preferred package manager, setup the plugin, add the suggested keybindings for portals and tagging, and give it a go! Default settings for the plugin can be found in the [settings](#default-settings) section below
 
 ## Features
 
@@ -24,7 +24,7 @@ To get started, [install](#installation) the plugin using your preferred package
 ## Requirements
 
 * [Neovim >= 0.5](https://github.com/neovim/neovim/releases/tag/v0.5.0)
-* Neovim >= 0.9 - (Optional, for [floating window title](https://github.com/neovim/neovim/issues/17458))
+* Neovim >= 0.9 - optional, for [floating window title](https://github.com/neovim/neovim/issues/17458)
 
 ## Installation
 
@@ -33,13 +33,6 @@ To get started, [install](#installation) the plugin using your preferred package
 ```lua
 use {
     "cbochs/portal.nvim",
-    config = function()
-        require("portal").setup({
-            -- Your configuration goes here
-            -- Leave empty to use the default configuration
-            -- Please see the Configuration section below for more information
-        })
-    end,
     requires = {
         "cbochs/grapple.nvim",  -- Optional: provides the "grapple" query item
         "ThePrimeagen/harpoon", -- Optional: provides the "harpoon" query item
@@ -53,12 +46,15 @@ use {
 Plug "cbochs/portal.nvim"
 ```
 
-## Configuration
+## Default Settings
 
-The following is the default configuration. All configuration options may be overridden during plugin setup.
+The following are the default settings for Portal. **Setup is not required**, but settings may be overridden by passing them as table arguments to the `portal#setup` function.
 
 ```lua
 require("portal").setup({
+    ---@type "debug" | "info" | "warn" | "error"
+    log_level = "warn",
+
     ---The default queries used when searching the jumplist. An entry can
     ---be a name of a registered query item, an anonymous predicate, or
     ---a well-formed query item. See Queries section for more information.
@@ -144,7 +140,7 @@ For example, a query of `{ "modified", "different" }` will attempt to find two j
 local query = { "modified", "different" }
 
 -- A query can be used in the context of jumping and passed in as an option
--- or through the configuration
+-- or through during setup
 require("portal").jump_forward({ query = query })
 
 -- A list of query-like items must be resolved into proper Portal.QueryItem's
@@ -181,7 +177,7 @@ See how to create your own [custom query items](#custom-query-items) and availab
 
 ### Custom Query Items
 
-A **query item** found in the configuration is in fact a "query-like" item. It may be either a `string`, `Portal.Predicate`, or `Portal.QueryItem`. A string may be used to specify a query item that has been _registered_. To register a query, use `query.register` and pass in a key, predicate, and optional `name` and `name_short`.
+A **query item** found in the settings is in fact a "query-like" item. It may be either a `string`, `Portal.Predicate`, or `Portal.QueryItem`. A string may be used to specify a query item that has been _registered_. To register a query, use `query.register` and pass in a key, predicate, and optional `name` and `name_short`.
 
 #### Registering query items
 
