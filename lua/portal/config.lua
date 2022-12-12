@@ -1,7 +1,7 @@
----@type Portal.Config
+---@type Portal.Settings
 local M = {}
 
----@class Portal.Config
+---@class Portal.Settings
 local DEFAULT_CONFIG = {
     -- todo(cbochs): implement
     log_level = vim.log.levels.WARN,
@@ -96,7 +96,7 @@ local DEFAULT_CONFIG = {
     },
 }
 
---- @type Portal.Config
+--- @type Portal.Settings
 local _config = DEFAULT_CONFIG
 
 local function resolve_key(key)
@@ -126,18 +126,16 @@ local function resolve_keys(keys)
     return resolved_keys
 end
 
---- @param opts? Portal.Config
+--- @param opts? Portal.Settings
 function M.load(opts)
     opts = opts or {}
 
-    --- @type Portal.Config
+    --- @type Portal.Settings
     _config = vim.tbl_deep_extend("force", DEFAULT_CONFIG, opts)
 
     -- Resolve label keycodes
     _config.labels = resolve_keys(_config.labels)
     _config.escape = resolve_keys(_config.escape)
-    _config.backward = resolve_key(_config.backward)
-    _config.forward = resolve_key(_config.forward)
 end
 
 setmetatable(M, {

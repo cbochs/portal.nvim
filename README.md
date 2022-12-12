@@ -82,12 +82,6 @@ require("portal").setup({
     ---of jumps in the jumplist that will be queried.
     lookback = 100,
 
-    ---Keycodes used for jumping forward and backward. These are not overrides
-    ---of the current keymaps, but instead will be used internally when a jump
-    ---is selected.
-    backward = "<c-o>",
-    forward = "<c-i>",
-
     portal = {
         title = {
             --- When a portal is empty, render an default portal title
