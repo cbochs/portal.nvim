@@ -43,12 +43,12 @@ end
 
 --- @param opts? Portal.Options
 function M.jump_backward(opts)
-    M.jump(types.Direction.BACKWARD, opts)
+    M.jump(types.direction.backward, opts)
 end
 
 --- @param opts? Portal.Options
 function M.jump_forward(opts)
-    M.jump(types.Direction.FORWARD, opts)
+    M.jump(types.direction.forward, opts)
 end
 
 --- @param jumps Portal.Jump[]
@@ -84,7 +84,7 @@ function M.select(portals)
         end
 
         for _, portal in pairs(portals) do
-            if portal.jump.direction == types.Direction.NONE then
+            if portal.jump.direction == types.direction.none then
                 goto continue
             end
             if input_label == portal.label then

@@ -1,10 +1,10 @@
-local M = {}
+local types = {}
 
 --- @enum Portal.Direction
-M.Direction = {
-    BACKWARD = 0,
-    FORWARD = 1,
-    NONE = 2,
+types.direction = {
+    backward = "backward",
+    forward = "forward",
+    none = "none",
 }
 
-return M
+return types

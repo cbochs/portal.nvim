@@ -159,7 +159,7 @@ require("portal").jump_forward({ query = query })
 local resolved_query = require("portal.query").resolve(query)
 
 -- A search can be explicitly searched for, returning a list of Portal.Jump.
--- Invalid jumps will have their direction field set to types.Direction.NONE
+-- Invalid jumps will have their direction field set to types.direction.none
 local available_jumps = require("portal.jump").search(query)
 ```
 
@@ -310,9 +310,8 @@ require("portal").setup({
 Use Portal and Grapple to jump directly to the first tagged buffer navigating backwards in the jumplist, without opening any portals.
 
 ```lua
-local types = require("portal.types")
 local query = require("portal.query").resolve({ "grapple" })
-local jumps = require("portal.jump").search(query, types.Direction.BACKWARD)
+local jumps = require("portal.jump").search(query, "backward")
 require("portal.jump").select(jumps[1])
 ```
 

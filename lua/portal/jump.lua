@@ -26,9 +26,9 @@ local function jumplist_iter(direction, lookback)
     local start_pos = jumplist_tuple[2] + 1
 
     local signed_step = 1
-    if direction == types.Direction.BACKWARD then
+    if direction == types.direction.backward then
         signed_step = -1
-    elseif direction == types.Direction.FORWARD then
+    elseif direction == types.direction.forward then
         signed_step = 1
     end
 
@@ -114,7 +114,7 @@ function M.search(queries, direction, opts)
     for i = 1, #queries do
         if identified_jumps[i] == nil then
             identified_jumps[i] = {
-                direction = types.Direction.NONE,
+                direction = types.direction.none,
                 query = queries[i],
             }
         end
@@ -126,11 +126,11 @@ end
 --- @param jump Portal.Jump
 function M.select(jump)
     local jump_key = nil
-    if jump.direction == types.Direction.BACKWARD then
+    if jump.direction == types.direction.backward then
         jump_key = backward_key
-    elseif jump.direction == types.Direction.FORWARD then
+    elseif jump.direction == types.direction.forward then
         jump_key = forward_key
-    elseif jump.direction == types.Direction.NONE then
+    elseif jump.direction == types.direction.none then
         return
     end
 
