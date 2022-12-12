@@ -27,11 +27,11 @@ M.default = {
 ---@return Portal.HighlightGroup
 function M.set_border(window, direction)
     local highlight_group
-    if direction == types.Direction.BACKWARD then
+    if direction == types.direction.backward then
         highlight_group = M.groups.border_backward
-    elseif direction == types.Direction.FORWARD then
+    elseif direction == types.direction.forward then
         highlight_group = M.groups.border_forward
-    elseif direction == types.Direction.NONE then
+    elseif direction == types.direction.none then
         highlight_group = M.groups.border_none
     else
         error("Invalid jump direction")

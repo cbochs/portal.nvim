@@ -86,7 +86,7 @@ function M.label(jumps, namespace)
     local labels = {}
 
     for index, jump in pairs(jumps) do
-        if jump.direction == types.Direction.NONE then
+        if jump.direction == types.direction.none then
             goto continue
         end
         if not ensure_loaded(jump.buffer) then
@@ -143,7 +143,7 @@ function M.open_0_8(jumps, namespace)
     for index, jump in pairs(jumps) do
         local windows = {}
 
-        local empty_portal = jump.direction == types.Direction.NONE
+        local empty_portal = jump.direction == types.direction.none
         if not empty_portal and not ensure_loaded(jump.buffer) then
             goto continue
         end
@@ -229,7 +229,7 @@ function M.open_0_9(jumps, namespace)
     for index, jump in pairs(jumps) do
         local windows = {}
 
-        local empty_portal = jump.direction == types.Direction.NONE
+        local empty_portal = jump.direction == types.direction.none
         if not empty_portal and not ensure_loaded(jump.buffer) then
             goto continue
         end
