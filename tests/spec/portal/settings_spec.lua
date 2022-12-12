@@ -1,0 +1,27 @@
+describe("settings", function()
+    it("has the correct defaults", function()
+        local settings = require("portal.settings")
+        assert.equals("warn", settings.log_level)
+
+        assert.equals("modified", settings.query[1])
+        assert.equals("different", settings.query[2])
+        assert.equals("valid", settings.query[3])
+
+        assert.equals("j", settings.labels[1])
+        assert.equals("k", settings.labels[2])
+        assert.equals("h", settings.labels[3])
+        assert.equals("l", settings.labels[4])
+
+        local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
+        assert.equals(esc, settings.escape[1])
+
+        assert.equals(true, settings.portal.render_empty)
+        assert.equals("cursor", settings.portal.options.relative)
+        assert.equals(80, settings.portal.options.width)
+        assert.equals(3, settings.portal.options.height)
+        assert.equals(2, settings.portal.options.col)
+        assert.equals(false, settings.portal.options.focusable)
+        assert.equals("single", settings.portal.options.border)
+        assert.equals(true, settings.portal.options.noautocmd)
+    end)
+end)
