@@ -1,15 +1,15 @@
-local config = require("portal.config")
+local input = {}
 
-local M = {}
+---@param escape_keys? string[]
+---@return string | nil
+function input.get_label(escape_keys)
+    escape_keys = escape_keys or require("portal.settings").escape
 
---- @return string | nil
-function M.get_label()
     local ok, char = pcall(vim.fn.getcharstr)
     if not ok then
         return nil
     end
 
-    local escape_keys = config.escape or {}
     for _, keycode in pairs(escape_keys) do
         if char == keycode then
             return nil
@@ -19,4 +19,4 @@ function M.get_label()
     return char
 end
 
-return M
+return input

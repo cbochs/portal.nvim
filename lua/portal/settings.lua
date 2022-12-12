@@ -1,10 +1,10 @@
 ---@type Portal.Settings
-local M = {}
+local settings = {}
 
 ---@class Portal.Settings
-local DEFAULT_CONFIG = {
-    -- todo(cbochs): implement
-    log_level = vim.log.levels.WARN,
+local DEFAULT_SETTINGS = {
+    ---@type "debug" | "info" | "warn" | "error"
+    log_level = "warn",
 
     ---The default queries used when searching the jumplist. An entry can
     ---be a name of a registered query item, an anonymous predicate, or
@@ -18,8 +18,8 @@ local DEFAULT_CONFIG = {
     labels = { "j", "k", "h", "l" },
 
     ---Keys used for exiting portal selection. To disable a key, set its value
-    ---to `nil` or `false`.
-    ---@type table<string, boolean | nil>
+    ---to `false`.
+    ---@type table<string, boolean>
     escape = {
         ["<esc>"] = true,
     },
@@ -88,27 +88,24 @@ local DEFAULT_CONFIG = {
     },
 }
 
---- @type Portal.Settings
-local _config = DEFAULT_CONFIG
-
-local function resolve_key(key)
+local function termcode_for(key)
     return vim.api.nvim_replace_termcodes(key, true, false, true)
 end
 
 --- @param keys table
-local function resolve_keys(keys)
+local function replace_termcodes(keys)
     local resolved_keys = {}
 
     for key_or_index, key_or_flag in pairs(keys) do
         -- Table style: { "a", "b", "c" }. In this case, key_or_flag is the key
         if type(key_or_index) == "number" then
-            table.insert(resolved_keys, resolve_key(key_or_flag))
+            table.insert(resolved_keys, termcode_for(key_or_flag))
             goto continue
         end
 
         -- Table style: { ["<esc>"] = true }. In this case, key_or_index is the key
         if type(key_or_index) == "string" and key_or_flag == true then
-            table.insert(resolved_keys, resolve_key(key_or_index))
+            table.insert(resolved_keys, termcode_for(key_or_index))
             goto continue
         end
 
@@ -118,22 +115,22 @@ local function resolve_keys(keys)
     return resolved_keys
 end
 
---- @param opts? Portal.Settings
-function M.load(opts)
-    opts = opts or {}
+--- @type Portal.Settings
+local _settings = DEFAULT_SETTINGS
+_settings.escape = replace_termcodes(_settings.escape)
+_settings.labels = replace_termcodes(_settings.labels)
 
-    --- @type Portal.Settings
-    _config = vim.tbl_deep_extend("force", DEFAULT_CONFIG, opts)
-
-    -- Resolve label keycodes
-    _config.labels = resolve_keys(_config.labels)
-    _config.escape = resolve_keys(_config.escape)
+---@param overrides? Portal.Settings
+function settings.update(overrides)
+    _settings = vim.tbl_deep_extend("force", DEFAULT_SETTINGS, overrides or {})
+    _settings.escape = replace_termcodes(_settings.escape)
+    _settings.labels = replace_termcodes(_settings.labels)
 end
 
-setmetatable(M, {
+setmetatable(settings, {
     __index = function(_, index)
-        return _config[index]
+        return _settings[index]
     end,
 })
 
-return M
+return settings
