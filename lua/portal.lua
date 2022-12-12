@@ -3,8 +3,6 @@ local jump = require("portal.jump")
 local query = require("portal.query")
 local settings = require("portal.settings")
 local types = require("portal.types")
-local settings = require("portal.settings")
-local types = require("portal.types")
 
 local M = {}
 
