@@ -2,8 +2,8 @@ local highlight = require("portal.highlight")
 local input = require("portal.input")
 local jump = require("portal.jump")
 local query = require("portal.query")
-local types = require("portal.types")
 local settings = require("portal.settings")
+local types = require("portal.types")
 
 local M = {}
 
