@@ -97,7 +97,10 @@ function log.new(settings, modes)
             if settings.use_file then
                 local date = os.date()
                 local formatted_message = format_log(mode.name, info_short, date, message)
-                log_path:write(formatted_message .. "\n", "a")
+
+                local file = io.open(log_path, "a")
+                file:write(formatted_message)
+                file:close()
             end
         end
     end
