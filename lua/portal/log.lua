@@ -99,7 +99,7 @@ function log.new(settings, modes)
                 local formatted_message = format_log(mode.name, info_short, date, message)
 
                 local file = io.open(log_path, "a")
-                file:write(formatted_message)
+                file:write(formatted_message .. "\n")
                 file:close()
             end
         end
