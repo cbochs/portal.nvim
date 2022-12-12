@@ -29,6 +29,9 @@ local M = {}
 --- @field col integer
 --- @field details table
 
+---@type Portal.Namespace
+local default_namespace = vim.api.nvim_create_namespace("PortalNamespace")
+
 --- @param buffer integer
 --- @return boolean
 local function ensure_loaded(buffer)
@@ -119,9 +122,10 @@ function M.label(jumps, namespace)
 end
 
 --- @param jumps Portal.Jump[]
---- @param namespace Portal.Namespace
+--- @param namespace? Portal.Namespace
 --- @return Portal.Portal[]
 function M.open(jumps, namespace)
+    namespace = namespace or default_namespace
     if vim.fn.has("nvim-0.9") == 1 then
         return M.open_0_9(jumps, namespace)
     else

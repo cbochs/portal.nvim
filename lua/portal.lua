@@ -1,4 +1,3 @@
-local highlight = require("portal.highlight")
 local input = require("portal.input")
 local jump = require("portal.jump")
 local query = require("portal.query")
@@ -11,10 +10,9 @@ local M = {}
 
 local initialized = false
 
---- @class Portal.Options
---- @field query Portal.QueryLike[]
---- @field previewer Portal.Previewer
---- @field namespace Portal.Namespace
+---@class Portal.Options
+---@field query Portal.QueryLike[]
+---@field previewer Portal.Previewer
 
 function M.initialize()
     if initialized then
@@ -45,7 +43,7 @@ function M.jump(direction, opts)
     local jumps = jump.search(queries, direction, { lookback = settings.lookback })
 
     local previewer = opts.previewer or require("portal.previewer")
-    local portals = M.open(jumps, previewer, opts.namespace)
+    local portals = M.open(jumps, previewer)
 
     M.select(portals)
     M.close(portals, previewer)
@@ -63,12 +61,9 @@ end
 
 --- @param jumps Portal.Jump[]
 --- @param previewer Portal.Previewer
---- @param namespace? integer
 --- @return Portal.Portal[]
-function M.open(jumps, previewer, namespace)
-    namespace = namespace or highlight.namespace
-
-    local portals = previewer.open(jumps, namespace)
+function M.open(jumps, previewer)
+    local portals = previewer.open(jumps)
 
     -- Force UI to redraw to avoid user input blocking preview windows from
     -- showing up.
