@@ -1,7 +1,12 @@
-local config = require("portal.config")
 local types = require("portal.types")
 
 local M = {}
+
+---Keycodes used for jumping forward and backward. These are not overrides
+---of the current keymaps, but instead will be used internally when a jump
+---is selected.
+local backward_key = vim.api.nvim_replace_termcodes("<c-o>", true, false, true)
+local forward_key = vim.api.nvim_replace_termcodes("<c-i>", true, false, true)
 
 --- @class Portal.Jump
 --- @field buffer integer
@@ -122,9 +127,9 @@ end
 function M.select(jump)
     local jump_key = nil
     if jump.direction == types.Direction.BACKWARD then
-        jump_key = config.backward
+        jump_key = backward_key
     elseif jump.direction == types.Direction.FORWARD then
-        jump_key = config.forward
+        jump_key = forward_key
     elseif jump.direction == types.Direction.NONE then
         return
     end
