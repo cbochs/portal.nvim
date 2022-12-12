@@ -1,5 +1,3 @@
-local Path = require("plenary.path")
-
 local log = {}
 
 local _logger = {}
@@ -72,14 +70,10 @@ function log.new(settings, modes)
     modes = modes or DEFAULT_MODES
 
     local logger = {}
-    local log_dir = Path:new(settings.log_dir)
+    local log_dir = settings.log_dir
     local log_name = string.format("%s.log", settings.plugin_name)
-    local log_path = log_dir / log_name
+    local log_path = vim.fs.normalize(log_dir .. "/" .. log_name)
     local log_level = get_log_level(settings.log_level, modes)
-
-    if settings.use_file and not log_dir:exists() then
-        log_dir:mkdir()
-    end
 
     for mode_level, mode in ipairs(modes) do
         -- logger[mode.name .. "_fmt"] = function(...) end
