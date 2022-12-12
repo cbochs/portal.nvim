@@ -140,7 +140,7 @@ For example, a query of `{ "modified", "different" }` will attempt to find two j
 local query = { "modified", "different" }
 
 -- A query can be used in the context of jumping and passed in as an option
--- or through during setup
+-- or during setup
 require("portal").jump_forward({ query = query })
 
 -- A list of query-like items must be resolved into proper Portal.QueryItem's
