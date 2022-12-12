@@ -1,9 +1,9 @@
-local config = require("portal.config")
 local highlight = require("portal.highlight")
 local input = require("portal.input")
 local jump = require("portal.jump")
 local query = require("portal.query")
 local types = require("portal.types")
+local settings = require("portal.settings")
 
 local M = {}
 
@@ -26,10 +26,11 @@ function M.initialize()
     require("portal.integrations.harpoon").register()
 end
 
---- @param opts? Portal.Config
+--- @param opts? Portal.Settings
 function M.setup(opts)
-    config.load(opts or {})
-    require("portal.log").global({ log_level = config.log_level })
+    settings.update(opts)
+    require("portal.log").global({ log_level = settings.log_level })
+
     M.initialize()
 end
 
@@ -38,8 +39,8 @@ end
 function M.jump(direction, opts)
     opts = opts or {}
 
-    local queries = query.resolve(opts.query or config.query)
-    local jumps = jump.search(queries, direction, { lookback = config.lookback })
+    local queries = query.resolve(opts.query or settings.query)
+    local jumps = jump.search(queries, direction, { lookback = settings.lookback })
 
     local previewer = opts.previewer or require("portal.previewer")
     local portals = M.open(jumps, previewer, opts.namespace)
