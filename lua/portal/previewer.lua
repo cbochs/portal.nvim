@@ -30,7 +30,7 @@ local M = {}
 --- @field details table
 
 ---@type Portal.Namespace
-local default_namespace = vim.api.nvim_create_namespace("PortalNamespace")
+local default_namespace = vim.api.nvim_create_namespace("Portal")
 
 --- @param buffer integer
 --- @return boolean
