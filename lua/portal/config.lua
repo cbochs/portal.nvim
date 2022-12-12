@@ -86,14 +86,6 @@ local DEFAULT_CONFIG = {
             },
         },
     },
-
-    integrations = {
-        ---cbochs/grapple.nvim: registers the "grapple" query item
-        grapple = true,
-
-        ---ThePrimeagen/harpoon: registers the "harpoon" query item
-        harpoon = true,
-    },
 }
 
 --- @type Portal.Settings

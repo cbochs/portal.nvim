@@ -118,14 +118,6 @@ require("portal").setup({
             },
         },
     },
-
-    integrations = {
-        ---cbochs/grapple.nvim: registers the "grapple" query item
-        grapple = false,
-
-        ---ThePrimeagen/harpoon: registers the "harpoon" query item
-        harpoon = false,
-    }
 })
 ```
 
@@ -283,19 +275,13 @@ vim.api.nvim_set_hl(0, "PortalBorderNone", { fg = "#89b4fa" })
 
 ## Integrations
 
+The following additional queries are automatically registered if their associated plugin is found.
+
 ### [grapple.nvim](https://github.com/cbochs/grapple.nvim)
 
 **Query item**: `"grapple"`
 
 Matches jumps that are in a buffer tagged by [grapple.nvim](https://github.com/cbochs/grapple.nvim).
-
-```lua
-require("portal").setup({
-    integrations = {
-        grapple = true
-    }
-])
-```
 
 **Usage**
 
@@ -320,14 +306,6 @@ require("portal.jump").select(jumps[1])
 **Query item**: `"harpoon"`
 
 Matches jumps that are in a buffer marked by [harpoon](https://github.com/ThePrimeagen/harpoon).
-
-```lua
-require("portal").setup({
-    integrations = {
-        harpoon = true
-    }
-})
-```
 
 **Usage**
 

@@ -11,7 +11,7 @@ end
 function M.register()
     local ok, _ = pcall(require, "grapple")
     if not ok then
-        require("portal.log").warn("Unable to register query item. Please check that grapple.nvim is installed.")
+        require("portal.log").debug("Unable to register query item. Please check that grapple.nvim is installed.")
         return
     end
 

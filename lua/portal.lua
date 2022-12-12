@@ -2,28 +2,35 @@ local config = require("portal.config")
 local highlight = require("portal.highlight")
 local input = require("portal.input")
 local jump = require("portal.jump")
-local log = require("portal.log")
 local query = require("portal.query")
 local types = require("portal.types")
 
 local M = {}
+
+local initialized = false
 
 --- @class Portal.Options
 --- @field query Portal.QueryLike[]
 --- @field previewer Portal.Previewer
 --- @field namespace Portal.Namespace
 
+function M.initialize()
+    if initialized then
+        return
+    end
+    initialized = true
+
+    require("portal.highlight").load()
+
+    require("portal.integrations.grapple").register()
+    require("portal.integrations.harpoon").register()
+end
+
 --- @param opts? Portal.Config
 function M.setup(opts)
     config.load(opts or {})
-    log.global({ level = config.log_level })
-    highlight.load()
-
-    for plugin_name, is_enabled in pairs(config.integrations) do
-        if is_enabled then
-            require("portal.integrations." .. plugin_name).register()
-        end
-    end
+    require("portal.log").global({ log_level = config.log_level })
+    M.initialize()
 end
 
 --- @param direction Portal.Direction
