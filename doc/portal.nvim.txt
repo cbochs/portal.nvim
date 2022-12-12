@@ -156,14 +156,6 @@ overridden during plugin setup.
                 },
             },
         },
-    
-        integrations = {
-            ---cbochs/grapple.nvim: registers the "grapple" query item
-            grapple = false,
-    
-            ---ThePrimeagen/harpoon: registers the "harpoon" query item
-            harpoon = false,
-        }
     })
 <
 
@@ -356,21 +348,15 @@ The label (extmark) placed next to a portal jump location.
 
 INTEGRATIONS                                        *portal.nvim-integrations*
 
+The following additional queries are automatically registered if their
+associated plugin is found.
+
 GRAPPLE.NVIM <HTTPS://GITHUB.COM/CBOCHS/GRAPPLE.NVIM> ~
 
 **Query item**: `"grapple"`
 
 Matches jumps that are in a buffer tagged by grapple.nvim
 <https://github.com/cbochs/grapple.nvim>.
-
->
-    require("portal").setup({
-        integrations = {
-            grapple = true
-        }
-    ])
-<
-
 
 **Usage**
 
@@ -402,15 +388,6 @@ HARPOON <HTTPS://GITHUB.COM/THEPRIMEAGEN/HARPOON> ~
 
 Matches jumps that are in a buffer marked by harpoon
 <https://github.com/ThePrimeagen/harpoon>.
-
->
-    require("portal").setup({
-        integrations = {
-            harpoon = true
-        }
-    })
-<
-
 
 **Usage**
 
