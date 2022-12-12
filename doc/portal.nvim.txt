@@ -8,7 +8,7 @@ Table of Contents                              *portal.nvim-table-of-contents*
   - Features                                            |portal.nvim-features|
   - Requirements                                    |portal.nvim-requirements|
   - Installation                                    |portal.nvim-installation|
-  - Configuration                                  |portal.nvim-configuration|
+  - Default Settings                            |portal.nvim-default-settings|
   - Portals                                              |portal.nvim-portals|
   - Queries                                              |portal.nvim-queries|
   - Previewer                                          |portal.nvim-previewer|
@@ -42,8 +42,8 @@ of |portal.nvim-queries|.
 
 To get started, |portal.nvim-install| the plugin using your preferred package
 manager, setup the plugin, add the suggested keybindings for portals and
-tagging, and give it a go! You can find the default configuration for the
-plugin in the secion |portal.nvim-below|.
+tagging, and give it a go! Default settings for the plugin can be found in the
+|portal.nvim-settings| section below
 
 FEATURES                                                *portal.nvim-features*
 
@@ -58,7 +58,7 @@ REQUIREMENTS                                        *portal.nvim-requirements*
 
 
 - Neovim >= 0.5 <https://github.com/neovim/neovim/releases/tag/v0.5.0>
-- Neovim >= 0.9 - (Optional, for floating window title <https://github.com/neovim/neovim/issues/17458>)
+- Neovim >= 0.9 - optional, for floating window title <https://github.com/neovim/neovim/issues/17458>
 
 
 INSTALLATION                                        *portal.nvim-installation*
@@ -68,13 +68,6 @@ PACKER <HTTPS://GITHUB.COM/WBTHOMASON/PACKER.NVIM> ~
 >
     use {
         "cbochs/portal.nvim",
-        config = function()
-            require("portal").setup({
-                -- Your configuration goes here
-                -- Leave empty to use the default configuration
-                -- Please see the Configuration section below for more information
-            })
-        end,
         requires = {
             "cbochs/grapple.nvim",  -- Optional: provides the "grapple" query item
             "ThePrimeagen/harpoon", -- Optional: provides the "harpoon" query item
@@ -90,13 +83,17 @@ PLUG <HTTPS://GITHUB.COM/JUNEGUNN/VIM-PLUG> ~
 <
 
 
-CONFIGURATION                                      *portal.nvim-configuration*
+DEFAULT SETTINGS                                *portal.nvim-default-settings*
 
-The following is the default configuration. All configuration options may be
-overridden during plugin setup.
+The following are the default settings for Portal. **Setup is not required**,
+but settings may be overridden by passing them as table arguments to the
+`portalsetup` function.
 
 >
     require("portal").setup({
+        ---@type "debug" | "info" | "warn" | "error"
+        log_level = "warn",
+    
         ---The default queries used when searching the jumplist. An entry can
         ---be a name of a registered query item, an anonymous predicate, or
         ---a well-formed query item. See Queries section for more information.
@@ -191,7 +188,7 @@ second is where a jump’s buffer is _different_ than the current buffer.
     local query = { "modified", "different" }
     
     -- A query can be used in the context of jumping and passed in as an option
-    -- or through the configuration
+    -- or during setup
     require("portal").jump_forward({ query = query })
     
     -- A list of query-like items must be resolved into proper Portal.QueryItem's
@@ -241,9 +238,9 @@ example, the query item for `"valid"` would be:
 
 CUSTOM QUERY ITEMS ~
 
-A **query item** found in the configuration is in fact a "query-like" item. It
-may be either a `string`, `Portal.Predicate`, or `Portal.QueryItem`. A string
-may be used to specify a query item that has been _registered_. To register a
+A **query item** found in the settings is in fact a "query-like" item. It may
+be either a `string`, `Portal.Predicate`, or `Portal.QueryItem`. A string may
+be used to specify a query item that has been _registered_. To register a
 query, use `query.register` and pass in a key, predicate, and optional `name`
 and `name_short`.
 
