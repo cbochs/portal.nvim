@@ -44,7 +44,7 @@ local function ensure_loaded(buffer)
         -- There are various reasons "bufload" can fail. For example, if a swap
         -- file exists for the buffer and a prompt is brought up.
         -- Reference: https://github.com/cbochs/portal.nvim/issues/20
-        local ok, _ = pcall(vim.fn.bufload(buffer))
+        local ok, _ = pcall(vim.fn.bufload, buffer)
         if not ok then
             log.error(string.format("Unable to ensure buffer is loaded. Buffer: %s", buffer))
         end
