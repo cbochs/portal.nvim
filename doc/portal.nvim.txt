@@ -1,4 +1,4 @@
-*portal.nvim.txt*         For NVIM v0.8.0        Last change: 2022 December 12
+*portal.nvim.txt*         For NVIM v0.8.0         Last change: 2023 January 26
 
 ==============================================================================
 Table of Contents                              *portal.nvim-table-of-contents*
