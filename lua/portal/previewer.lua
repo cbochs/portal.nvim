@@ -1,5 +1,6 @@
-local settings = require("portal.settings")
 local highlight = require("portal.highlight")
+local log = require("portal.log")
+local settings = require("portal.settings")
 local types = require("portal.types")
 
 local M = {}
@@ -38,10 +39,19 @@ local function ensure_loaded(buffer)
     if not vim.api.nvim_buf_is_valid(buffer) then
         return false
     end
+
     if not vim.api.nvim_buf_is_loaded(buffer) then
-        vim.fn.bufload(buffer)
+        -- There are various reasons "bufload" can fail. For example, if a swap
+        -- file exists for the buffer and a prompt is brought up.
+        -- Reference: https://github.com/cbochs/portal.nvim/issues/20
+        local ok, _ = pcall(vim.fn.bufload(buffer))
+        if not ok then
+            log.error(string.format("Unable to ensure buffer is loaded. Buffer: %s", buffer))
+        end
     end
-    return true
+
+    -- Even though "bufload" may fail, the buffer may still have loaded
+    return vim.api.nvim_buf_is_loaded(buffer)
 end
 
 --- @param buffer integer
