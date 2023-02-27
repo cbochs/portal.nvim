@@ -1,5 +1,7 @@
 ---@class Portal.Iterator
 ---@field iterable table
+---@field step number
+---@field start_index number
 local Iterator = {}
 
 ---@class Portal.Predicate
@@ -16,15 +18,39 @@ local Iterator = {}
 ---@param iterable? T[]
 ---@return Portal.Iterator
 function Iterator:new(iterable)
-    local iterator = { iterable = iterable or {} }
+    local iterator = {
+        iterable = iterable or {},
+        step = 1,
+        start_index = 0,
+    }
     setmetatable(iterator, self)
     self.__index = self
     return iterator
 end
 
+function Iterator:start_at(index)
+    self.start_index = index - self.step
+    return self
+end
+
+---@param n number
+---@return Portal.Iterator
+function Iterator:step_by(n)
+    self.step = n
+    return self
+end
+
+---@return Portal.Iterator
+function Iterator:reverse()
+    self.start_index = #self.iterable + self.step
+    self.step = -self.step
+    return self
+end
+
 ---@param index? number
 function Iterator:next(index)
-    index = (index or 0) + 1
+    index = index or self.start_index
+    index = index + self.step
     local value = self.iterable[index]
     if value then
         return index, value
@@ -33,7 +59,7 @@ end
 
 ---@param index? number
 function Iterator:iter(index)
-    return self.next, self, (index or 0)
+    return self.next, self, index
 end
 
 ---@class Portal.FilterAdapter
@@ -85,6 +111,7 @@ local Take = Iterator:new()
 ---@return Portal.Iterator
 function Take:new(iterator, n)
     if n < 0 then
+        require("portal.log").error("Take 'n' must be a positive number.")
         error("Take 'n' must be a positive number.")
     end
 
@@ -114,6 +141,17 @@ end
 ---@return Portal.Iterator
 function Iterator:take(n)
     return Take:new(self, n)
+end
+
+local Wrap = Iterator:new()
+
+---@param iterator Portal.Iterator
+---@return Portal.Iterator
+function Wrap:new(iterator, f)
+    local map = { iterator = iterator, f = f }
+    setmetatable(map, self)
+    self.__index = self
+    return map
 end
 
 ---@class Portal.MapAdapter
@@ -198,10 +236,11 @@ function Iterator:search(query)
 end
 
 ---@generic T
+---@param index? number
 ---@return T[]
-function Iterator:collect()
+function Iterator:collect(index)
     local values = {}
-    for _, value in self:iter() do
+    for _, value in self:iter(index) do
         table.insert(values, value)
     end
     return values

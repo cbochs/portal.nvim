@@ -12,6 +12,21 @@ describe("iterator", function()
         assert.are.same({ 3, "c" }, { iter:next(2) })
     end)
 
+    it("can be iterated in steps", function()
+        local iter = Iterator:new({ "a", "b", "c", "d" }):step_by(2)
+        assert.are.same({ "b", "d" }, iter:collect())
+    end)
+
+    it("can be iterated in reverse", function()
+        local iter = Iterator:new({ "a", "b", "c" }):reverse()
+        assert.are.same({ "c", "b", "a" }, iter:collect())
+    end)
+
+    it("can start at an arbitraty index", function()
+        local iter = Iterator:new({ 1, 2, 3, 4, 5, 6 }):start_at(5)
+        assert.are.same({ 5, 6 }, iter:collect())
+    end)
+
     it("can be exhausted", function()
         assert.are.same({ "a", "b", "c" }, Iterator:new({ "a", "b", "c" }):collect())
     end)
