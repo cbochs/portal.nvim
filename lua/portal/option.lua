@@ -37,6 +37,7 @@ end
 function Option:unwrap()
     if self:is_none() then
         error("Cannot unwrap None-type.")
+        require("portal.log").error("Cannot unwrap None-type.")
     end
     return self.value
 end
