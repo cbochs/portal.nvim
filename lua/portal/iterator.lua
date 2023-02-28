@@ -1,6 +1,6 @@
 ---@class Portal.Iterator
 ---@field iterable table
----@field step_size number
+---@field step number
 ---@field start_index number
 local Iterator = {}
 
@@ -11,7 +11,7 @@ local Iterator = {}
 function Iterator:new(iterable)
     local iterator = {
         iterable = iterable or {},
-        step_size = 1,
+        step = 1,
         start_index = 1,
     }
     setmetatable(iterator, self)
@@ -22,9 +22,9 @@ end
 ---@param index? number
 function Iterator:next(index)
     if not index then
-        index = self.start_index - self.step_size
+        index = self.start_index - self.step
     end
-    index = index + self.step_size
+    index = index + self.step
 
     local value = self.iterable[index]
     if value then
