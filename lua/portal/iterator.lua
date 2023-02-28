@@ -3,6 +3,7 @@
 ---@field step number
 ---@field start_index number
 local Iterator = {}
+Iterator.__index = Iterator
 
 ---@alias Portal.Predicate fun(value: any):boolean
 
@@ -15,7 +16,6 @@ function Iterator:new(iterable)
         start_index = 1,
     }
     setmetatable(iterator, self)
-    self.__index = self
     return iterator
 end
 
@@ -96,7 +96,7 @@ end
 ---@return Portal.Iterator
 function Iterator:reverse()
     local iter = root_iter(self)
-    iter.step_size = -1
+    iter.step = -1
 
     -- Only change the start index if it is the default
     if iter.start_index == 1 then
