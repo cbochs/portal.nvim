@@ -24,11 +24,6 @@ describe("iterator", function()
         assert.are.same({ 5, 6 }, iter:collect())
     end)
 
-    it("can be iterated in steps", function()
-        local iter = Iterator:new({ "a", "b", "c", "d" }):step_by(2)
-        assert.are.same({ "a", "c" }, iter:collect())
-    end)
-
     it("can be iterated in reverse", function()
         local iter = Iterator:new({ "a", "b", "c" }):reverse()
         assert.are.same({ "c", "b", "a" }, iter:collect())
@@ -54,6 +49,13 @@ describe("iterator", function()
         assert.are.same({ 11, 7 }, iter:collect())
     end)
 
+    describe("#step_by", function()
+        it("steps over the iterator", function()
+            local iter = Iterator:new({ 0, 1, 2, 3, 4 }):step_by(3)
+            assert.are.same({ 0, 3 }, iter:collect())
+        end)
+    end)
+
     describe("#filter", function()
         it("filters an iterator", function()
             -- stylua: ignore
@@ -71,7 +73,7 @@ describe("iterator", function()
     end)
 
     describe("#map", function()
-        it("transforms the values", function()
+        it("maps the values", function()
             -- stylua: ignore
             local map = function(v) return v * 2 end
             local iter = Iterator:new({ 0, 1, 2 }):map(map)

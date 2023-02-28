@@ -72,7 +72,12 @@ local function root_iter(start_iter)
     end
 end
 
+---@param n? number
+---@return Portal.Iterator
 function Iterator:start_at(n)
+    if n == nil then
+        error("Iterator.start_at: start index cannot be nil.")
+    end
     root_iter(self).start_index = n
     return self
 end
@@ -94,9 +99,11 @@ local StepBy = Iterator:new()
 StepBy.__index = StepBy
 
 function StepBy:new(iterator, n)
-    if n < 0 then
-        require("portal.log").error("StepBy 'n' must be a positive number.")
-        error("StepBy 'n' must be a positive number.")
+    if n == nil then
+        error("Iterator.step_by: step amount cannot be nil.")
+    end
+    if n <= 0 then
+        error("Iterator.step_by: 'n' must be a positive number.")
     end
 
     local step_by = {
@@ -136,6 +143,10 @@ Filter.__index = Filter
 ---@param predicate Portal.Predicate
 ---@return Portal.Iterator
 function Filter:new(iterator, predicate)
+    if predicate == nil then
+        error("Iterator.filter: predicate function cannot be nil.")
+    end
+
     local filter = {
         iterator = iterator,
         predicate = predicate,
@@ -174,9 +185,11 @@ Take.__index = Take
 ---@param n number
 ---@return Portal.Iterator
 function Take:new(iterator, n)
+    if n == nil then
+        error("Iterator.take: predicate function cannot be nil.")
+    end
     if n < 0 then
-        require("portal.log").error("Take 'n' must be a positive number.")
-        error("Take 'n' must be a positive number.")
+        error("Iterator.take: 'n' must be a positive number.")
     end
 
     local take = {
@@ -202,10 +215,10 @@ function Take:next(index)
     end
 end
 
----@param n number
+---@param n? number
 ---@return Portal.Iterator
 function Iterator:take(n)
-    return Take:new(self, n)
+    return Take:new(self, n or 1)
 end
 
 ---@class Portal.MapAdapter
@@ -218,6 +231,10 @@ Map.__index = Map
 ---@param f fun(value: any): any
 ---@return Portal.Iterator
 function Map:new(iterator, f)
+    if f == nil then
+        error("Iterator.map: map function cannot be nil.")
+    end
+
     local map = {
         iterator = iterator,
         f = f,
@@ -253,6 +270,10 @@ Search.__index = Search
 ---@param query Portal.SearchQuery
 ---@return Portal.Iterator
 function Search:new(iterator, query)
+    if query == nil then
+        error("Iterator.search: search query cannot be nil.")
+    end
+
     local search = {
         iterator = iterator,
         query = query,
