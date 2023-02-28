@@ -4,10 +4,10 @@ local initialized = false
 
 ---@class Portal.Options
 ---@field filter Portal.Predicate
+---@field map Portal.MapFunction
 ---@field direction Portal.Direction
 ---@field start number
 ---@field max_results number
----@field transform Portal.MapFunction
 ---@field query? Portal.Predicate[]
 
 function Portal.initialize()
