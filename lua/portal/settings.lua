@@ -9,8 +9,11 @@ local DEFAULT_SETTINGS = {
     ---The default queries used when searching the jumplist. An entry can
     ---be a name of a registered query item, an anonymous predicate, or
     ---a well-formed query item. See Queries section for more information.
-    ---@type Portal.QueryLike[]
+    ---@type Portal.Predicate[] | string[]
     query = { "modified", "different", "valid" },
+
+    --- TODO: document lookback behaviour
+    lookback = 100,
 
     ---An ordered list of keys that will be used for labelling available jumps.
     ---Labels will be applied in same order as `query`.
@@ -24,68 +27,25 @@ local DEFAULT_SETTINGS = {
         ["<esc>"] = true,
     },
 
-    ---The jumplist is fixed at 100 items, which has the possibility to impact
-    ---portal performance. Set this to a value less than 100 to limit the number
-    ---of jumps in the jumplist that will be queried.
-    lookback = 100,
+    ---When a portal is empty, render an default portal title
+    render_empty = false,
+
+    ---The raw window options used for the portal window
+    window_options = {
+        relative = "cursor",
+        width = 80, -- implement as "min/max width",
+        height = 3, -- implement as "context lines"
+        col = 2, -- implement as "offset"
+        focusable = false,
+        border = "single",
+        noautocmd = true,
+    },
 
     ---Keycodes used for jumping forward and backward. These are not overrides
     ---of the current keymaps, but instead will be used internally when a jump
     ---is selected.
     backward = "<c-o>",
     forward = "<c-i>",
-
-    ---
-    portal = {
-        ---feat(nvim-0.9) When a portal is empty, render an default portal title
-        render_empty = true,
-
-        ---feat(nvim-0.9) The raw window options used for the portal window
-        options = {
-            relative = "cursor",
-            width = 80, -- implement as "min/max width",
-            height = 3, -- implement as "context lines"
-            col = 2, -- implement as "offset"
-            focusable = false,
-            border = "single",
-            noautocmd = true,
-        },
-
-        title = {
-            ---When a portal is empty, render an default portal title
-            render_empty = true,
-
-            ---The raw window options used for the portal title window
-            options = {
-                relative = "cursor",
-                width = 80, -- implement as "min/mas width",
-                height = 1,
-                col = 2,
-                style = "minimal",
-                focusable = false,
-                border = "single",
-                noautocmd = true,
-                zindex = 98,
-            },
-        },
-
-        body = {
-            ---When a portal is empty, render an empty buffer body
-            render_empty = false,
-
-            ---The raw window options used for the portal body window
-            options = {
-                relative = "cursor",
-                width = 80, -- implement as "min/max width",
-                height = 3, -- implement as "context lines"
-                col = 2, -- implement as "offset"
-                focusable = false,
-                border = "single",
-                noautocmd = true,
-                zindex = 99,
-            },
-        },
-    },
 }
 
 local function termcode_for(key)
