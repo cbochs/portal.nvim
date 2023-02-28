@@ -29,6 +29,8 @@ end
 function Portal.search(list, opts)
     local Search = require("portal.search")
 
+    opts = opts or {}
+
     local iter = Search.iter(list, opts)
     if not opts.query then
         return iter:collect()
