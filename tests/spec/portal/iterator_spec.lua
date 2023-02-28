@@ -19,6 +19,33 @@ describe("iterator", function()
         end
     end)
 
+    it("can be collected into a list", function()
+        assert.are.same({ "a", "b" }, Iterator:new({ "a", "b" }):collect())
+    end)
+
+    it("can be collected into a table", function()
+        assert.are.same(
+            { a = 1, b = 2 },
+            Iterator:new({
+                { "a", 1 },
+                { "b", 2 },
+            }):collect_table()
+        )
+    end)
+
+    it("can be reduced into a table", function()
+        assert.are.same(
+            { a = 1, b = 2 },
+            Iterator:new({
+                { "a", 1 },
+                { "b", 2 },
+            }):reduce(function(acc, v, _)
+                acc[v[1]] = v[2]
+                return acc
+            end, {})
+        )
+    end)
+
     it("can start at an arbitraty index", function()
         local iter = Iterator:new({ 1, 2, 3, 4, 5, 6 }):start_at(5)
         assert.are.same({ 5, 6 }, iter:collect())
@@ -81,31 +108,36 @@ describe("iterator", function()
         end)
     end)
 
-    describe("#search", function()
-        it("searches for specific values", function()
-            -- stylua: ignore
-            local search = {
-                { call = function(v) return v == 4 end },
-                { call = function(v) return v == 2 end },
-                { call = function(v) return v == 5 end },
-            }
-            -- stylua: ignore
-            local map = function(v) return v.value end
-
-            local iter = Iterator:new({ 0, 1, 2, 3, 4 }):search(search):map(map)
-            assert.are.same({ 2, 4 }, iter:collect())
-        end)
-
-        it("searches in the correct order", function()
-            -- stylua: ignore
-            local search = {
-                { call = function(_) return true end }
-            }
-            -- stylua: ignore
-            local map = function(v) return v.value end
-
-            local iter = Iterator:new({ 0, 1, 2, 3, 4 }):reverse():search(search):map(map)
-            assert.are.same({ 4 }, iter:collect())
-        end)
-    end)
+    -- describe("#search", function()
+    --     it("searches for specific values", function()
+    --         -- stylua: ignore
+    --         local search = {
+    --             function(v) return v == 5 end,
+    --             function(v) return v == 4 end,
+    --             function(v) return v == 2 end,
+    --         }
+    --
+    --         local iter = Iterator:new({ 0, 1, 2, 3, 4 }):search(search)
+    --         assert.are.same({ [2] = 4, [3] = 2 }, iter:collect_table())
+    --     end)
+    --
+    --     it("searches in the correct order", function()
+    --         -- stylua: ignore
+    --         local search = { function(_) return true end }
+    --
+    --         local iter = Iterator:new({ 0, 1, 2, 3, 4 }):reverse():search(search)
+    --         assert.are.same({ 4 }, iter:collect_table())
+    --     end)
+    --
+    --     it("searches for duplicate items", function()
+    --         -- stylua: ignore
+    --         local search = {
+    --             function(v) return v > 2 end,
+    --             function(v) return v > 3 end,
+    --         }
+    --
+    --         local iter = Iterator:new({ 0, 1, 2, 3, 4 }):reverse():search(search)
+    --         assert.are.same({ 4, 4 }, iter:collect_table())
+    --     end)
+    -- end)
 end)

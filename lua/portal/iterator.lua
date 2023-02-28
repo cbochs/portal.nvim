@@ -4,15 +4,7 @@
 ---@field start_index number
 local Iterator = {}
 
----@class Portal.Predicate
----@field name? string
----@field call fun(value: any): boolean
-
----@alias Portal.SearchQuery Portal.Predicate | Portal.Predicate[]
-
----@class Portal.SearchResult
----@field value any
----@field predicate Portal.Predicate
+---@alias Portal.Predicate fun(value: any):boolean
 
 ---@param iterable? table
 ---@return Portal.Iterator
@@ -46,12 +38,31 @@ function Iterator:iter(index)
 end
 
 ---@generic T
----@param index? number
 ---@return T[]
-function Iterator:collect(index)
+function Iterator:collect()
     local values = {}
-    for _, value in self:iter(index) do
+    for _, value in self:iter() do
         table.insert(values, value)
+    end
+    return values
+end
+
+---@return table
+function Iterator:collect_table()
+    local values = {}
+    for _, value in self:iter() do
+        values[value[1]] = value[2]
+    end
+    return values
+end
+
+---@param reducer fun(acc: any, val: any, i?: number): any
+---@param initial_state any
+---@return any
+function Iterator:reduce(reducer, initial_state)
+    local values = initial_state
+    for i, value in self:iter() do
+        values = reducer(values, value, i)
     end
     return values
 end
@@ -129,6 +140,8 @@ function StepBy:next(index)
     end
 end
 
+---@param n number
+---@return Portal.Iterator
 function Iterator:step_by(n)
     return StepBy:new(self, n)
 end
@@ -257,59 +270,6 @@ end
 ---@return Portal.Iterator
 function Iterator:map(f)
     return Map:new(self, f)
-end
-
----@class Portal.SearchAdapter
----@field iterator Portal.Iterator
----@field query Portal.SearchQuery
----@field query_results Portal.SearchQuery
-local Search = Iterator:new()
-Search.__index = Search
-
----@param iterator Portal.Iterator
----@param query Portal.SearchQuery
----@return Portal.Iterator
-function Search:new(iterator, query)
-    if query == nil then
-        error("Iterator.search: search query cannot be nil.")
-    end
-
-    local search = {
-        iterator = iterator,
-        query = query,
-        query_results = {},
-    }
-    setmetatable(search, self)
-    return search
-end
-
----@param index? number
-function Search:next(index)
-    if #self.query_results == #self.query then
-        return nil, nil
-    end
-
-    while true do
-        local new_index, value = self.iterator:next(index)
-        index = new_index
-        if index == nil then
-            break
-        end
-
-        for i, predicate in ipairs(self.query) do
-            if self.query_results[i] == nil and predicate.call(value) then
-                local result = { value = value, index = i, predicate = predicate }
-                self.query_results[i] = result
-                return index, result
-            end
-        end
-    end
-end
-
----@param query Portal.SearchQuery[]
----@return Portal.Iterator
-function Iterator:search(query)
-    return Search:new(self, query)
 end
 
 return Iterator
