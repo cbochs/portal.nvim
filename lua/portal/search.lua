@@ -3,13 +3,14 @@ local Iterator = require("portal.iterator")
 local Search = {}
 
 ---@class Portal.SearchOptions
----@field filter Portal.SearchQuery
+---@field filter Portal.Predicate
+---@field map Portal.MapFunction
 ---@field direction Portal.Direction
 ---@field start number
 ---@field max_results number
 
----@alias Portal.SearchQuery Portal.Predicate[]
 ---@alias Portal.SearchResult any[]
+---@alias Portal.MapFunction fun(v: any): any
 
 ---@enum Portal.Direction
 Search.direction = {
@@ -26,14 +27,18 @@ function Search.iter(list, opts)
     -- stylua: ignore
     local iter = Iterator:new(list)
 
+    if opts.filter then
+        iter = iter:filter(opts.filter)
+    end
+    if opts.map then
+        iter = iter:map(opts.map)
+    end
+
     if opts.direction == Search.direction.backward then
         iter = iter:reverse()
     end
     if opts.start then
         iter = iter:start_at(opts.start)
-    end
-    if opts.filter then
-        iter = iter:filter(opts.filter)
     end
     if opts.max_results then
         iter = iter:take(opts.max_results)
@@ -43,7 +48,7 @@ function Search.iter(list, opts)
 end
 
 ---@param iter Portal.Iterator
----@param query Portal.SearchQuery
+---@param query Portal.Predicate[]
 ---@return Portal.SearchResult
 function Search.query(iter, query)
     if type(query) == "function" then
@@ -55,7 +60,6 @@ function Search.query(iter, query)
             if not acc.matched_predicates[predicate] and predicate(value) then
                 acc.matched_predicates[predicate] = true
                 acc.matches[i] = value
-                break
             end
         end
         return acc
