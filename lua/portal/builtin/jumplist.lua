@@ -17,6 +17,7 @@ return {
             start = start + 1,
             direction = "backward",
             max_results = #settings.labels,
+            query = settings.query,
         }, opts)
 
         -- stylua: ignore

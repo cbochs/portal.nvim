@@ -1,3 +1,5 @@
+local log = require("portal.log")
+
 ---@class Portal.Window
 ---@field content Portal.WindowContent
 ---@field options Portal.WindowOptions
@@ -36,13 +38,13 @@ vim.api.nvim_set_hl(0, "PortalLabel", { link = "Search" })
 ---@return Portal.Window
 function Window:new(content, options)
     if not content.buffer or not vim.api.nvim_buf_is_valid(content.buffer) then
-        error(("Window.new: invalid buffer %s"):format(content.buffer))
+        log.error(("Window.new: invalid buffer %s"):format(content.buffer))
     end
     if not content.cursor or not content.cursor.row or not content.cursor.col then
-        error(("Window.new: cursor is not present or valid in %s"):format(vim.inspect(content)))
+        log.error(("Window.new: cursor is not present or valid in %s"):format(vim.inspect(content)))
     end
     if not content.select then
-        error(("Window.new: select is not present."):format(vim.inspect(content)))
+        log.error(("Window.new: select is not present."):format(vim.inspect(content)))
     end
 
     local window = {
@@ -56,7 +58,8 @@ end
 
 function Window:open()
     if self.state then
-        error("Window.open: window is already open.")
+        log.warn("Window.open: window is already open.")
+        return
     end
 
     self.state = {}
@@ -67,10 +70,13 @@ function Window:open()
         -- There are various reasons "bufload" can fail. For example, if a swap
         -- file exists for the buffer and a prompt is brought up.
         -- Reference: https://github.com/cbochs/portal.nvim/issues/20
-        local ok, _ = pcall(vim.fn.bufload, self.state.buffer)
+        local ok, reason = pcall(vim.fn.bufload, self.state.buffer)
 
-        if not ok or not vim.api.nvim_buf_is_loaded(self.state.buffer) then
-            error(("Window.open: failed to load buffer %s"):format(self.state.buffer))
+        if not ok then
+            log.warn(("Window.open: unable to load buffer, reason: %s"):format(reason))
+        end
+        if not vim.api.nvim_buf_is_loaded(self.state.buffer) then
+            log.error(("Window.open: failed to load buffer %s"):format(self.state.buffer))
         end
     end
 
@@ -89,7 +95,7 @@ end
 
 function Window:label(label)
     if not self.state then
-        error("Window.label: window is not open.")
+        log.error("Window.label: window is not open.")
     end
 
     self.state.label = label
@@ -124,14 +130,16 @@ end
 
 function Window:select()
     if not self.state then
-        error("Window.select: window is not open.")
+        log.warn("Window.select: window is not open.")
+        return
     end
     self.content.select(self.content)
 end
 
 function Window:close()
     if not self.state then
-        error("Window.close: window is not open.")
+        log.warn("Window.close: window is not open.")
+        return
     end
     if vim.api.nvim_win_is_valid(self.state.window) then
         vim.api.nvim_win_close(self.state.window, true)

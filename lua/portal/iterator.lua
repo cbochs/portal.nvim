@@ -1,3 +1,5 @@
+local log = require("portal.log")
+
 ---@class Portal.Iterator
 ---@field iterable table
 ---@field step number
@@ -76,7 +78,7 @@ local function root_iter(start_iter)
             if current_iter.iterable then
                 return current_iter
             else
-                error("At root iterator, but could not find iterable.")
+                log.error("At root iterator, but could not find iterable.")
             end
         end
         current_iter = current_iter.iterator
@@ -87,7 +89,7 @@ end
 ---@return Portal.Iterator
 function Iterator:start_at(n)
     if n == nil then
-        error("Iterator.start_at: start index cannot be nil.")
+        log.error("Iterator.start_at: start index cannot be nil.")
     end
     root_iter(self).start_index = n
     return self
@@ -114,10 +116,10 @@ Skip.__index = Skip
 
 function Skip:new(iterator, n)
     if n == nil then
-        error("Iterator.skip: skipped items 'n' cannot be nil.")
+        log.error("Iterator.skip: skipped items 'n' cannot be nil.")
     end
     if n < 0 then
-        error("Iterator.skip: 'n' must be a non-negative number.")
+        log.error("Iterator.skip: 'n' must be a non-negative number.")
     end
 
     local skip = {
@@ -154,10 +156,10 @@ StepBy.__index = StepBy
 
 function StepBy:new(iterator, n)
     if n == nil then
-        error("Iterator.step_by: step size 'n' cannot be nil.")
+        log.error("Iterator.step_by: step size 'n' cannot be nil.")
     end
     if n <= 0 then
-        error("Iterator.step_by: 'n' must be a positive number.")
+        log.error("Iterator.step_by: 'n' must be a positive number.")
     end
 
     local step_by = {
@@ -200,7 +202,7 @@ Filter.__index = Filter
 ---@return Portal.Iterator
 function Filter:new(iterator, predicate)
     if predicate == nil then
-        error("Iterator.filter: predicate function cannot be nil.")
+        log.error("Iterator.filter: predicate function cannot be nil.")
     end
 
     local filter = {
@@ -242,10 +244,10 @@ Take.__index = Take
 ---@return Portal.Iterator
 function Take:new(iterator, n)
     if n == nil then
-        error("Iterator.take: predicate function cannot be nil.")
+        log.error("Iterator.take: predicate function cannot be nil.")
     end
     if n < 0 then
-        error("Iterator.take: 'n' must be a non-negative number.")
+        log.error("Iterator.take: 'n' must be a non-negative number.")
     end
 
     local take = {
@@ -288,7 +290,7 @@ Map.__index = Map
 ---@return Portal.Iterator
 function Map:new(iterator, f)
     if f == nil then
-        error("Iterator.map: map function cannot be nil.")
+        log.error("Iterator.map: map function cannot be nil.")
     end
 
     local map = {
