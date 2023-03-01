@@ -1,4 +1,3 @@
-local Iterator = require("portal.iterator")
 local Window = require("portal.window")
 
 local Search = {}
@@ -9,7 +8,7 @@ local Search = {}
 ---@field max_results integer
 ---@field map Portal.MapFunction
 ---@field filter Portal.Predicate
----@field query? Portal.Predicate[]
+---@field query Portal.Predicate[]
 
 ---@alias Portal.SearchResult Portal.WindowContent[]
 
@@ -23,51 +22,18 @@ Search.direction = {
 }
 
 ---@generic T
----@param list T[]
----@param opts Portal.SearchOptions
+---@param iter Portal.Iterator
+---@param query? Portal.Predicate | Portal.Predicate[]
 ---@return Portal.SearchResult
-function Search.search(list, opts)
-    opts = opts or {}
-
-    local iter = Search.iter(list, opts)
-    if not opts.query then
-        return iter:collect()
+function Search.search(iter, query)
+    if query then
+        return Search.query(iter, query)
     end
-
-    return Search.query(iter, opts.query)
-end
-
----@param list table
----@param opts? Portal.SearchOptions
----@return Portal.Iterator
-function Search.iter(list, opts)
-    opts = opts or {}
-
-    -- stylua: ignore
-    local iter = Iterator:new(list)
-
-    if opts.map then
-        iter = iter:map(opts.map)
-    end
-    if opts.filter then
-        iter = iter:filter(opts.filter)
-    end
-
-    if opts.direction == Search.direction.backward then
-        iter = iter:reverse()
-    end
-    if opts.start then
-        iter = iter:start_at(opts.start)
-    end
-    if opts.max_results then
-        iter = iter:take(opts.max_results)
-    end
-
-    return iter
+    return iter:collect()
 end
 
 ---@param iter Portal.Iterator
----@param query Portal.Predicate[]
+---@param query Portal.Predicate | Portal.Predicate[]
 ---@return Portal.SearchResult
 function Search.query(iter, query)
     if type(query) == "function" then
@@ -113,6 +79,10 @@ function Search.open(results, labels, window_options)
 
         table.insert(windows, window)
     end
+
+    -- Force UI to redraw to avoid user input blocking preview windows from
+    -- showing up.
+    vim.cmd("redraw")
 
     return windows
 end

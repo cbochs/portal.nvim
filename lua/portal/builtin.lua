@@ -2,9 +2,10 @@ local Builtin = {}
 
 ---@class Portal.GeneratorSpec
 ---@field name string
----@field tunnel Portal.Tunnel
+---@field generate Portal.Generator
 
----@alias Portal.Tunnel fun(opts: Portal.PortalOptions): Portal.PortalOptions
+---@alias Portal.Generator fun(o: Portal.SearchOptions, s: Portal.Settings): Portal.PortalOptions
+---@alias Portal.Tunnel fun(o: Portal.SearchOptions)
 
 setmetatable(Builtin, {
     __index = function(t, name)
@@ -14,17 +15,27 @@ setmetatable(Builtin, {
 
         local ok, spec = pcall(require, ("portal.builtin.%s"):format(name))
         if not ok then
-            -- TODO: log warning
-            return
+            return -- TODO: log warning
         end
 
         local builtin = {
-            tunnel = spec.tunnel,
-            tunnel_forward = function(opts)
-                spec.tunnel(vim.tbl_extend("force", opts, { direction = "forward" }))
+            ---@type Portal.Tunnel
+            tunnel = function(opts)
+                local Portal = require("portal")
+                local Settings = require("portal.settings")
+
+                opts = spec.generate(opts or {}, Settings)
+                Portal.tunnel(opts)
             end,
+
+            ---@type Portal.Tunnel
+            tunnel_forward = function(opts)
+                Builtin[name].tunnel(vim.tbl_extend("force", opts or {}, { direction = "forward" }))
+            end,
+
+            ---@type Portal.Tunnel
             tunnel_backward = function(opts)
-                spec.tunnel(vim.tbl_extend("force", opts, { direction = "backward" }))
+                Builtin[name].tunnel(vim.tbl_extend("force", opts or {}, { direction = "backward" }))
             end,
         }
 
