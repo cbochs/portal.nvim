@@ -1,5 +1,5 @@
 ---@type Portal.Settings
-local settings = {}
+local Settings = {}
 
 ---@class Portal.Settings
 local DEFAULT_SETTINGS = {
@@ -81,16 +81,16 @@ _settings.escape = replace_termcodes(_settings.escape)
 _settings.labels = replace_termcodes(_settings.labels)
 
 ---@param overrides? Portal.Settings
-function settings.update(overrides)
+function Settings.update(overrides)
     _settings = vim.tbl_deep_extend("force", DEFAULT_SETTINGS, overrides or {})
     _settings.escape = replace_termcodes(_settings.escape)
     _settings.labels = replace_termcodes(_settings.labels)
 end
 
-setmetatable(settings, {
+setmetatable(Settings, {
     __index = function(_, index)
         return _settings[index]
     end,
 })
 
-return settings
+return Settings

@@ -2,6 +2,32 @@ local Iterator = require("portal.iterator")
 local Search = require("portal.search")
 
 describe("search", function()
+    describe("#search", function()
+        it("returns a filtered list", function()
+            -- stylua: ignore
+            assert.are.same(
+                { 1, 2 },
+                Search.search({ 1, 2, 3 }, {
+                    filter = function(v) return v < 3 end,
+                })
+            )
+        end)
+
+        it("returns a queries list", function()
+            -- stylua: ignore
+            assert.are.same(
+                { 2, 2, 1 },
+                Search.search({ 1, 2, 3 }, {
+                    query = {
+                        function(v) return v == 2 end,
+                        function(v) return v > 1 end,
+                        function(v) return v == 1 end,
+                    },
+                })
+            )
+        end)
+    end)
+
     describe("#iter", function()
         it("returns the list if no options are provided", function()
             assert.are.same({ 1, 2, 3 }, Search.iter({ 1, 2, 3 }):collect())

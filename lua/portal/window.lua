@@ -3,8 +3,10 @@
 ---@field options Portal.WindowOptions
 ---@field state Portal.WindowState
 local Window = {}
+Window.__index = Window
 
 ---@class Portal.WindowContent
+---@field window integer | any
 ---@field buffer number
 ---@field cursor { row: number, col: number }
 
@@ -22,6 +24,8 @@ local Window = {}
 ---@field window integer | any
 ---@field buffer integer | any
 ---@field extmark integer | any
+---@field cursor integer[]
+---@field label string
 
 local namespace = vim.api.nvim_create_namespace("portal")
 
@@ -29,37 +33,114 @@ local namespace = vim.api.nvim_create_namespace("portal")
 ---@param options Portal.WindowOptions
 ---@return Portal.Window
 function Window:new(content, options)
+    if not vim.api.nvim_buf_is_valid(content.buffer) then
+        error(("Window.new: invalid buffer %s"):format(content.buffer))
+    end
+
     local window = {
         content = content,
         options = options,
-        state = {},
+        state = nil,
     }
     setmetatable(window, self)
     return window
 end
 
 function Window:open()
+    if self.state then
+        error("Window.open: window is already open.")
+    end
+
+    self.state = {}
+
     self.state.buffer = self.content.buffer
+
+    if not vim.api.nvim_buf_is_loaded(self.state.buffer) then
+        -- There are various reasons "bufload" can fail. For example, if a swap
+        -- file exists for the buffer and a prompt is brought up.
+        -- Reference: https://github.com/cbochs/portal.nvim/issues/20
+        local ok, _ = pcall(vim.fn.bufload, self.state.buffer)
+
+        if not ok or vim.api.nvim_buf_is_loaded(self.state.buffer) then
+            error(("Window.open: failed to load buffer %s"):format(self.state.buffer))
+        end
+    end
     -- vim.api.nvim_buf_set_option(self.buffer, "bufhidden", "wipe")
-    -- vim.api.nvim_buf_set_option(self.buffer, "filetype", "portal")
 
     self.state.window = vim.api.nvim_open_win(self.state.buffer, false, self.options)
 
-    local cursor = { self.content.cursor.row, self.content.cursor.col }
-    vim.api.nvim_win_set_cursor(self.state.window, cursor)
+    self.state.cursor = self.content.cursor
+    self.state.cursor = { self.content.cursor.row, self.content.cursor.col }
+    local total_lines = vim.api.nvim_buf_line_count(self.state.buffer)
+    if self.state.cursor[1] > total_lines then
+        self.state.cursor[1] = total_lines
+        self.state.cursor[2] = 0
+    end
+
+    vim.api.nvim_win_set_cursor(self.state.window, self.state.cursor)
 end
 
--- luacheck: ignore
-function Window:label() end
+function Window:label(label)
+    if not self.state then
+        error("Window.label: window is not open.")
+    end
+
+    self.state.label = label
+
+    local cursor = { self.state.cursor[1] - 1, self.state.cursor[2] }
+    local row = cursor[1]
+    local col = cursor[2]
+    local id = nil
+    local virt_text = { { label, "@function.call" } }
+
+    local extmarks = vim.api.nvim_buf_get_extmarks(self.state.buffer, namespace, cursor, cursor, { details = true })
+    if not vim.tbl_isempty(extmarks) then
+        local extmark = extmarks[1]
+        id = extmark[1]
+        row = extmark[2]
+        col = extmark[3]
+        virt_text = vim.list_extend(extmark[4].virt_text, virt_text)
+    end
+
+    self.state.extmark = vim.api.nvim_buf_set_extmark(self.state.buffer, namespace, row, col, {
+        id = id,
+        virt_text = virt_text,
+        virt_text_pos = "overlay",
+        strict = false,
+        spell = false,
+    })
+end
+
+function Window:label_value()
+    if not self.state then
+        error("Window.label_value: window is not open.")
+    end
+    return self.state.label
+end
+
+function Window:select()
+    if not self.state then
+        error("Window.select: window is not open.")
+    end
+    if self.content.window then
+        vim.api.nvim_set_current_win(self.content.window)
+    end
+    vim.api.nvim_set_current_buf(self.state.buffer)
+    vim.api.nvim_win_set_cursor(0, self.state.cursor)
+end
 
 function Window:close()
+    if not self.state then
+        error("Window.close: window is not open.")
+    end
     if vim.api.nvim_win_is_valid(self.state.window) then
         vim.api.nvim_win_close(self.state.window, true)
     end
     if vim.api.nvim_buf_is_valid(self.state.buffer) then
+        -- vim.api.nvim_buf_del_extmark(self.state.buffer, namespace, self.state.extmark)
         vim.api.nvim_buf_clear_namespace(self.state.buffer, namespace, 0, -1)
     end
-    self.state = {}
+    self.state = nil
 end
 
 return Window

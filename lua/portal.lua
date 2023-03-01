@@ -2,14 +2,6 @@ local Portal = {}
 
 local initialized = false
 
----@class Portal.Options
----@field filter Portal.Predicate
----@field map Portal.MapFunction
----@field direction Portal.Direction
----@field start number
----@field max_results number
----@field query? Portal.Predicate[]
-
 function Portal.initialize()
     if initialized then
         return
@@ -23,27 +15,16 @@ function Portal.setup(opts)
     Portal.initialize()
 end
 
----@param list table
----@param opts Portal.Options
----@return Portal.SearchResult
-function Portal.search(list, opts)
+---@generic T
+---@param list T[]
+---@param opts Portal.SearchOptions
+function Portal.tunnel(list, opts)
     local Search = require("portal.search")
+    local Settings = require("portal.settings")
 
-    opts = opts or {}
-
-    local iter = Search.iter(list, opts)
-    if not opts.query then
-        return iter:collect()
-    end
-
-    return Search.query(iter, opts.query)
-end
-
----@param list table
----@param opts Portal.Options
-function Portal.jump(list, opts)
-    -- luacheck: ignore
-    local results = Portal.search(list, opts)
+    local results = Search.search(list, opts)
+    local windows = Search.open(results, Settings.labels, Settings.window_options)
+    Search.select(windows, Settings.escape)
 end
 
 return Portal
