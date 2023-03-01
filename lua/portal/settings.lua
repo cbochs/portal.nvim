@@ -9,15 +9,14 @@ local DEFAULT_SETTINGS = {
     ---The default queries used when searching the jumplist. An entry can
     ---be a name of a registered query item, an anonymous predicate, or
     ---a well-formed query item. See Queries section for more information.
-    ---@type Portal.Predicate[] | string[]
+    ---@type Portal.Predicate[]
     query = nil,
 
     -- stylua: ignore
     ---@type Portal.Predicate
     filter = function(v) return vim.api.nvim_buf_is_valid(v.buffer) end,
 
-    max_results = 3,
-
+    ---@type integer
     --- TODO: document lookback behaviour
     lookback = 100,
 
@@ -46,12 +45,6 @@ local DEFAULT_SETTINGS = {
         border = "single",
         noautocmd = true,
     },
-
-    ---Keycodes used for jumping forward and backward. These are not overrides
-    ---of the current keymaps, but instead will be used internally when a jump
-    ---is selected.
-    backward = "<c-o>",
-    forward = "<c-i>",
 }
 
 local function termcode_for(key)
