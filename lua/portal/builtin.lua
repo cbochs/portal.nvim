@@ -1,3 +1,5 @@
+local log = require("portal.log")
+
 local Builtin = {}
 
 ---@class Portal.GeneratorSpec
@@ -15,7 +17,8 @@ setmetatable(Builtin, {
 
         local ok, spec = pcall(require, ("portal.builtin.%s"):format(name))
         if not ok then
-            return -- TODO: log warning
+            log.warn(("Unable to load builtin %s"):format(name))
+            return
         end
 
         local builtin = {
