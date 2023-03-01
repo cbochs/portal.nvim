@@ -13,11 +13,12 @@ local DEFAULT_SETTINGS = {
     query = nil,
 
     -- stylua: ignore
+    --- TODO: document base filter
     ---@type Portal.Predicate
     filter = function(v) return vim.api.nvim_buf_is_valid(v.buffer) end,
 
-    ---@type integer
     --- TODO: document lookback behaviour
+    ---@type integer
     lookback = 100,
 
     ---An ordered list of keys that will be used for labelling available jumps.
@@ -32,8 +33,14 @@ local DEFAULT_SETTINGS = {
         ["<esc>"] = true,
     },
 
-    ---When a portal is empty, render an default portal title
-    render_empty = false,
+    -- -- TODO: document ignored filetypes
+    -- ---@type string[]
+    -- ignored = {
+    --     "grapple",
+    --     "harpoon",
+    --     "noice",
+    --     "telescope",
+    -- },
 
     ---The raw window options used for the portal window
     window_options = {
