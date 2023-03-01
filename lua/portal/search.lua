@@ -70,8 +70,15 @@ function Search.open(results, labels, window_options)
 
     for i, result in ipairs(results) do
         window_options = vim.deepcopy(window_options)
-        window_options.title = ("Result [%s]"):format(i)
         window_options.row = (i - 1) * (window_options.height + 2)
+
+        if vim.fn.has("nvim-0.9") == 1 then
+            local title = vim.fs.basename(vim.api.nvim_buf_get_name(result.buffer))
+            if title == "" then
+                title = "Result"
+            end
+            window_options.title = ("[%s] %s"):format(i, title)
+        end
 
         local window = Window:new(result, window_options)
         window:open()
@@ -80,8 +87,7 @@ function Search.open(results, labels, window_options)
         table.insert(windows, window)
     end
 
-    -- Force UI to redraw to avoid user input blocking preview windows from
-    -- showing up.
+    -- Force UI to redraw to ensure windows appear before user input
     vim.cmd("redraw")
 
     return windows
