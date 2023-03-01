@@ -96,6 +96,7 @@ end
 ---@return Portal.Window[]
 function Search.open(results, labels, window_options)
     if vim.tbl_isempty(results) then
+        vim.notify("Portal: empty search results")
         return {}
     end
 

@@ -29,6 +29,8 @@ Window.__index = Window
 
 local namespace = vim.api.nvim_create_namespace("portal")
 
+vim.api.nvim_set_hl(0, "PortalLabel", { link = "Search" })
+
 ---@param content Portal.WindowContent
 ---@param options Portal.WindowOptions
 ---@return Portal.Window
@@ -61,7 +63,7 @@ function Window:open()
         -- Reference: https://github.com/cbochs/portal.nvim/issues/20
         local ok, _ = pcall(vim.fn.bufload, self.state.buffer)
 
-        if not ok or vim.api.nvim_buf_is_loaded(self.state.buffer) then
+        if not ok or not vim.api.nvim_buf_is_loaded(self.state.buffer) then
             error(("Window.open: failed to load buffer %s"):format(self.state.buffer))
         end
     end
@@ -91,7 +93,7 @@ function Window:label(label)
     local row = cursor[1]
     local col = cursor[2]
     local id = nil
-    local virt_text = { { label, "@function.call" } }
+    local virt_text = { { (" %s "):format(label), "PortalLabel" } }
 
     local extmarks = vim.api.nvim_buf_get_extmarks(self.state.buffer, namespace, cursor, cursor, { details = true })
     if not vim.tbl_isempty(extmarks) then
