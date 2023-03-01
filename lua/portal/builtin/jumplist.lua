@@ -6,6 +6,9 @@ return {
 
         local jumplist, start = unpack(vim.fn.getjumplist())
 
+        -- Hack: the start index has the possibility to move past the
+        -- end of the jumplist. When that happens, simply add a dummy
+        -- item to the end of the jumplist iterator
         if start == #jumplist then
             table.insert(jumplist, {})
         end
@@ -13,13 +16,14 @@ return {
         opts = vim.tbl_extend("force", {
             start = start + 1,
             direction = "backward",
-            max_results = settings.max_results,
+            max_results = #settings.labels,
         }, opts)
 
         -- stylua: ignore
         local iter = Iterator:new(jumplist)
             :start_at(opts.start)
             :skip(1)
+            :take(settings.lookback)
 
         if opts.direction == Search.direction.backward then
             iter = iter:reverse()
@@ -45,6 +49,8 @@ return {
 
         if opts.filter then
             iter = iter:filter(opts.filter)
+        end
+        if opts.max_results then
             iter = iter:take(opts.max_results)
         end
 
