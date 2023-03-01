@@ -10,7 +10,13 @@ local DEFAULT_SETTINGS = {
     ---be a name of a registered query item, an anonymous predicate, or
     ---a well-formed query item. See Queries section for more information.
     ---@type Portal.Predicate[] | string[]
-    query = { "modified", "different", "valid" },
+    query = nil,
+
+    -- stylua: ignore
+    ---@type Portal.Predicate
+    filter = function(v) return vim.api.nvim_buf_is_valid(v.buffer) end,
+
+    max_results = 3,
 
     --- TODO: document lookback behaviour
     lookback = 100,

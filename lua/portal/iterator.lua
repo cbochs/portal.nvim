@@ -236,7 +236,7 @@ end
 
 ---@class Portal.MapAdapter
 ---@field iterator Portal.Iterator
----@field f fun(value: any): any
+---@field f fun(v: any, i: number): any
 local Map = Iterator:new()
 Map.__index = Map
 
@@ -262,7 +262,7 @@ function Map:next(index)
     local new_index, value = self.iterator:next(index)
     index = new_index
     if index ~= nil then
-        return index, self.f(value)
+        return index, self.f(value, index)
     end
 end
 

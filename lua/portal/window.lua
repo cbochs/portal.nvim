@@ -6,9 +6,9 @@ local Window = {}
 Window.__index = Window
 
 ---@class Portal.WindowContent
----@field window integer | any
 ---@field buffer number
 ---@field cursor { row: number, col: number }
+---@field select fun(c: Portal.WindowContent)
 
 ---@class Portal.WindowOptions
 ---@field title string
@@ -35,8 +35,14 @@ vim.api.nvim_set_hl(0, "PortalLabel", { link = "Search" })
 ---@param options Portal.WindowOptions
 ---@return Portal.Window
 function Window:new(content, options)
-    if not vim.api.nvim_buf_is_valid(content.buffer) then
+    if not content.buffer or not vim.api.nvim_buf_is_valid(content.buffer) then
         error(("Window.new: invalid buffer %s"):format(content.buffer))
+    end
+    if not content.cursor or not content.cursor.row or not content.cursor.col then
+        error(("Window.new: cursor is not present or valid in %s"):format(vim.inspect(content)))
+    end
+    if not content.select then
+        error(("Window.new: select is not present."):format(vim.inspect(content)))
     end
 
     local window = {
@@ -67,7 +73,6 @@ function Window:open()
             error(("Window.open: failed to load buffer %s"):format(self.state.buffer))
         end
     end
-    -- vim.api.nvim_buf_set_option(self.buffer, "bufhidden", "wipe")
 
     self.state.window = vim.api.nvim_open_win(self.state.buffer, false, self.options)
 
@@ -113,22 +118,15 @@ function Window:label(label)
     })
 end
 
-function Window:label_value()
-    if not self.state then
-        error("Window.label_value: window is not open.")
-    end
-    return self.state.label
+function Window:has_label(label)
+    return self.state.label == label
 end
 
 function Window:select()
     if not self.state then
         error("Window.select: window is not open.")
     end
-    if self.content.window then
-        vim.api.nvim_set_current_win(self.content.window)
-    end
-    vim.api.nvim_set_current_buf(self.state.buffer)
-    vim.api.nvim_win_set_cursor(0, self.state.cursor)
+    self.content.select(self.content)
 end
 
 function Window:close()

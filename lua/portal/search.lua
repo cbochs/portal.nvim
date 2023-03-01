@@ -4,17 +4,17 @@ local Window = require("portal.window")
 local Search = {}
 
 ---@class Portal.SearchOptions
+---@field start integer
+---@field direction Portal.Direction
+---@field max_results integer
 ---@field map Portal.MapFunction
 ---@field filter Portal.Predicate
----@field direction Portal.Direction
----@field start number
----@field max_results number
 ---@field query? Portal.Predicate[]
 
 ---@alias Portal.SearchResult Portal.WindowContent[]
 
 ---@generic T
----@alias Portal.MapFunction fun(v: T): Portal.WindowContent
+---@alias Portal.MapFunction fun(v: T, i: integer): Portal.WindowContent
 
 ---@enum Portal.Direction
 Search.direction = {
@@ -120,6 +120,10 @@ end
 ---@param windows Portal.Window[]
 ---@param escape_keys string[]
 function Search.select(windows, escape_keys)
+    if vim.tbl_isempty(windows) then
+        return
+    end
+
     while true do
         local ok, char = pcall(vim.fn.getcharstr)
         if not ok then
@@ -131,7 +135,7 @@ function Search.select(windows, escape_keys)
             end
         end
         for _, window in ipairs(windows) do
-            if char == window:label_value() then
+            if window:has_label(char) then
                 window:select()
                 goto done
             end
