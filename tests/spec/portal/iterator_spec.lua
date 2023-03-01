@@ -76,6 +76,13 @@ describe("iterator", function()
         assert.are.same({ 11, 7 }, iter:collect())
     end)
 
+    describe("#skip", function()
+        it("skips the first n items", function()
+            local iter = Iterator:new({ 1, 2, 3 }):skip(2)
+            assert.are.same({ 3 }, iter:collect())
+        end)
+    end)
+
     describe("#step_by", function()
         it("steps over the iterator", function()
             local iter = Iterator:new({ 0, 1, 2, 3, 4 }):step_by(3)

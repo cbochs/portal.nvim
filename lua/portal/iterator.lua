@@ -106,12 +106,55 @@ function Iterator:reverse()
     return self
 end
 
+---@class Portal.SkipAdapter
+---@field iterator Portal.Iterator
+---@field n integer
+local Skip = Iterator:new()
+Skip.__index = Skip
+
+function Skip:new(iterator, n)
+    if n == nil then
+        error("Iterator.skip: skipped items 'n' cannot be nil.")
+    end
+    if n < 0 then
+        error("Iterator.skip: 'n' must be a non-negative number.")
+    end
+
+    local skip = {
+        iterator = iterator,
+        n = n,
+    }
+    setmetatable(skip, self)
+    return skip
+end
+
+function Skip:next(index)
+    while true do
+        local new_index, value = self.iterator:next(index)
+        index = new_index
+        if index == nil then
+            return nil, nil
+        end
+        if self.n == 0 then
+            return index, value
+        end
+        self.n = self.n - 1
+    end
+end
+
+function Iterator:skip(n)
+    return Skip:new(self, n)
+end
+
+---@class Portal.StepByAdapter
+---@field iterator Portal.Iterator
+---@field n integer
 local StepBy = Iterator:new()
 StepBy.__index = StepBy
 
 function StepBy:new(iterator, n)
     if n == nil then
-        error("Iterator.step_by: step amount cannot be nil.")
+        error("Iterator.step_by: step size 'n' cannot be nil.")
     end
     if n <= 0 then
         error("Iterator.step_by: 'n' must be a positive number.")
@@ -120,7 +163,7 @@ function StepBy:new(iterator, n)
     local step_by = {
         iterator = iterator,
         n = n,
-        count = n - 1,
+        count = -1,
     }
     setmetatable(step_by, self)
     return step_by
@@ -202,7 +245,7 @@ function Take:new(iterator, n)
         error("Iterator.take: predicate function cannot be nil.")
     end
     if n < 0 then
-        error("Iterator.take: 'n' must be a positive number.")
+        error("Iterator.take: 'n' must be a non-negative number.")
     end
 
     local take = {
