@@ -14,7 +14,7 @@ describe("iterator", function()
 
     it("can be iterated", function()
         local list = { "a", "b", "c" }
-        for i, v in Iterator:new(lsit):iter() do
+        for i, v in Iterator:new(list):iter() do
             assert.equals(list[i], v)
         end
     end)
