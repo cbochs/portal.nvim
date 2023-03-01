@@ -11,11 +11,17 @@ function Portal.initialize()
         return
     end
     initialized = true
+
+    require("portal.commands").create()
 end
 
--- luacheck: ignore
---- @param opts? Portal.Settings
-function Portal.setup(opts)
+--- @param overrides? Portal.Settings
+function Portal.setup(overrides)
+    local Settings = require("portal.settings")
+
+    Settings.update(overrides)
+    require("portal.log").global({ log_level = Settings.log_level })
+
     Portal.initialize()
 end
 
@@ -28,5 +34,11 @@ function Portal.tunnel(opts)
     local windows = Search.open(results, Settings.labels, Settings.window_options)
     Search.select(windows, Settings.escape)
 end
+
+setmetatable(Portal, {
+    __index = function(_, name)
+        return require("portal.builtin")[name]
+    end,
+})
 
 return Portal
