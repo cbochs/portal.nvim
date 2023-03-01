@@ -1,15 +1,13 @@
 ---@class Portal.Option
 ---@field value any
 local Option = {}
+Option.__index = Option
 
 ---@param value any
 ---@return Portal.Option
 function Option:new(value)
     local option = { value = value }
-
     setmetatable(option, self)
-    self.__index = self
-
     return option
 end
 
