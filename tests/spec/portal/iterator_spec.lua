@@ -46,6 +46,11 @@ describe("iterator", function()
         )
     end)
 
+    it("can be flattened", function()
+        local iter = Iterator:new({ { 1, 2 }, { 2, 3 } })
+        assert.are.same({ 1, 2, 2, 3 }, iter:flatten())
+    end)
+
     it("can start at an arbitraty index", function()
         local iter = Iterator:new({ 1, 2, 3, 4, 5, 6 }):start_at(5)
         assert.are.same({ 5, 6 }, iter:collect())
