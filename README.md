@@ -8,7 +8,7 @@ _Theme: [kanagawa](https://github.com/rebelot/kanagawa.nvim)_
 
 > Look at you, sailing through [neovim] majestically, like an eagle... piloting a blimp.
 
-Portal is a plugin that aims to build upon and enhance existing lists (e.g. jumplist, quickfix list) and their associated motions (e.g. `<c-o>` and `<c-i>`) by surfacing contextual information with the use of [portals](#portals).
+Portal is a plugin that aims to build upon and enhance existing lists (e.g. jumplist and quickfix list) and their associated motions (e.g. `<c-o>` and `<c-i>`) by surfacing contextual information with the use of [portals](#portals).
 
 See the [quickstart](#quickstart) section to get started.
 
@@ -47,9 +47,8 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 ```lua
 {
     "cbochs/portal.nvim",
-    dependencies = {
-        "cbochs/grapple.nvim",  -- (optional)
-    },
+    -- Ootional dependencies
+    dependencies = { "cbochs/grapple.nvim" },
 }
 ```
 
@@ -61,9 +60,8 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 ```lua
 use {
     "cbochs/portal.nvim",
-    requires = {
-        "cbochs/grapple.nvim",  -- (optional)
-    },
+    -- Optional dependencies
+    requires = { "cbochs/grapple.nvim" },
 }
 ```
 
@@ -74,8 +72,7 @@ use {
 
 ```vim
 Plug "cbochs/portal.nvim"
-
-" Optional
+" Optional dependencies
 Plug "cbochs/grapple.nvim"
 ```
 
@@ -93,25 +90,28 @@ require("portal").setup({
     ---@type "debug" | "info" | "warn" | "error"
     log_level = "warn",
 
-    ---The default queries used when searching the jumplist. An entry can
-    ---be a name of a registered query item, an anonymous predicate, or
-    ---a well-formed query item. See Queries section for more information.
+    ---The default query used when searching some lists
     ---@type Portal.Predicate[]
     query = nil,
 
-    -- stylua: ignore
+    ---The base filter that is applied to every search.
     ---@type Portal.Predicate
     filter = function(v) return vim.api.nvim_buf_is_valid(v.buffer) end,
 
+    ---The maximum number of results that can be returned when no query is given.
+    ---@type integer
+    max_results = 4,
+
+    ---The maximum number of items that can be searched.
     ---@type integer
     lookback = 100,
 
-    ---An ordered list of keys that will be used for labelling available jumps.
-    ---Labels will be applied in same order as `query`.
+    ---An ordered list of keys for labelling portals.
+    ---Labels will be applied in order, or to match queried results.
     ---@type string[]
     labels = { "j", "k", "h", "l" },
 
-    ---Keys used for exiting portal selection. To disable a key, set its value
+    ---Keys used for exiting portal selection. Disable with [{key}] = false
     ---to `false`.
     ---@type table<string, boolean>
     escape = {
@@ -121,9 +121,9 @@ require("portal").setup({
     ---The raw window options used for the portal window
     window_options = {
         relative = "cursor",
-        width = 80, -- implement as "min/max width",
-        height = 3, -- implement as "context lines"
-        col = 2, -- implement as "offset"
+        width = 80,
+        height = 3,
+        col = 2,
         focusable = false,
         border = "single",
         noautocmd = true,
@@ -137,7 +137,7 @@ require("portal").setup({
 
 ### Builtins
 
-<details>
+<details open>
 <summary>Builtin Lists and Examples</summary>
 
 #### `jumplist`
@@ -164,7 +164,10 @@ Query, filter, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/u
 **Examples**
 
 ```lua
+-- Open portals for the jumplist going backward (<c-o>)
 require("portal.builtin").jumplist.tunnel_backward()
+
+-- Open portals for the jumplist going forward (<c-i>)
 require("portal.builtin").jumplist.tunnel_forward()
 ```
 
@@ -192,6 +195,7 @@ Query, filter, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/us
 **Example**
 
 ```lua
+-- Open portals for the quickfix list (from the top)
 require("portal.builtin").quickfix.tunnel()
 ```
 
@@ -199,16 +203,25 @@ require("portal.builtin").quickfix.tunnel()
 
 ### Portal API
 
-<details>
+<details open>
 <summary>Portal API and Examples</summary>
 
 #### `portal#tunnel`
+
+**API**: `require("portal").tunnel(opts)`
+
+**`opts?`**: [`Portal.PortalOptions`](#portalportaloptions)
+
+**Example**
+
+```lua
+```
 
 </details>
 
 ## Portals
 
-A **portal** is a window that shows a snippet of some cursor location, a labelled "hotkey" for immediate navigation to the portal location, and any other available contextual information (e.g. the file buffer's name).
+A **portal** is a window that shows a snippet of a buffer, a labelled "hotkey" for immediate navigation to the portal location, and any other available contextual information (e.g. the file buffer's name).
 
 <img width="1043" alt="portal_screenshot" src="https://user-images.githubusercontent.com/2467016/222313082-8ae51576-5497-40e8-88d9-466ca504e22d.png">
 
