@@ -142,38 +142,12 @@ describe("iterator", function()
             local iter = Iterator:new({ 0, 1, 2 }):map(map)
             assert.are.same({ 0, 2, 4 }, iter:collect())
         end)
-    end)
 
-    -- describe("#search", function()
-    --     it("searches for specific values", function()
-    --         -- stylua: ignore
-    --         local search = {
-    --             function(v) return v == 5 end,
-    --             function(v) return v == 4 end,
-    --             function(v) return v == 2 end,
-    --         }
-    --
-    --         local iter = Iterator:new({ 0, 1, 2, 3, 4 }):search(search)
-    --         assert.are.same({ [2] = 4, [3] = 2 }, iter:collect_table())
-    --     end)
-    --
-    --     it("searches in the correct order", function()
-    --         -- stylua: ignore
-    --         local search = { function(_) return true end }
-    --
-    --         local iter = Iterator:new({ 0, 1, 2, 3, 4 }):reverse():search(search)
-    --         assert.are.same({ 4 }, iter:collect_table())
-    --     end)
-    --
-    --     it("searches for duplicate items", function()
-    --         -- stylua: ignore
-    --         local search = {
-    --             function(v) return v > 2 end,
-    --             function(v) return v > 3 end,
-    --         }
-    --
-    --         local iter = Iterator:new({ 0, 1, 2, 3, 4 }):reverse():search(search)
-    --         assert.are.same({ 4, 4 }, iter:collect_table())
-    --     end)
-    -- end)
+        it("skips nil values", function()
+            -- stylua: ignore
+            local map = function(v) if v > 0 then return v * 2 end end
+            local iter = Iterator:new({ 0, 1, 2 }):map(map)
+            assert.are.same({ 2, 4 }, iter:collect())
+        end)
+    end)
 end)

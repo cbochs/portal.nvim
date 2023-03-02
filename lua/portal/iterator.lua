@@ -320,12 +320,18 @@ function Map:new(iterator, f)
 end
 
 ---@param index? any
----@return any
 function Map:next(index)
-    local new_index, value = self.iterator:next(index)
-    index = new_index
-    if index ~= nil then
-        return index, self.f(value, index)
+    while true do
+        local new_index, value = self.iterator:next(index)
+        index = new_index
+        if index == nil then
+            return nil, nil
+        end
+
+        local mapped_value = self.f(value, index)
+        if mapped_value then
+            return index, mapped_value
+        end
     end
 end
 
