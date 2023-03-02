@@ -2,7 +2,7 @@ local Commands = {}
 
 function Commands.create()
     vim.api.nvim_create_user_command("Portal", function(opts)
-        require("portal").jumplist.tunnel({ direction = opts.fargs[1] })
+        require("portal").jumplist.tunnel({ direction = opts.fargs[2] })
     end, {
         desc = "Open portals",
         nargs = "*",
