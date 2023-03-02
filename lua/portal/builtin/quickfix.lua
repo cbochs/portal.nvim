@@ -38,7 +38,7 @@ return {
         if opts.filter then
             iter = iter:filter(opts.filter)
         end
-        if opts.max_results then
+        if not opts.query then
             iter = iter:take(opts.max_results)
         end
 
