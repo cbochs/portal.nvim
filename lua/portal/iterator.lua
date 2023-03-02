@@ -67,6 +67,14 @@ function Iterator:reduce(reducer, initial_state)
     return values
 end
 
+function Iterator:flatten()
+    local values = {}
+    for _, value in self:iter() do
+        vim.list_extend(values, value)
+    end
+    return values
+end
+
 ---@param start_iter Portal.Iterator
 ---@return Portal.Iterator
 local function root_iter(start_iter)
