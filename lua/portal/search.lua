@@ -7,11 +7,9 @@ local Search = {}
 ---@field start integer
 ---@field direction Portal.Direction
 ---@field max_results integer
----@field map Portal.SearchMapFunction
 ---@field filter Portal.SearchPredicate
 ---@field query Portal.SearchPredicate[]
 
----@alias Portal.SearchMapFunction fun(v: any, i: integer): Portal.WindowContent | nil
 ---@alias Portal.SearchPredicate fun(v: Portal.WindowContent, i: integer): boolean
 
 ---@enum Portal.Direction
