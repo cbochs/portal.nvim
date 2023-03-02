@@ -2,13 +2,17 @@ local Commands = {}
 
 function Commands.create()
     vim.api.nvim_create_user_command("Portal", function(opts)
-        require("portal").jumplist.tunnel({ direction = opts.fargs[2] })
+        local builtin = require("portal.builtin")[opts.fargs[1]]
+        if not builtin then
+            return
+        end
+        builtin.tunnel({ direction = opts.fargs[2] })
     end, {
         desc = "Open portals",
         nargs = "*",
         complete = function(_, cmd_line, _)
             local directions = { "forward", "backward" }
-            local builtins = { "jumplist" }
+            local builtins = { "jumplist", "quickfix" }
 
             local line_split = vim.split(cmd_line, "%s+")
             local n = #line_split - 2
