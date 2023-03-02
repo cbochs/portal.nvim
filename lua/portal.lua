@@ -35,10 +35,4 @@ function Portal.tunnel(opts)
     Search.select(windows, Settings.escape)
 end
 
-setmetatable(Portal, {
-    __index = function(_, name)
-        return require("portal.builtin")[name]
-    end,
-})
-
 return Portal
