@@ -153,6 +153,7 @@ Query, filter, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/u
 - `require("portal.builtin").jumplist.tunnel(opts)`
 - `require("portal.builtin").jumplist.tunnel_forward(opts)`
 - `require("portal.builtin").jumplist.tunnel_backward(opts)`
+- `require("portal.builtin").jumplist.query(opts)`
 
 **`opts?`**: [`Portal.SearchOptions`](#portalsearchoptions)
 
@@ -205,6 +206,7 @@ Query, filter, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/us
 - `require("portal.builtin").quickfix.tunnel(opts)`
 - `require("portal.builtin").quickfix.tunnel_forward(opts)`
 - `require("portal.builtin").quickfix.tunnel_backward(opts)`
+- `require("portal.builtin").quickfix.query(opts)`
 
 **`opts?`**: [`Portal.SearchOptions`](#portalsearchoptions)
 
@@ -238,22 +240,28 @@ require("portal.builtin").quickfix.tunnel()
 
 The top-level method used for searching, opening, and selecting a portal location.
 
-**API**: `require("portal").tunnel(opts)`
+**API**: `require("portal").tunnel(queries)`
 
-**`opts?`**: [`Portal.PortalOptions`](#portalportaloptions)
+**`queries`**: [`Portal.Query[]`](#portalquery)
 
 <details>
 <summary><b>Example</b></summary>
 
 ```lua
-local Iterator = require("portal.iterator")
+-- Run a simple filtered search over the jumplist
+local query = require("portal.builtin").jumplist.query()
+require("portal").tunnel(query)
 
-local iter = Iterator:new()
 
-require("portal").tunnel({
-    iter = iter,
-    query = {}
-})
+-- Search both the jumplist and quickfix list
+local jumplist = require("portal.builtin").jumplist
+local jumplist_query = jumplist.query({ max_results = 1 })
+
+local quickfix = require("portal.builtin").quickfix
+local quickfix_query = quickfix.query({ max_results = 1 })
+
+require("portal").tunnel({ jumplist_query, quickfix_query })
+
 ```
 
 #### `portal.search#search`
@@ -307,8 +315,9 @@ require("portal.builtin").quickfix({
 
 ### Queries
 
+To begin a search, list of (one or more) **[queries](#portalquery)** must be provided.
+To specify _exactly_ what portals appear, users may create **queries** to pick and choose
 
-### Transformations
 ### Iteration
 
 **Iterable operations**
@@ -391,14 +400,17 @@ Iterator:rrepeat(1)
 <details open>
 <summary>Type Definitions</summary>
 
-### `Portal.PortalOptions`
+### `Portal.SearchOptions`
 
-Named tuple of `(iter, query)` used for opening portals for a set of search results.
+Options available for tuning a search query. See the [builtins](#builtins) section for information regarding search option defaults.
 
 **Type**: `table`
 
-- **`iter`**: [`Portal.Iterator`](#iteration)
-- **`query`**: [`Portal.Predicate[]`](#queries)
+- **`start`**: `integer`
+- **`direction`**: [`Portal.Direction`](#portaldirection)
+- **`max_results`**: `integer`
+- **`filter`**: [`Portal.SearchPredicate`](#portalsearchpredicate)
+- **`query`**: [`Portal.Query[]`](#portalsearchpredicate)
 
 ### `Portal.Direction`
 
@@ -409,11 +421,21 @@ Used for indicating whether a search should be performed forwards or backwards.
 - **`"forward"`**
 - **`"backward"`**
 
-### `Portal.Predicate`
+### `Portal.SearchPredicate`
 
-Basic function type used for [filtering](#filters) and [querying](#queries) an iterator.
+Specialized [predicate](#portalpredicate) where the argument provided is a [`Portal.WindowContent`](#portalwindowcontent) result.
 
-**Type**: `fun(v: any): boolean`
+**Type**: `fun(c: Portal.WindowContent): boolean`
+
+### `Portal.Query`
+
+Named tuple of `(source, predicates)`.
+
+**Type**: `table`
+
+- **`source`**: [`Portal.Iterator`](#iteration)
+- **`predicates`**: [`Portal.SearchPredicate[]`](#portalsearchpredicate) | `nil`
+
 
 ### `Portal.WindowContent`
 
@@ -426,34 +448,15 @@ Named tuple of `(buffer, cursor, select)` used in opening and selecting a portal
 - **`select`**: `fun(c: Portal.WindowContent)`
 - **anything else**
 
-### `Portal.SearchOptions`
+### `Portal.Predicate`
 
-Options available for tuning a search query. See the [builtins](#builtins) section for information regarding search option defaults.
+Basic function type used for [filtering](#filters) and [querying](#queries) an iterator.
 
-**Type**: `table`
+**Type**: `fun(v: any): boolean`
 
-- **`start`**: `integer`
-- **`direction`**: [`Portal.Direction`](#portaldirection)
-- **`max_results`**: `integer`
-- **`filter`**: [`Portal.SearchPredicate`](#portalsearchpredicate)
-- **`query`**: [`Portal.SearchPredicate[]`](#portalsearchpredicate)
+### `Portal.QueryGenerator`
 
-### `Portal.SearchPredicate`
-
-Specialized [predicate](#portalpredicate) where the argument provided is a [`Portal.WindowContent`](#portalwindowcontent) result.
-
-**Type**: `fun(c: Portal.WindowContent): boolean`
-
-### `Portal.GeneratorSpec`
-
-**Type**: `table`
-
-- **`name`**: `string`
-- **`genearator`**: [`Portal.Generator`](#portalgenerator)
-
-### `Portal.Generator`
-
-**Type**: `fun(o: Portal.SearchOptions, s: Portal.Settings): Portal.PortalOptions`
+**Type**: `fun(o: Portal.SearchOptions, s: Portal.Settings): Portal.Query`
 
 ### `Portal.Tunnel`
 
