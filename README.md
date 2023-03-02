@@ -138,7 +138,7 @@ require("portal").setup({
 
 ### Builtins
 
-<details open>
+<details>
 <summary>Builtin Lists and Examples</summary>
 
 #### `jumplist`
@@ -229,7 +229,7 @@ require("portal.builtin").quickfix.tunnel()
 
 ### Portal API
 
-<details open>
+<details>
 <summary>Portal API and Examples</summary>
 
 
@@ -388,12 +388,16 @@ Iterator:rrepeat(1)
 
 ### `Portal.PortalOptions`
 
+Named tuple of `(iter, query)` used for opening portals for a set of search results.
+
 **Type**: `table`
 
 - **`iter`**: [`Portal.Iterator`](#iteration)
 - **`query`**: [`Portal.Predicate[]`](#queries)
 
 ### `Portal.Direction`
+
+Used for indicating whether a search should be performed forwards or backwards.
 
 **Type**: `enum`
 
@@ -402,9 +406,13 @@ Iterator:rrepeat(1)
 
 ### `Portal.Predicate`
 
+Basic function type used for [filtering](#filters) and [querying](#queries) an iterator.
+
 **Type**: `fun(v: any): boolean`
 
 ### `Portal.WindowContent`
+
+Named tuple of `(buffer, cursor, select)` used in opening and selecting a portal location. **May contain** any additional data to aide in filtering, querying, and selecting a portal. See the [builtins](#builtins) section for information on which additional fields are present.
 
 **Type**: `table`
 
@@ -415,20 +423,19 @@ Iterator:rrepeat(1)
 
 ### `Portal.SearchOptions`
 
+Options available for tuning a search query. See the [builtins](#builtins) section for information regarding search option defaults.
+
 **Type**: `table`
 
 - **`start`**: `integer`
 - **`direction`**: [`Portal.Direction`](#portaldirection)
 - **`max_results`**: `integer`
-- **`map`**: [`Portal.SearchMapFunction`](#portalsearchmapfunction)
-- **`filter`**: [`Portal.SearchPredicate`](#portalsearchmapfunction)
-- **`query`**: [`Portal.SearchPredicate[]`](#portalsearchmapfunction)
-
-### `Portal.SearchMapFunction`
-
-**Type**: `fun(c: Portal.WindowContent, i: integer): Portal.WindowContent | nil`
+- **`filter`**: [`Portal.SearchPredicate`](#portalsearchpredicate)
+- **`query`**: [`Portal.SearchPredicate[]`](#portalsearchpredicate)
 
 ### `Portal.SearchPredicate`
+
+Specialized [predicate](#portalpredicate) where the argument provided is a [`Portal.WindowContent`](#portalwindowcontent) result.
 
 **Type**: `fun(c: Portal.WindowContent): boolean`
 
