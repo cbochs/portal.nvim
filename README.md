@@ -1,26 +1,23 @@
 # Portal.nvim
 
-> Look at you, sailing through [neovim] majestically, like an eagle... piloting a blimp.
-
----
-
 ![portal_showcase](https://user-images.githubusercontent.com/2467016/222316702-cf85ad4a-c331-4148-a851-26c275ed60cd.gif)
 
 _Theme: [kanagawa](https://github.com/rebelot/kanagawa.nvim)_
 
 ## Introduction
 
-Portal is a plugin that aims to build upon and enhance existing lists (e.g. jumplist, taglist) and their assocaited motions (e.g. `<c-o>` and `<c-i>`) by surfacing contextual information with the use of [portals](#portals).
+> Look at you, sailing through [neovim] majestically, like an eagle... piloting a blimp.
+
+Portal is a plugin that aims to build upon and enhance existing lists (e.g. jumplist, quickfix list) and their associated motions (e.g. `<c-o>` and `<c-i>`) by surfacing contextual information with the use of [portals](#portals).
 
 See the [quickstart](#quickstart) section to get started.
 
 ## Features
 
-<!-- TODO: update links to sections -->
 * **Labelled** [portals](#portals) for immediate movement to a jump location
-* **Customizable** [queries and filters](#portal-results) for surfacing exactly where you want to go
-* **Extensible** to open portals for virtually any list of items
-* **Integration** with [grapple.nvim](https://github.com/cbochs/grapple.nvim) and [harpoon](https://github.com/ThePrimeagen/harpoon) to provide additional queries
+* **Customizable** [queries](#queries) and [filters](#filters) for surfacing exactly where you want to go
+* **Extensible** to open portals for virtually any [list of items](#builtins)
+* **Integration** with [grapple.nvim](https://github.com/cbochs/grapple.nvim) to provide additional queries
 
 ## Requirements
 
@@ -30,7 +27,7 @@ See the [quickstart](#quickstart) section to get started.
 ## Quickstart
 
 - [Install](#installation) Portal.nvim using your preferred package manager
-- Add a simple keybind for opening portals, both forwards and backwards
+- Add keybinds for opening portals, both forwards and backwards
 
 ```lua
 vim.keymap.set("n", "<leader>o", "<cmd>Portal jumplist backward<cr>")
@@ -40,7 +37,6 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 **Next steps**
 
 - Check out the [default settings](#settings)
-- Try jumping with a different [builtin](#builtin) list
 - Build your own portal provider using [Portal API](#portal-api)
 
 ## Installation
@@ -53,7 +49,6 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
     "cbochs/portal.nvim",
     dependencies = {
         "cbochs/grapple.nvim",  -- (optional)
-        "ThePrimeagen/harpoon", -- (optional)
     },
 }
 ```
@@ -68,7 +63,6 @@ use {
     "cbochs/portal.nvim",
     requires = {
         "cbochs/grapple.nvim",  -- (optional)
-        "ThePrimeagen/harpoon", -- (optional)
     },
 }
 ```
@@ -83,7 +77,6 @@ Plug "cbochs/portal.nvim"
 
 " Optional
 Plug "cbochs/grapple.nvim"
-Plug "ThePrimeagen/harpoon"
 ```
 
 </details>
@@ -107,11 +100,9 @@ require("portal").setup({
     query = nil,
 
     -- stylua: ignore
-    --- TODO: document base filter
     ---@type Portal.Predicate
     filter = function(v) return vim.api.nvim_buf_is_valid(v.buffer) end,
 
-    --- TODO: document lookback behaviour
     ---@type integer
     lookback = 100,
 
@@ -144,38 +135,124 @@ require("portal").setup({
 
 ## Usage
 
-### Builtin
+### Builtins
 
 <details>
 <summary>Builtin Lists and Examples</summary>
+
+#### `jumplist`
+
+Query, filter, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/user/motion.html#jump-motions).
+
+**Command**: `:Portal jumplist [direction]`
+
+**API**:
+
+- `require("portal.builtin").jumplist.tunnel(opts)`
+- `require("portal.builtin").jumplist.tunnel_forward(opts)`
+- `require("portal.builtin").jumplist.tunnel_backward(opts)`
+
+**`opts?`**: [`Portal.SearchOptions`](#portalsearchoptions)
+
+**Defaults**
+
+- **`opts.start`**: current jump index
+- **`opts.direction`**: `"backward"`
+- **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
+- **`opts.query`**: `settings.query`
+
+**Examples**
+
+```lua
+require("portal.builtin").jumplist.tunnel_backward()
+require("portal.builtin").jumplist.tunnel_forward()
+```
+
+#### `quickfix`
+
+Query, filter, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/user/quickfix.html) list.
+
+**Command**: `:Portal quickfix [direction]`
+
+**API**:
+
+- `require("portal.builtin").quickfix.tunnel(opts)`
+- `require("portal.builtin").quickfix.tunnel_forward(opts)`
+- `require("portal.builtin").quickfix.tunnel_backward(opts)`
+
+**`opts?`**: [`Portal.SearchOptions`](#portalsearchoptions)
+
+**Defaults**
+
+- **`opts.start`**: `1`
+- **`opts.direction`**: `"forward"`
+- **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
+- **`opts.query`**: `nil`
+
+**Example**
+
+```lua
+require("portal.builtin").quickfix.tunnel()
+```
+
 </details>
 
 ### Portal API
 
 <details>
 <summary>Portal API and Examples</summary>
+
+#### `portal#tunnel`
+
 </details>
 
 ## Portals
 
-A **portal** is a window that shows a snippet of some cursor location, a label "hotkey" for immediate navigation to the portal location, and any other available contextual information (e.g. the file buffer's name).
+A **portal** is a window that shows a snippet of some cursor location, a labelled "hotkey" for immediate navigation to the portal location, and any other available contextual information (e.g. the file buffer's name).
 
-<!-- TODO: update portal screenshot -->
 <img width="1043" alt="portal_screenshot" src="https://user-images.githubusercontent.com/2467016/222313082-8ae51576-5497-40e8-88d9-466ca504e22d.png">
 
-## List Sources
+## Sources
 
 Lists provided to Portal can be filtered and queried to help present useful jump locations.
 
+### Iterators
 ### Filters
 ### Queries
 
-#### Available Queries
+### Example Predicates
 
-* `different`: matches when the buffer is not the current buffer
-* `modified`: matches when the buffer has been modified
+The following predicates can be used as either a `filter` or as part of a `query`.
 
-A few
+**Different buffer**
 
-* `grapple`: matches when the buffer has been tagged by [grapple.nvim](https://github.com/cbochs/grapple.nvim)
-* `harpoon`: matches when the buffer has been marked by [harpoon](https://github.com/ThePrimeagen/harpoon)
+```lua
+function(value) return value.buffer ~= vim.fn.bufnr() end
+```
+
+**Modified buffer**
+
+```lua
+function(value) return vim.api.nvim_buf_get_option(value.buffer, "modified") end
+```
+
+**Tagged by grapple.nvim**
+
+```lua
+function(value) return require("grapple").exists({ buffer = value.buffer }) end
+```
+## Portal Types
+
+<details open>
+<summary>Type Definitions</summary>
+
+### `Portal.PortalOptions`
+### `Portal.SearchOptions`
+### `Portal.Direction`
+### `Portal.Predicate`
+### `Portal.Iterator`
+### `Portal.GeneratorSpec`
+### `Portal.Generator`
+### `Portal.Tunnel`
+
+</details>
