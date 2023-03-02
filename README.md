@@ -47,7 +47,7 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 ## Installation
 
 <details>
-<summary>lazy.nvim</summary
+<summary>lazy.nvim</summary>
 
 ```lua
 {
@@ -62,7 +62,7 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 </details>
 
 <details>
-<summary>packer</summary
+<summary>packer</summary>
 
 ```lua
 use {
@@ -77,7 +77,7 @@ use {
 </details>
 
 <details>
-<summary>vim-plug</summary
+<summary>vim-plug</summary>
 
 ```vim
 Plug "cbochs/portal.nvim"
@@ -141,7 +141,7 @@ require("portal").setup({
 })
 ```
 
-<details>
+</details>
 
 ## Usage
 
