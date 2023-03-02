@@ -17,7 +17,7 @@ See the [quickstart](#quickstart) section to get started.
 * **Labelled** [portals](#portals) for immediate movement to a jump location
 * **Customizable** [queries](#queries) and [filters](#filters) for surfacing exactly where you want to go
 * **Extensible** to open portals for virtually any [list of items](#builtins)
-* **Integration** with [grapple.nvim](https://github.com/cbochs/grapple.nvim) to provide additional queries
+* **Integration** with [grapple.nvim](https://github.com/cbochs/grapple.nvim) for additional query options
 
 ## Requirements
 
@@ -37,6 +37,7 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 **Next steps**
 
 - Check out the [default settings](#settings)
+- Try out a [custom](#example-predicates) filter or query
 - Build your own portal provider using [Portal API](#portal-api)
 
 ## Installation
@@ -234,7 +235,7 @@ require("portal.builtin").quickfix.tunnel()
 
 #### `portal#tunnel`
 
-The core function for searching an arbitrary list.
+The top-level method used for searching, opening, and selecting a portal location.
 
 **API**: `require("portal").tunnel(opts)`
 
@@ -254,6 +255,14 @@ require("portal").tunnel({
 })
 ```
 
+#### `portal.search#search`
+
+A general-purpose method for collecting and (optionally) [querying](#queries) a Portal **[iterator](#iteration)**.
+
+#### `portal.search#query`
+
+A reduce-like method that attempts to match a list of [predicates](#filters) against items from an **[iterator](#iteration)**.
+
 </details>
 
 
@@ -261,19 +270,17 @@ require("portal").tunnel({
 
 ## Portals
 
-A **portal** is a window that shows a snippet of a buffer, a labelled "hotkey" for immediate navigation to the portal location, and any other available contextual information (e.g. the file buffer's name).
+A **portal** is a window that shows a labelled snippet of a buffer. The label indicates a key that can be used to navigate directly to the buffer location. A portal may also contain additional information, such as the buffer's name or the result's index.
 
 <img width="1043" alt="portal_screenshot" src="https://user-images.githubusercontent.com/2467016/222313082-8ae51576-5497-40e8-88d9-466ca504e22d.png">
 
-## Sources
+## Lists
 
-Lists provided to Portal can be filtered and queried to help present useful jump locations.
+Lists are searched in Portal using a construct known as an [iterator](#iteration), in this case a functional-style iterator. Iterators support [filter](#filters) and [map](#transformations) operations and a host of other [convenience methods](#iteration).
 
-### Iterators
 ### Filters
-### Queries
 
-### Example Predicates
+#### Example Predicates
 
 The following predicates can be used as either a `filter` or as part of a `query`.
 
@@ -294,18 +301,150 @@ function(value) return vim.api.nvim_buf_get_option(value.buffer, "modified") end
 ```lua
 function(value) return require("grapple").exists({ buffer = value.buffer }) end
 ```
+
+### Queries
+### Transformations
+### Iteration
+
+**Iterable operations**
+
+Operations which return a [lua-style](https://www.lua.org/pil/7.3.html) iterator.
+
+- `Iterator.next(index?: number)`: stateless iterator
+- `Iterator.iter()`: used in `for` loops, similar to `ipairs`
+
+**Chainable operations**
+
+Operations which return an iterator.
+
+- `Iterator.start_at(n: integer)`
+- `Iterator.reverse()`
+- `Iterator.rrepeat(value: any)`
+- `Iterator.skip(n: integer)`
+- `Iterator.step_by(n: integer)`
+- `Iterator.take(n: integer)`
+- `Iterator.filter(f: fun(v: any): boolean)`
+- `Iterator.map(f: fun(v: any, i: any): any | nil`: `nil` values are skipped
+
+**Collect operations**
+
+Operations which return a collection (list) of values.
+
+- `Iterator.collect(): T[]`
+- `Iterator.collect_table(): table`
+- `Iterator.reduce(reducer: fun(acc, val, i): any, initial_state: any)`
+
+<details>
+<summary><b>Examples</b></summary>
+
+```lua
+local Iterator = require("portal.iterator")
+
+-- Print all values in a list
+local iter = Iterator:new({ 1, 2, 3})
+for i, v in iter:iter() do
+    print(v)
+end
+
+-- Create the list { 7, 8, 9 }
+Iterator:new({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 })
+    :start_at(7)
+    :take(3)
+    :collect()
+
+-- Create the list { 2, 4, 6, 8, 10 }
+Iterator:new({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 })
+    :filter(function(v) return v % 2 == 0 end)
+    :collect()
+
+-- Create the table { a = 1, b = 2 }
+Iterator:new({ "a", "b" })
+    :map(function(v, i) return { v, i } end)
+    :collect_table()
+
+-- Create a filtered and mapped table { 4, 6 }
+Iterator:new({ 1, 2, 3})
+    :filter(function(v) return v > 1 end)
+    :map(function(v) return v * 2 end)
+    :collect()
+
+-- Create the same filtered and mapped table { 4, 6 }
+Iterator:new({ 1, 2, 3 })
+    :map(function(v) if v > 1 then return v * 2 end end)
+    :collect()
+
+-- Create the repeated list { 1, 1, 1 }
+Iterator:rrepeat(1)
+    :take(3)
+    :collect()
+```
+
+</details>
+
 ## Portal Types
 
 <details open>
 <summary>Type Definitions</summary>
 
 ### `Portal.PortalOptions`
-### `Portal.SearchOptions`
+
+**Type**: `table`
+
+- **`iter`**: [`Portal.Iterator`](#iteration)
+- **`query`**: [`Portal.Predicate[]`](#queries)
+
 ### `Portal.Direction`
+
+**Type**: `enum`
+
+- **`"forward"`**
+- **`"backward"`**
+
 ### `Portal.Predicate`
-### `Portal.Iterator`
+
+**Type**: `fun(v: any): boolean`
+
+### `Portal.WindowContent`
+
+**Type**: `table`
+
+- **`buffer`**: `integer`
+- **`cursor`**: `{ row: integer, col: integer }`
+- **`select`**: `fun(c: Portal.WindowContent)`
+- **anything else**
+
+### `Portal.SearchOptions`
+
+**Type**: `table`
+
+- **`start`**: `integer`
+- **`direction`**: [`Portal.Direction`](#portaldirection)
+- **`max_results`**: `integer`
+- **`map`**: [`Portal.SearchMapFunction`](#portalsearchmapfunction)
+- **`filter`**: [`Portal.SearchPredicate`](#portalsearchmapfunction)
+- **`query`**: [`Portal.SearchPredicate[]`](#portalsearchmapfunction)
+
+### `Portal.SearchMapFunction`
+
+**Type**: `fun(c: Portal.WindowContent, i: integer): Portal.WindowContent | nil`
+
+### `Portal.SearchPredicate`
+
+**Type**: `fun(c: Portal.WindowContent): boolean`
+
 ### `Portal.GeneratorSpec`
+
+**Type**: `table`
+
+- **`name`**: `string`
+- **`genearator`**: [`Portal.Generator`](#portalgenerator)
+
 ### `Portal.Generator`
+
+**Type**: `fun(o: Portal.SearchOptions, s: Portal.Settings): Portal.PortalOptions`
+
 ### `Portal.Tunnel`
+
+**Type**: `fun(o: Portal.SearchOptions)`
 
 </details>
