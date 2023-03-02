@@ -2,7 +2,7 @@ local Portal = {}
 
 ---@class Portal.PortalOptions
 ---@field iter Portal.Iterator
----@field query? Portal.Predicate[]
+---@field query? Portal.SearchPredicate[]
 
 local initialized = false
 

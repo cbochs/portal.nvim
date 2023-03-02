@@ -8,17 +8,17 @@ local Window = {}
 Window.__index = Window
 
 ---@class Portal.WindowContent
----@field buffer number
----@field cursor { row: number, col: number }
+---@field buffer integer
+---@field cursor { row: integer, col: integer }
 ---@field select fun(c: Portal.WindowContent)
 
 ---@class Portal.WindowOptions
 ---@field title string
 ---@field relative string
----@field width number
----@field height number
----@field row number
----@field col number
+---@field width integer
+---@field height integer
+---@field row integer
+---@field col integer
 ---@field border string | table
 ---@field noautocmd boolean
 

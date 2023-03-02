@@ -11,7 +11,7 @@ local Search = {}
 ---@field filter Portal.SearchPredicate
 ---@field query Portal.SearchPredicate[]
 
----@alias Portal.SearchMapFunction map fun(v: any, i: integer): Portal.WindowContent
+---@alias Portal.SearchMapFunction fun(v: any, i: integer): Portal.WindowContent | nil
 ---@alias Portal.SearchPredicate fun(v: Portal.WindowContent, i: integer): boolean
 
 ---@enum Portal.Direction
