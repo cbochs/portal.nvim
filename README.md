@@ -170,8 +170,9 @@ Filter, query, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/u
 - **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
 - **`opts.query`**: `settings.query`
 
-**Window Content**
+**Content**
 
+- **`type`**: `"jumplist"`
 - **`buffer`**: the jumplist `bufnr`
 - **`cursor`**: the jumplist `lnum` and `col`
 - **`select`**: uses native `<c-o>` and `<c-i>` to preserve jumplist ordering
@@ -220,8 +221,9 @@ Filter, query, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/us
 - **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
 - **`opts.query`**: `nil`
 
-**Window Content**
+**Content**
 
+- **`type`**: `"quickfix"`
 - **`buffer`**: the quickfix `bufnr`
 - **`cursor`**: the quickfix `lnum` and `col`
 - **`select`**: uses `nvim_win_set_cursor` for selection
@@ -305,6 +307,19 @@ require("portal.builtin").quickfix({
 -- Filter for buffers that have been tagged by grapple.nvim
 require("portal.builtin").quickfix({
     filter = function(v) return require("grapple").exists({ buffer = v.buffer }) end
+})
+
+-- Filter for results that are in some "root" directory
+require("portal.builtin").jumplist({
+    filter = function(v)
+        local root_files = vim.fs.find({ ".git" }, { upward = true })
+        if #root_files > 0 then
+            local root_dir = vim.fs.dirname(root_files[1])
+            local file_path = vim.api.nvim_buf_get_name(v.buffer)
+            return string.match(file_path, ("^%s"):format(root_dir)) ~= nil
+        end
+        return true
+    end
 })
 ```
 
@@ -439,9 +454,9 @@ Used for indicating whether a search should be performed forwards or backwards.
 
 ### `Portal.SearchPredicate`
 
-Specialized [predicate](#portalpredicate) where the argument provided is a [`Portal.WindowContent`](#portalwindowcontent) result.
+Specialized [predicate](#portalpredicate) where the argument provided is a [`Portal.Content`](#portalcontent) result.
 
-**Type**: `fun(c: Portal.WindowContent): boolean`
+**Type**: `fun(c: Portal.Content): boolean`
 
 ### `Portal.Query`
 
@@ -452,15 +467,16 @@ Named tuple of `(source, predicates)`.
 - **`source`**: [`Portal.Iterator`](#iterators)
 - **`predicates`**: [`Portal.SearchPredicate[]`](#portalsearchpredicate) | `nil`
 
-### `Portal.WindowContent`
+### `Portal.Content`
 
-Named tuple of `(buffer, cursor, select)` used in opening and selecting a portal location. **May contain** any additional data to aide in filtering, querying, and selecting a portal. See the [builtins](#builtin-queries) section for information on which additional fields are present.
+Named tuple of `(type, buffer, cursor, select)` used in opening and selecting a portal location. **May contain** any additional data to aide in filtering, querying, and selecting a portal. See the [builtins](#builtin-queries) section for information on which additional fields are present.
 
 **Type**: `table`
 
+- **`type`**: `string`
 - **`buffer`**: `integer`
 - **`cursor`**: `{ row: integer, col: integer }`
-- **`select`**: `fun(c: Portal.WindowContent)`
+- **`select`**: `fun(c: Portal.Content)`
 - **anything else**
 
 ### `Portal.Predicate`
