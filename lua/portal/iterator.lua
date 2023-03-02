@@ -15,7 +15,6 @@ function Iterator:new(iterable)
     local iterator = {
         iterable = iterable or {},
         step = 1,
-        start_index = 1,
     }
     setmetatable(iterator, self)
     return iterator
@@ -24,7 +23,7 @@ end
 ---@param index? number
 function Iterator:next(index)
     if not index then
-        index = self.start_index - self.step
+        index = (self.start_index or 1) - self.step
     end
     index = index + self.step
 
@@ -101,7 +100,7 @@ function Iterator:reverse()
     iter.step = -1
 
     -- Only change the start index if it is the default
-    if iter.start_index == 1 then
+    if not iter.start_index then
         iter.start_index = #iter.iterable
     end
 
