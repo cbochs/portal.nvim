@@ -9,7 +9,7 @@ describe("settings", function()
         assert.are.same({ "j", "k", "h", "l" }, settings.labels)
 
         local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
-        assert.equals(esc, settings.escape[1])
+        assert.are.same({ esc }, settings.escape)
 
         assert.equals("cursor", settings.window_options.relative)
         assert.equals(80, settings.window_options.width)
