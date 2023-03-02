@@ -161,15 +161,36 @@ Query, filter, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/u
 - **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
 - **`opts.query`**: `settings.query`
 
-**Examples**
+
+<details>
+<summary><b>Example</b></summary>
 
 ```lua
+-- Open portals for the jumplist (default: search backward)
+require("portal.builtin").jumplist.tunnel()
+
 -- Open portals for the jumplist going backward (<c-o>)
-require("portal.builtin").jumplist.tunnel_backward()
+-- Query for two jumps:
+-- 1. A jump that is in a different buffer than the current buffer
+-- 2. A jump that is in a buffer that has been modified
+require("portal.builtin").jumplist.tunnel_backward({
+    query = {
+        function(value) return value.buffer ~= vim.fn.bufnr() end,
+        function(value) return vim.api.nvim_buf_get_option(value.buffer, "modified") end,
+    }
+})
 
 -- Open portals for the jumplist going forward (<c-i>)
-require("portal.builtin").jumplist.tunnel_forward()
+-- Filters the results based on whether the buffer has been tagged
+-- by grapple.nvim or not. Return a maximum of two results.
+local filter = function(value) return require("grapple").exists({ buffer = value.buffer }) end
+require("portal.builtin").jumplist.tunnel_forward({
+    filter = filter,
+    max_results = 2,
+})
 ```
+
+</details>
 
 #### `quickfix`
 
@@ -192,7 +213,9 @@ Query, filter, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/us
 - **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
 - **`opts.query`**: `nil`
 
-**Example**
+
+<details>
+<summary><b>Example</b></summary>
 
 ```lua
 -- Open portals for the quickfix list (from the top)
@@ -201,21 +224,38 @@ require("portal.builtin").quickfix.tunnel()
 
 </details>
 
+</details>
+
 ### Portal API
 
 <details open>
 <summary>Portal API and Examples</summary>
 
+
 #### `portal#tunnel`
+
+The core function for searching an arbitrary list.
 
 **API**: `require("portal").tunnel(opts)`
 
 **`opts?`**: [`Portal.PortalOptions`](#portalportaloptions)
 
-**Example**
+<details>
+<summary><b>Example</b></summary>
 
 ```lua
+local Iterator = require("portal.iterator")
+
+local iter = Iterator:new()
+
+require("portal").tunnel({
+    iter = iter,
+    query = {}
+})
 ```
+
+</details>
+
 
 </details>
 
