@@ -2,8 +2,8 @@ local log = require("portal.log")
 
 ---@class Portal.Iterator
 ---@field iterable table
----@field step number
----@field start_index number
+---@field step integer
+---@field start_index integer
 local Iterator = {}
 Iterator.__index = Iterator
 
@@ -20,7 +20,7 @@ function Iterator:new(iterable)
     return iterator
 end
 
----@param index? number
+---@param index? integer
 function Iterator:next(index)
     if not index then
         index = (self.start_index or 1) - self.step
@@ -33,9 +33,8 @@ function Iterator:next(index)
     end
 end
 
----@param index? number
-function Iterator:iter(index)
-    return self.next, self, index
+function Iterator:iter()
+    return self.next, self, nil
 end
 
 ---@generic T
@@ -57,7 +56,7 @@ function Iterator:collect_table()
     return values
 end
 
----@param reducer fun(acc: any, val: any, i?: number): any
+---@param reducer fun(acc: any, val: any, i?: integer): any
 ---@param initial_state any
 ---@return any
 function Iterator:reduce(reducer, initial_state)
@@ -84,7 +83,7 @@ local function root_iter(start_iter)
     end
 end
 
----@param n number
+---@param n integer
 ---@return Portal.Iterator
 function Iterator:start_at(n)
     if n == nil then
@@ -138,7 +137,7 @@ function Skip:new(iterator, n)
         log.error("Iterator.skip: skipped items 'n' cannot be nil.")
     end
     if n < 0 then
-        log.error("Iterator.skip: 'n' must be a non-negative number.")
+        log.error("Iterator.skip: 'n' must be a non-negative integer.")
     end
 
     local skip = {
@@ -178,7 +177,7 @@ function StepBy:new(iterator, n)
         log.error("Iterator.step_by: step size 'n' cannot be nil.")
     end
     if n <= 0 then
-        log.error("Iterator.step_by: 'n' must be a positive number.")
+        log.error("Iterator.step_by: 'n' must be a positive integer.")
     end
 
     local step_by = {
@@ -204,7 +203,7 @@ function StepBy:next(index)
     end
 end
 
----@param n number
+---@param n integer
 ---@return Portal.Iterator
 function Iterator:step_by(n)
     return StepBy:new(self, n)
@@ -232,7 +231,7 @@ function Filter:new(iterator, predicate)
     return filter
 end
 
----@param index? number
+---@param index? integer
 function Filter:next(index)
     while true do
         local new_index, value = self.iterator:next(index)
@@ -254,19 +253,19 @@ end
 
 ---@class Portal.TakeAdapter
 ---@field iterator Portal.Iterator
----@field n number
+---@field n integer
 local Take = Iterator:new()
 Take.__index = Take
 
 ---@param iterator Portal.Iterator
----@param n number
+---@param n integer
 ---@return Portal.Iterator
 function Take:new(iterator, n)
     if n == nil then
         log.error("Iterator.take: predicate function cannot be nil.")
     end
     if n < 0 then
-        log.error("Iterator.take: 'n' must be a non-negative number.")
+        log.error("Iterator.take: 'n' must be a non-negative integer.")
     end
 
     local take = {
@@ -277,7 +276,7 @@ function Take:new(iterator, n)
     return take
 end
 
----@param index? number
+---@param index? integer
 function Take:next(index)
     if self.n == 0 then
         return nil, nil
@@ -292,7 +291,7 @@ function Take:next(index)
     end
 end
 
----@param n? number
+---@param n? integer
 ---@return Portal.Iterator
 function Iterator:take(n)
     return Take:new(self, n or 1)
@@ -300,7 +299,7 @@ end
 
 ---@class Portal.MapAdapter
 ---@field iterator Portal.Iterator
----@field f fun(v: any, i: number): any
+---@field f fun(v: any, i: integer): any
 local Map = Iterator:new()
 Map.__index = Map
 

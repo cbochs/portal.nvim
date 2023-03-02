@@ -7,14 +7,12 @@ local Search = {}
 ---@field start integer
 ---@field direction Portal.Direction
 ---@field max_results integer
----@field map Portal.MapFunction
----@field filter Portal.Predicate
----@field query Portal.Predicate[]
+---@field map Portal.SearchMapFunction
+---@field filter Portal.SearchPredicate
+---@field query Portal.SearchPredicate[]
 
----@alias Portal.SearchResult Portal.WindowContent[]
-
----@generic T
----@alias Portal.MapFunction fun(v: T, i: integer): Portal.WindowContent
+---@alias Portal.SearchMapFunction map fun(v: any, i: integer): Portal.WindowContent
+---@alias Portal.SearchPredicate fun(v: Portal.WindowContent, i: integer): boolean
 
 ---@enum Portal.Direction
 Search.direction = {
@@ -25,7 +23,7 @@ Search.direction = {
 ---@generic T
 ---@param iter Portal.Iterator
 ---@param query? Portal.Predicate | Portal.Predicate[]
----@return Portal.SearchResult
+---@return T[]
 function Search.search(iter, query)
     if query then
         return Search.query(iter, query)
@@ -33,9 +31,10 @@ function Search.search(iter, query)
     return iter:collect()
 end
 
+---@generic T
 ---@param iter Portal.Iterator
 ---@param query Portal.Predicate | Portal.Predicate[]
----@return Portal.SearchResult
+---@return T[]
 function Search.query(iter, query)
     if type(query) == "function" then
         query = { query }
@@ -57,7 +56,7 @@ function Search.query(iter, query)
     return results.matches
 end
 
----@param results Portal.SearchResult
+---@param results Portal.WindowContent[]
 ---@param labels string[]
 ---@param window_options Portal.WindowOptions
 ---@return Portal.Window[]
