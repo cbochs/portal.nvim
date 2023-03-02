@@ -18,17 +18,6 @@ describe("search", function()
             }))
         end)
 
-        it("can search for duplicate predicates", function()
-            -- stylua: ignore
-            assert.are.same({ 1, 1 }, Search.search({
-                source = Iterator:new({ 1, 2, 3}),
-                predicates = {
-                    function(v) return v ~= 2 end,
-                    function(v) return v < 2 end,
-                }
-            }))
-        end)
-
         it("can search and partially match a list of predicates", function()
             -- stylua: ignore
             assert.are.same({ [1] = 1, [3] = 3 }, Search.search({

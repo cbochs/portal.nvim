@@ -1,16 +1,17 @@
 local log = require("portal.log")
 
 ---@class Portal.Window
----@field content Portal.WindowContent
+---@field content Portal.Content
 ---@field options Portal.WindowOptions
 ---@field state Portal.WindowState
 local Window = {}
 Window.__index = Window
 
----@class Portal.WindowContent
+---@class Portal.Content
+---@field type string
 ---@field buffer integer
 ---@field cursor { row: integer, col: integer }
----@field select fun(c: Portal.WindowContent)
+---@field select fun(c: Portal.Content)
 
 ---@class Portal.WindowOptions
 ---@field title string
@@ -33,7 +34,7 @@ local namespace = vim.api.nvim_create_namespace("portal")
 
 vim.api.nvim_set_hl(0, "PortalLabel", { link = "Search" })
 
----@param content Portal.WindowContent
+---@param content Portal.Content
 ---@param options Portal.WindowOptions
 ---@return Portal.Window
 function Window:new(content, options)

@@ -31,6 +31,7 @@ local function generate(opts, settings)
 
     iter = iter:map(function(v, i)
         return {
+            type = "jumplist",
             buffer = v.bufnr,
             cursor = { row = v.lnum, col = v.col },
             select = function(content)

@@ -23,6 +23,7 @@ return function(opts, settings)
 
     iter = iter:map(function(v, _)
         return {
+            type = "quickfix",
             buffer = v.bufnr,
             cursor = { row = v.lnum, col = v.col },
             select = function(content)

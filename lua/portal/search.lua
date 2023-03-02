@@ -14,7 +14,7 @@ local Search = {}
 ---@field source Portal.Iterator
 ---@field predicates Portal.SearchPredicate[] | nil
 
----@alias Portal.SearchPredicate fun(v: Portal.WindowContent): boolean
+---@alias Portal.SearchPredicate fun(v: Portal.Content): boolean
 
 ---@enum Portal.Direction
 Search.direction = {
@@ -37,21 +37,18 @@ function Search.search(query)
 
     local results = query.source:reduce(function(acc, value)
         for i, predicate in ipairs(predicates) do
-            if not acc.matched_predicates[predicate] and predicate(value) then
-                acc.matched_predicates[predicate] = true
-                acc.matches[i] = value
+            if not acc[i] and predicate(value) then
+                acc[i] = value
+                break
             end
         end
         return acc
-    end, {
-        matches = {},
-        matched_predicates = {},
-    })
+    end, {})
 
-    return results.matches
+    return results
 end
 
----@param results Portal.WindowContent[]
+---@param results Portal.Content[]
 ---@param labels string[]
 ---@param window_options Portal.WindowOptions
 ---@return Portal.Window[]
@@ -84,7 +81,7 @@ function Search.open(results, labels, window_options)
             if title == "" then
                 title = "Result"
             end
-            window_options.title = ("[%s] %s"):format(i, title)
+            window_options.title = ("[%s] %s"):format(result.type, title)
         end
 
         local window = Window:new(result, window_options)
