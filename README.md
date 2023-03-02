@@ -242,7 +242,7 @@ require("portal.builtin").quickfix.tunnel()
 
 ### Portal API
 
-<details open>
+<details>
 <summary>Portal API and Examples</summary>
 
 #### `portal#tunnel`
