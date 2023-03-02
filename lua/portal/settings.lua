@@ -6,45 +6,34 @@ local DEFAULT_SETTINGS = {
     ---@type "debug" | "info" | "warn" | "error"
     log_level = "warn",
 
-    ---The default queries used when searching the jumplist. An entry can
-    ---be a name of a registered query item, an anonymous predicate, or
-    ---a well-formed query item. See Queries section for more information.
+    ---The default query used when searching some lists
     ---@type Portal.Predicate[]
     query = nil,
 
     -- stylua: ignore
-    --- TODO: document base filter
+    ---The base filter that is applied to every search.
     ---@type Portal.Predicate
     filter = function(v) return vim.api.nvim_buf_is_valid(v.buffer) end,
 
-    --- TODO: document max_results behaviour
+    ---The maximum number of results that can be returned when no query is given.
     ---@type integer
     max_results = 4,
 
-    --- TODO: document lookback behaviour
+    ---The maximum number of items that can be searched.
     ---@type integer
     lookback = 100,
 
-    ---An ordered list of keys that will be used for labelling available jumps.
-    ---Labels will be applied in same order as `query`.
+    ---An ordered list of keys for labelling portals.
+    ---Labels will be applied in order, or to match queried results.
     ---@type string[]
     labels = { "j", "k", "h", "l" },
 
-    ---Keys used for exiting portal selection. To disable a key, set its value
+    ---Keys used for exiting portal selection. Disable with [{key}] = false
     ---to `false`.
     ---@type table<string, boolean>
     escape = {
         ["<esc>"] = true,
     },
-
-    -- -- TODO: document ignored filetypes
-    -- ---@type string[]
-    -- ignored = {
-    --     "grapple",
-    --     "harpoon",
-    --     "noice",
-    --     "telescope",
-    -- },
 
     ---The raw window options used for the portal window
     window_options = {
