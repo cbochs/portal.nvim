@@ -37,8 +37,9 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 **Next steps**
 
 - Check out the [default settings](#settings)
-- Try out a [custom](#example-predicates) filter or query
-- Build your own portal provider using [Portal API](#portal-api)
+- Explore the available [builtin](#builtins) lists
+- Add a custom [filter](#filters) or [query](#queries)
+- Build a custom portal provider
 
 ## Installation
 
@@ -274,35 +275,39 @@ A **portal** is a window that shows a labelled snippet of a buffer. The label in
 
 <img width="1043" alt="portal_screenshot" src="https://user-images.githubusercontent.com/2467016/222313082-8ae51576-5497-40e8-88d9-466ca504e22d.png">
 
-## Lists
+## Portal Search
 
-Lists are searched in Portal using a construct known as an [iterator](#iteration), in this case a functional-style iterator. Iterators support [filter](#filters) and [map](#transformations) operations and a host of other [convenience methods](#iteration).
+Lists are searched in Portal using a construct known as an [iterator](#iteration), in this case a functional-style iterator. Iterators support map and [filter](#filters) operations and a host of other [convenience methods](#iteration).
 
 ### Filters
 
-#### Example Predicates
+During a search, a **filter** may be applied to remove any unwanted results from being displayed. More specifically, a filter is a [predicate](#portalsearchpredicate) function which accepts some value and returns `true` or `false`, indicating whether that value should be kept or discarded.
 
-The following predicates can be used as either a `filter` or as part of a `query`.
-
-**Different buffer**
-
-```lua
-function(value) return value.buffer ~= vim.fn.bufnr() end
-```
-
-**Modified buffer**
+<details>
+<summary><b>Examples</b></summary>
 
 ```lua
-function(value) return vim.api.nvim_buf_get_option(value.buffer, "modified") end
+-- Filter for results that are in the same buffer
+require("portal.builtin").jumplist({
+    filter = function(v) return v.buffer == vim.fn.bufnr() end
+})
+
+-- Filter for results that are in a modified buffer
+require("portal.builtin").quickfix({
+    filter = function(v) return vim.api.nvim_buf_get_option(v.buffer, "modified") end
+})
+
+-- Filter for buffers that have been tagged by grapple.nvim
+require("portal.builtin").quickfix({
+    filter = function(v) return require("grapple").exists({ buffer = v.buffer }) end
+})
 ```
 
-**Tagged by grapple.nvim**
-
-```lua
-function(value) return require("grapple").exists({ buffer = value.buffer }) end
-```
+</details>
 
 ### Queries
+
+
 ### Transformations
 ### Iteration
 
