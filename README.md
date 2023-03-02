@@ -4,14 +4,13 @@
 
 ---
 
-<!-- TODO: update showcase -->
-![portal_showcase](https://user-images.githubusercontent.com/2467016/199164298-1083fdae-4d9c-480c-9962-41a853127e80.gif)
+![portal_showcase](https://user-images.githubusercontent.com/2467016/222316702-cf85ad4a-c331-4148-a851-26c275ed60cd.gif)
 
-_Theme: [catppuccin](https://github.com/catppuccin/nvim)_
+_Theme: [kanagawa](https://github.com/rebelot/kanagawa.nvim)_
 
 ## Introduction
 
-Portal is a plugin that aims to build upon and enhance existing jump lists (e.g. jumplist, taglist) and their assocaited motions (i.e. `<c-o>` and `<c-i>`) by surfacing contextual information with the use of [portals](#portals).
+Portal is a plugin that aims to build upon and enhance existing lists (e.g. jumplist, taglist) and their assocaited motions (e.g. `<c-o>` and `<c-i>`) by surfacing contextual information with the use of [portals](#portals).
 
 See the [quickstart](#quickstart) section to get started.
 
@@ -162,7 +161,7 @@ require("portal").setup({
 A **portal** is a window that shows a snippet of some cursor location, a label "hotkey" for immediate navigation to the portal location, and any other available contextual information (e.g. the file buffer's name).
 
 <!-- TODO: update portal screenshot -->
-<img width="1774" alt="Screen Shot 2022-11-01 at 14 02 18" src="https://user-images.githubusercontent.com/2467016/199328505-ebd06a30-c931-4aa3-9828-d2970d811dfd.png">
+<img width="1043" alt="portal_screenshot" src="https://user-images.githubusercontent.com/2467016/222313082-8ae51576-5497-40e8-88d9-466ca504e22d.png">
 
 ## List Sources
 
