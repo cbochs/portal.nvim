@@ -1,4 +1,5 @@
 local Window = require("portal.window")
+local log = require("portal.log")
 
 local Search = {}
 
@@ -65,12 +66,24 @@ function Search.open(results, labels, window_options)
         vim.notify("Portal: empty search results")
         return {}
     end
+    if vim.tbl_count(results) > vim.tbl_count(labels) then
+        log.warn("Search.open: found more results than available labels.")
+    end
 
     local windows = {}
 
-    for i, result in ipairs(results) do
+    local max_index = math.max(unpack(vim.tbl_keys(results)))
+    local cur_row = 0
+
+    for i = 1, max_index do
+        local result = results[i]
+        if not result then
+            goto continue
+        end
+
+        cur_row = cur_row + 1
         window_options = vim.deepcopy(window_options)
-        window_options.row = (i - 1) * (window_options.height + 2)
+        window_options.row = (cur_row - 1) * (window_options.height + 2)
 
         if vim.fn.has("nvim-0.9") == 1 then
             local title = vim.fs.basename(vim.api.nvim_buf_get_name(result.buffer))
@@ -85,6 +98,8 @@ function Search.open(results, labels, window_options)
         window:label(labels[i])
 
         table.insert(windows, window)
+
+        ::continue::
     end
 
     -- Force UI to redraw to ensure windows appear before user input
