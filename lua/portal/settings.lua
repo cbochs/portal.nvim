@@ -17,6 +17,10 @@ local DEFAULT_SETTINGS = {
     ---@type Portal.Predicate
     filter = function(v) return vim.api.nvim_buf_is_valid(v.buffer) end,
 
+    --- TODO: document max_results behaviour
+    ---@type integer
+    max_results = 4,
+
     --- TODO: document lookback behaviour
     ---@type integer
     lookback = 100,

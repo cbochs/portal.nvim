@@ -16,7 +16,7 @@ return {
         opts = vim.tbl_extend("force", {
             start = start + 1,
             direction = "backward",
-            max_results = #settings.labels,
+            max_results = math.min(settings.max_results, #settings.labels),
             query = settings.query,
         }, opts)
 
