@@ -76,6 +76,18 @@ describe("iterator", function()
         assert.are.same({ 11, 7 }, iter:collect())
     end)
 
+    describe("#rrepeat", function()
+        it("repeats forever", function()
+            local iter = Iterator:rrepeat(1):take(3)
+            assert.are.same({ 1, 1, 1 }, iter:collect())
+        end)
+
+        it("repeats anything", function()
+            local iter = Iterator:rrepeat({}):take(3)
+            assert.are.same({ {}, {}, {} }, iter:collect())
+        end)
+    end)
+
     describe("#skip", function()
         it("skips the first n items", function()
             local iter = Iterator:new({ 1, 2, 3 }):skip(2)

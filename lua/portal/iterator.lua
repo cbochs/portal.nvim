@@ -85,7 +85,7 @@ local function root_iter(start_iter)
     end
 end
 
----@param n? number
+---@param n number
 ---@return Portal.Iterator
 function Iterator:start_at(n)
     if n == nil then
@@ -106,6 +106,26 @@ function Iterator:reverse()
     end
 
     return self
+end
+
+---@class Portal.RepeatAdapter
+---@field value any
+local Repeat = Iterator:new()
+Repeat.__index = Repeat
+
+function Repeat:new(value)
+    local rrepeat = { value = value }
+    setmetatable(rrepeat, self)
+    return rrepeat
+end
+
+function Repeat:next(index)
+    return (index or 0) + 1, vim.deepcopy(self.value)
+end
+
+-- luacheck: ignore
+function Iterator:rrepeat(value)
+    return Repeat:new(value)
 end
 
 ---@class Portal.SkipAdapter
