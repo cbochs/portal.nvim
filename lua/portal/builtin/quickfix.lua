@@ -10,7 +10,7 @@ return function(opts, settings)
         direction = "forward",
         max_results = math.min(settings.max_results, #settings.labels),
         query = nil,
-    }, opts)
+    }, opts or {})
 
         -- stylua: ignore
         local iter = Iterator:new(quickfix)
@@ -29,7 +29,6 @@ return function(opts, settings)
                 vim.api.nvim_win_set_buf(0, content.buffer)
                 vim.api.nvim_win_set_cursor(0, { content.cursor.row, content.cursor.col })
             end,
-            type = "quickfix",
         }
     end)
 

@@ -2,7 +2,7 @@ local log = require("portal.log")
 
 local Builtin = {}
 
----@alias Portal.QueryGenerator fun(o: Portal.SearchOptions, s: Portal.Settings): Portal.Query | Portal.Query[]
+---@alias Portal.QueryGenerator fun(o: Portal.SearchOptions, s: Portal.Settings): Portal.Query
 ---@alias Portal.Tunnel fun(o: Portal.SearchOptions)
 
 setmetatable(Builtin, {

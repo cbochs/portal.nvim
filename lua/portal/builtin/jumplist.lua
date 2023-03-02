@@ -17,7 +17,7 @@ local function generate(opts, settings)
         direction = "backward",
         max_results = math.min(settings.max_results, #settings.labels),
         query = settings.query,
-    }, opts)
+    }, opts or {})
 
         -- stylua: ignore
         local iter = Iterator:new(jumplist)
@@ -40,7 +40,6 @@ local function generate(opts, settings)
                 end
                 vim.api.nvim_feedkeys(content.distance .. keycode, "n", false)
             end,
-            type = "jumplist",
             direction = opts.direction,
             distance = math.abs(opts.start - i),
         }
