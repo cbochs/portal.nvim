@@ -1,9 +1,5 @@
 local Portal = {}
 
----@class Portal.PortalOptions
----@field iter Portal.Iterator
----@field query? Portal.SearchPredicate[]
-
 local initialized = false
 
 function Portal.initialize()
@@ -25,12 +21,24 @@ function Portal.setup(overrides)
     Portal.initialize()
 end
 
----@param opts Portal.PortalOptions
-function Portal.tunnel(opts)
+---@param queries Portal.Query[]
+function Portal.tunnel(queries)
+    local Iterator = require("portal.iterator")
     local Search = require("portal.search")
     local Settings = require("portal.settings")
 
-    local results = Search.search(opts.iter, opts.query)
+    -- Wrap a single query as a single item list
+    -- Note: tables have length 0
+    if #queries == 0 then
+        queries = { queries }
+    end
+
+    local results = {}
+    for _, query in ipairs(queries) do
+        table.insert(results, Search.search(query))
+    end
+    results = Iterator:new(results):flatten()
+
     local windows = Search.open(results, Settings.labels, Settings.window_options)
     Search.select(windows, Settings.escape)
 end

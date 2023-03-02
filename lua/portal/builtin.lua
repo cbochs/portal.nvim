@@ -2,11 +2,7 @@ local log = require("portal.log")
 
 local Builtin = {}
 
----@class Portal.GeneratorSpec
----@field name string
----@field generate Portal.Generator
-
----@alias Portal.Generator fun(o: Portal.SearchOptions, s: Portal.Settings): Portal.PortalOptions
+---@alias Portal.QueryGenerator fun(o: Portal.SearchOptions, s: Portal.Settings): Portal.Query | Portal.Query[]
 ---@alias Portal.Tunnel fun(o: Portal.SearchOptions)
 
 setmetatable(Builtin, {
@@ -15,20 +11,24 @@ setmetatable(Builtin, {
             return rawget(t, name)
         end
 
-        local ok, spec = pcall(require, ("portal.builtin.%s"):format(name))
+        ---@type boolean, Portal.QueryGenerator
+        local ok, generator = pcall(require, ("portal.builtin.%s"):format(name))
         if not ok then
             log.warn(("Unable to load builtin %s"):format(name))
             return
         end
 
         local builtin = {
+            query = function(opts)
+                local Settings = require("portal.settings")
+                return generator(opts or {}, Settings)
+            end,
+
             ---@type Portal.Tunnel
             tunnel = function(opts)
                 local Portal = require("portal")
-                local Settings = require("portal.settings")
-
-                opts = spec.generate(opts or {}, Settings)
-                Portal.tunnel(opts)
+                local query = Builtin[name].query(opts)
+                Portal.tunnel(query)
             end,
 
             ---@type Portal.Tunnel

@@ -10,7 +10,11 @@ local Search = {}
 ---@field filter Portal.SearchPredicate
 ---@field query Portal.SearchPredicate[]
 
----@alias Portal.SearchPredicate fun(v: Portal.WindowContent, i: integer): boolean
+---@class Portal.Query
+---@field source Portal.Iterator
+---@field predicates Portal.Predicate[]
+
+---@alias Portal.SearchPredicate fun(v: Portal.WindowContent): boolean
 
 ---@enum Portal.Direction
 Search.direction = {
@@ -19,27 +23,20 @@ Search.direction = {
 }
 
 ---@generic T
----@param iter Portal.Iterator
----@param query? Portal.Predicate | Portal.Predicate[]
+---@param query Portal.Query
 ---@return T[]
-function Search.search(iter, query)
-    if query then
-        return Search.query(iter, query)
-    end
-    return iter:collect()
-end
-
----@generic T
----@param iter Portal.Iterator
----@param query Portal.Predicate | Portal.Predicate[]
----@return T[]
-function Search.query(iter, query)
-    if type(query) == "function" then
-        query = { query }
+function Search.search(query)
+    if not query.predicates then
+        return query.source:collect()
     end
 
-    local results = iter:reduce(function(acc, value)
-        for i, predicate in ipairs(query) do
+    local predicates = query.predicates
+    if type(predicates) == "function" then
+        predicates = { predicates }
+    end
+
+    local results = query.source:reduce(function(acc, value)
+        for i, predicate in ipairs(predicates) do
             if not acc.matched_predicates[predicate] and predicate(value) then
                 acc.matched_predicates[predicate] = true
                 acc.matches[i] = value
