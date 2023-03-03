@@ -104,11 +104,13 @@ end
 ---@return Portal.Iterator
 function Iterator:reverse()
     local iter = root_iter(self)
-    iter.step = -1
+    iter.step = -iter.step
 
     -- Only change the start index if it is the default
     if not iter.start_index then
         iter.start_index = #iter.iterable
+    elseif iter.start_index == #iter.iterable then
+        iter.start_index = 1
     end
 
     return self
