@@ -39,7 +39,7 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 - Check out the [default settings](#settings)
 - Explore the available [builtin](#builtin-queries) queries
 - Tune your search results with a custom [filter](#filters) or [slot list](#slots)
-- Try combining multiple queries using the [`Portal API`](#portal-api)
+- Try combining multiple queries using the [Portal API](#portal-api)
 
 ## Installation
 
