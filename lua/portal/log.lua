@@ -30,7 +30,7 @@ local DEFAULT_MODES = {
 
 ---@param level string
 ---@param info string
----@param date string
+---@param date string | osdate
 ---@param message string
 local function format_log(level, info, date, message)
     return string.format("[%-6s%s] %s: %s", level:upper(), date, info, message)
@@ -101,6 +101,10 @@ function log.new(settings, modes)
                 local file = io.open(log_path, "a")
                 file:write(formatted_message .. "\n")
                 file:close()
+
+                if mode.name == "error" then
+                    error(formatted_message)
+                end
             end
         end
     end

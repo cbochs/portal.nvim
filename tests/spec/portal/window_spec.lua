@@ -1,0 +1,1 @@
+describe("window", function() end)

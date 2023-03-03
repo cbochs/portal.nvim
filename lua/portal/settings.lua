@@ -1,90 +1,45 @@
 ---@type Portal.Settings
-local settings = {}
+local Settings = {}
 
 ---@class Portal.Settings
 local DEFAULT_SETTINGS = {
     ---@type "debug" | "info" | "warn" | "error"
     log_level = "warn",
 
-    ---The default queries used when searching the jumplist. An entry can
-    ---be a name of a registered query item, an anonymous predicate, or
-    ---a well-formed query item. See Queries section for more information.
-    ---@type Portal.QueryLike[]
-    query = { "modified", "different", "valid" },
+    -- stylua: ignore
+    ---The base filter that is applied to every search.
+    ---@type Portal.SearchPredicate
+    filter = function(v) return vim.api.nvim_buf_is_valid(v.buffer) end,
 
-    ---An ordered list of keys that will be used for labelling available jumps.
-    ---Labels will be applied in same order as `query`.
+    ---The maximum number of results that can be returned.
+    ---@type integer
+    max_results = 4,
+
+    ---The maximum number of items that can be searched.
+    ---@type integer
+    lookback = 100,
+
+    ---An ordered list of keys for labelling portals.
+    ---Labels will be applied in order, or to match slotted results.
     ---@type string[]
     labels = { "j", "k", "h", "l" },
 
-    ---Keys used for exiting portal selection. To disable a key, set its value
+    ---Keys used for exiting portal selection. Disable with [{key}] = false
     ---to `false`.
     ---@type table<string, boolean>
     escape = {
         ["<esc>"] = true,
     },
 
-    ---The jumplist is fixed at 100 items, which has the possibility to impact
-    ---portal performance. Set this to a value less than 100 to limit the number
-    ---of jumps in the jumplist that will be queried.
-    lookback = 100,
-
-    ---Keycodes used for jumping forward and backward. These are not overrides
-    ---of the current keymaps, but instead will be used internally when a jump
-    ---is selected.
-    backward = "<c-o>",
-    forward = "<c-i>",
-
-    ---
-    portal = {
-        ---feat(nvim-0.9) When a portal is empty, render an default portal title
-        render_empty = true,
-
-        ---feat(nvim-0.9) The raw window options used for the portal window
-        options = {
-            relative = "cursor",
-            width = 80, -- implement as "min/max width",
-            height = 3, -- implement as "context lines"
-            col = 2, -- implement as "offset"
-            focusable = false,
-            border = "single",
-            noautocmd = true,
-        },
-
-        title = {
-            ---When a portal is empty, render an default portal title
-            render_empty = true,
-
-            ---The raw window options used for the portal title window
-            options = {
-                relative = "cursor",
-                width = 80, -- implement as "min/mas width",
-                height = 1,
-                col = 2,
-                style = "minimal",
-                focusable = false,
-                border = "single",
-                noautocmd = true,
-                zindex = 98,
-            },
-        },
-
-        body = {
-            ---When a portal is empty, render an empty buffer body
-            render_empty = false,
-
-            ---The raw window options used for the portal body window
-            options = {
-                relative = "cursor",
-                width = 80, -- implement as "min/max width",
-                height = 3, -- implement as "context lines"
-                col = 2, -- implement as "offset"
-                focusable = false,
-                border = "single",
-                noautocmd = true,
-                zindex = 99,
-            },
-        },
+    ---The raw window options used for the portal window
+    window_options = {
+        relative = "cursor",
+        width = 80, -- implement as "min/max width",
+        height = 3, -- implement as "context lines"
+        col = 2, -- implement as "offset"
+        focusable = false,
+        border = "single",
+        noautocmd = true,
     },
 }
 
@@ -121,16 +76,16 @@ _settings.escape = replace_termcodes(_settings.escape)
 _settings.labels = replace_termcodes(_settings.labels)
 
 ---@param overrides? Portal.Settings
-function settings.update(overrides)
+function Settings.update(overrides)
     _settings = vim.tbl_deep_extend("force", DEFAULT_SETTINGS, overrides or {})
     _settings.escape = replace_termcodes(_settings.escape)
     _settings.labels = replace_termcodes(_settings.labels)
 end
 
-setmetatable(settings, {
+setmetatable(Settings, {
     __index = function(_, index)
         return _settings[index]
     end,
 })
 
-return settings
+return Settings
