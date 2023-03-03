@@ -87,9 +87,14 @@ describe("iterator", function()
             assert.are.same({}, iter:collect())
         end)
 
-        it("can be reversed multiple times", function()
+        it("can be reversed an even number of times", function()
             local iter = Iterator:new({ "a", "b", "c" }):reverse():reverse():reverse():reverse()
             assert.are.same({ "a", "b", "c" }, iter:collect())
+        end)
+
+        it("can be reversed an odd number of times", function()
+            local iter = Iterator:new({ "a", "b", "c" }):reverse():reverse():reverse()
+            assert.are.same({ "c", "b", "a" }, iter:collect())
         end)
     end)
 
