@@ -340,7 +340,7 @@ require("portal.builtin").jumplist({
 
 ### Iterators
 
-All searches are performed over an input source list. Portal uses declarative **iterators** to prepare (`map`), refine (`filter`), and match (`reduce`), and `collect` list search results. Iterators can be used to create custom queries.
+All searches are performed over an input source list. Portal uses declarative **iterators** to prepare (`map`), refine (`filter`), match (`reduce`), and `collect` list search results. Iterators can be used to create custom queries.
 
 <details>
 <summary><b>Available operations</b></summary>
