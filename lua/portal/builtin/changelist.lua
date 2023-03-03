@@ -3,10 +3,10 @@ local function generate(opts, settings)
     local Iterator = require("portal.iterator")
     local Search = require("portal.search")
 
-    local jumplist, start = unpack(vim.fn.getjumplist())
+    local changelist, start = unpack(vim.fn.getchangelist())
 
-    if start == #jumplist then
-        table.insert(jumplist, {})
+    if start == #changelist then
+        table.insert(changelist, {})
     end
 
     opts = vim.tbl_extend("force", {
@@ -16,7 +16,7 @@ local function generate(opts, settings)
     }, opts or {})
 
     -- stylua: ignore
-    local iter = Iterator:new(jumplist)
+    local iter = Iterator:new(changelist)
         :start_at(opts.start)
         :skip(1)
         :take(settings.lookback)
@@ -27,13 +27,13 @@ local function generate(opts, settings)
 
     iter = iter:map(function(v, i)
         return {
-            type = "jumplist",
-            buffer = v.bufnr,
+            type = "changelist",
+            buffer = 0,
             cursor = { row = v.lnum, col = v.col },
             select = function(content)
-                local keycode = vim.api.nvim_replace_termcodes("<c-o>", true, false, true)
+                local keycode = vim.api.nvim_replace_termcodes("g;", true, false, true)
                 if content.direction == "forward" then
-                    keycode = vim.api.nvim_replace_termcodes("<c-i>", true, false, true)
+                    keycode = vim.api.nvim_replace_termcodes("g,", true, false, true)
                 end
                 vim.api.nvim_feedkeys(content.distance .. keycode, "n", false)
             end,

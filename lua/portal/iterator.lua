@@ -4,6 +4,7 @@ local log = require("portal.log")
 ---@field iterable table
 ---@field step integer
 ---@field start_index integer
+---@field explicit_start boolean
 local Iterator = {}
 Iterator.__index = Iterator
 
@@ -15,6 +16,8 @@ function Iterator:new(iterable)
     local iterator = {
         iterable = iterable or {},
         step = 1,
+        start_index = 1,
+        explicit_start = false,
     }
     setmetatable(iterator, self)
     return iterator
@@ -23,7 +26,7 @@ end
 ---@param index? integer
 function Iterator:next(index)
     if not index then
-        index = (self.start_index or 1) - self.step
+        index = self.start_index - self.step
     end
     index = index + self.step
 
@@ -97,18 +100,24 @@ function Iterator:start_at(n)
     if n == nil then
         log.error("Iterator.start_at: start index cannot be nil.")
     end
-    root_iter(self).start_index = n
+    local iter = root_iter(self)
+    iter.start_index = n
+    iter.explicit_start = true
     return self
 end
 
 ---@return Portal.Iterator
 function Iterator:reverse()
     local iter = root_iter(self)
-    iter.step = -1
+    iter.step = -iter.step
 
     -- Only change the start index if it is the default
-    if not iter.start_index then
-        iter.start_index = #iter.iterable
+    if not iter.explicit_start then
+        if iter.start_index == 1 then
+            iter.start_index = #iter.iterable
+        else
+            iter.start_index = 1
+        end
     end
 
     return self

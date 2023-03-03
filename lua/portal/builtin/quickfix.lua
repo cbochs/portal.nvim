@@ -6,17 +6,17 @@ return function(opts, settings)
     local quickfix = vim.fn.getqflist()
 
     opts = vim.tbl_extend("force", {
-        start = 1,
         direction = "forward",
         max_results = math.min(settings.max_results, #settings.labels),
-        slots = nil,
     }, opts or {})
 
-        -- stylua: ignore
-        local iter = Iterator:new(quickfix)
-            :start_at(opts.start)
-            :take(settings.lookback)
+    -- stylua: ignore
+    local iter = Iterator:new(quickfix)
+        :take(settings.lookback)
 
+    if opts.start then
+        iter = iter:start_at(opts.start)
+    end
     if opts.direction == Search.direction.backward then
         iter = iter:reverse()
     end

@@ -12,7 +12,7 @@ function Commands.create()
         nargs = "*",
         complete = function(_, cmd_line, _)
             local directions = { "forward", "backward" }
-            local builtins = { "jumplist", "quickfix" }
+            local builtins = { "changelist", "jumplist", "quickfix" }
 
             local line_split = vim.split(cmd_line, "%s+")
             local n = #line_split - 2
