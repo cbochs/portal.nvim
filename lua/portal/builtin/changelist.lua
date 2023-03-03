@@ -3,7 +3,8 @@ local function generate(opts, settings)
     local Iterator = require("portal.iterator")
     local Search = require("portal.search")
 
-    local changelist, start = unpack(vim.fn.getchangelist())
+    local buffer = 0
+    local changelist, start = unpack(vim.fn.getchangelist(buffer))
 
     if start == #changelist then
         table.insert(changelist, {})
@@ -28,7 +29,7 @@ local function generate(opts, settings)
     iter = iter:map(function(v, i)
         return {
             type = "changelist",
-            buffer = v.bufnr,
+            buffer = buffer,
             cursor = { row = v.lnum, col = v.col },
             select = function(content)
                 local keycode = vim.api.nvim_replace_termcodes("g;", true, false, true)
