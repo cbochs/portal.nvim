@@ -37,7 +37,12 @@ function Portal.tunnel(queries)
     for _, query in ipairs(queries) do
         table.insert(results, Search.search(query))
     end
-    results = Iterator:new(results):flatten()
+
+    if #queries > 1 then
+        results = Iterator:new(results):flatten()
+    else
+        results = results[1]
+    end
 
     local windows = Search.open(results, Settings.labels, Settings.window_options)
     Search.select(windows, Settings.escape)
