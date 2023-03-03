@@ -167,7 +167,7 @@ Filter, query, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/u
 - **`opts.direction`**: `"backward"`
 - **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
 
-**Result content**
+**Content**
 
 - **`type`**: `"jumplist"`
 - **`buffer`**: the jumplist `bufnr`
@@ -217,7 +217,7 @@ Filter, query, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/us
 - **`opts.direction`**: `"forward"`
 - **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
 
-**Result content**
+**Content**
 
 - **`type`**: `"quickfix"`
 - **`buffer`**: the quickfix `bufnr`
@@ -478,7 +478,7 @@ Named tuple of `(type, buffer, cursor, select)` used in opening and selecting a 
 
 ### `Portal.Predicate`
 
-Basic function type used for [filtering](#filters) and [querying](#slots) an iterator.
+Basic function type used for [filtering](#filters) and [matching](#slots) values produced from an [iterator](#iterators).
 
 **Type**: `fun(v: any): boolean`
 
