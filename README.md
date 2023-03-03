@@ -1,6 +1,6 @@
 # Portal.nvim
 
-![portal_showcase](https://user-images.githubusercontent.com/2467016/222316702-cf85ad4a-c331-4148-a851-26c275ed60cd.gif)
+![portal_showcase3 mov](https://user-images.githubusercontent.com/2467016/222644459-264e22e7-496a-4d4e-bfcb-e96efda0003d.gif)
 
 _Theme: [kanagawa](https://github.com/rebelot/kanagawa.nvim)_
 
@@ -8,7 +8,7 @@ _Theme: [kanagawa](https://github.com/rebelot/kanagawa.nvim)_
 
 > Look at you, sailing through [neovim] majestically, like an eagle... piloting a blimp.
 
-Portal is a plugin that aims to build upon and enhance existing lists (e.g. jumplist and quickfix list) and their associated motions (e.g. `<c-o>` and `<c-i>`) by surfacing contextual information with the use of [portals](#portals).
+Portal is a plugin that aims to build upon and enhance existing lists (e.g. jumplist, quickfix list, etc.) and their associated motions (e.g. `<c-o>` and `<c-i>`) by presenting jump locations to the user in the form of [portals](#portals).
 
 See the [quickstart](#quickstart) section to get started.
 
@@ -92,11 +92,12 @@ require("portal").setup({
     ---@type "debug" | "info" | "warn" | "error"
     log_level = "warn",
 
+    -- stylua: ignore
     ---The base filter that is applied to every search.
-    ---@type Portal.Predicate
+    ---@type Portal.SearchPredicate
     filter = function(v) return vim.api.nvim_buf_is_valid(v.buffer) end,
 
-    ---The maximum number of results that can be returned when no query is given.
+    ---The maximum number of results that can be returned.
     ---@type integer
     max_results = 4,
 
@@ -105,7 +106,7 @@ require("portal").setup({
     lookback = 100,
 
     ---An ordered list of keys for labelling portals.
-    ---Labels will be applied in order, or to match queried results.
+    ---Labels will be applied in order, or to match slotted results.
     ---@type string[]
     labels = { "j", "k", "h", "l" },
 
@@ -119,9 +120,9 @@ require("portal").setup({
     ---The raw window options used for the portal window
     window_options = {
         relative = "cursor",
-        width = 80,
-        height = 3,
-        col = 2,
+        width = 80, -- implement as "min/max width",
+        height = 3, -- implement as "context lines"
+        col = 2, -- implement as "offset"
         focusable = false,
         border = "single",
         noautocmd = true,
@@ -135,12 +136,13 @@ require("portal").setup({
 
 ### Builtin Queries
 
-Builin queries have a standardized interface. Each builtin can be accessed via the `Portal` command or lua API.
 
 <details>
 <summary>Builtin Queries and Examples</summary>
 
-Overview: the `tunnel` method provides the default entry point for searching a builtin; the `tunnel_forward` and `tunnel_backward` are convenience methods for easy keybinds; and the `query` method builds a [query](#portalquery) for use in [`portal#tunnel`](#portaltunnel).
+Builin queries have a standardized interface. Each builtin can be accessed via the `Portal` command or lua API.
+
+**Overview**: the `tunnel` method provides the default entry point for searching a builtin; the `tunnel_forward` and `tunnel_backward` are convenience methods for easy keybinds; and the `query` method builds a [query](#portalquery) for use in [`portal#tunnel`](#portaltunnel).
 
 **Command**: `:Portal {builtin} [direction]`
 
@@ -278,7 +280,7 @@ A **portal** is a labelled floating window showing a snippet of some buffer. The
 
 ## Portal Search
 
-To begin a search, a [query](#portalquery) must be provided to portal. This query will contain a **[filtered](#filters)** list source (some [iterator](#iterators)), and optionally a set of **[slots](#slots)** to match against.
+To begin a search, a [query](#portalquery) (or list of queries) must be provided to portal. Each query will contain a [filtered](#filters) source [iterator](#iterators) and (optionally) one or more [slots](#slots) to match against.
 
 ### Filters
 
@@ -321,8 +323,7 @@ require("portal.builtin").jumplist({
 
 ### Slots
 
-<!-- TODO: update query / query predicates as slots -->
-A **query predicate** provides a mechanism to picking out an _exact_ set of portal search results.
+To search for an exact set of results, one or more **slots** may be provided to a query. Each slot will be attempt to be matched with its exact order (and index) preserved.
 
 <details>
 <summary><b>Examples</b></summary>
@@ -339,7 +340,7 @@ require("portal.builtin").jumplist({
 
 ### Iterators
 
-At the core of Portal is its declarative-style **iterator**. Although quite powerful, it is not necessary for most user-related tasks. However, it is fundamental towards creating [custom queries](#portalquerygenerator) and would be usefule to understand how to create and compose them.
+All searches are performed over an input source list. Portal uses declarative **iterators** to prepare (`map`), refine (`filter`), and match (`reduce`), and `collect` list search results. Iterators can be used to create custom queries.
 
 <details>
 <summary><b>Available operations</b></summary>
@@ -437,7 +438,7 @@ Options available for tuning a search query. See the [builtins](#builtin-queries
 - **`direction`**: [`Portal.Direction`](#portaldirection)
 - **`max_results`**: `integer`
 - **`filter`**: [`Portal.SearchPredicate`](#portalsearchpredicate)
-- **`slots`**: [`Portal.Query[]`](#portalsearchpredicate)
+- **`slots`**: [`Portal.SearchPredicate[]`](#portalsearchpredicate) | `nil`
 
 ### `Portal.Direction`
 
@@ -450,13 +451,13 @@ Used for indicating whether a search should be performed forwards or backwards.
 
 ### `Portal.SearchPredicate`
 
-Specialized [predicate](#portalpredicate) where the argument provided is a [`Portal.Content`](#portalcontent) result.
+A specialized [predicate](#portalpredicate) where the value argument provided is a [`Portal.Content`](#portalcontent) result.
 
 **Type**: `fun(c: Portal.Content): boolean`
 
 ### `Portal.Query`
 
-Named tuple of `(source, predicates)`.
+Named tuple of `(source, slots)`. Used as the input to [`portal#tunnel`](#portaltunnel). When no `slots` are present, the `source` iterator will be simply be collected and presented as the search results.
 
 **Type**: `table`
 
@@ -482,6 +483,8 @@ Basic function type used for [filtering](#filters) and [querying](#slots) an ite
 **Type**: `fun(v: any): boolean`
 
 ### `Portal.QueryGenerator`
+
+Generating function which transforms an input set of [`Portal.SearchOptions`](#portalsearchoptions) into a proper [`Portal.Query`](#portalquery).
 
 **Type**: `fun(o: Portal.SearchOptions, s: Portal.Settings): Portal.Query`
 
