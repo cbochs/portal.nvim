@@ -8,7 +8,7 @@ _Theme: [kanagawa](https://github.com/rebelot/kanagawa.nvim)_
 
 > Look at you, sailing through [neovim] majestically, like an eagle... piloting a blimp.
 
-Portal is a plugin that aims to build upon and enhance existing lists (e.g. jumplist, quickfix list, etc.) and their associated motions (e.g. `<c-o>` and `<c-i>`) by presenting jump locations to the user in the form of [portals](#portals).
+Portal is a plugin that aims to build upon and enhance existing location lists (e.g. jumplist, changelist, quickfix list, etc.) and their associated motions (e.g. `<c-o>` and `<c-i>`) by presenting jump locations to the user in the form of [portals](#portals).
 
 See the [quickstart](#quickstart) section to get started.
 
@@ -16,7 +16,7 @@ See the [quickstart](#quickstart) section to get started.
 
 * **Labelled** [portals](#portals) for immediate movement to a portal location
 * **Customizable** [filters](#filters) and [slots](#slots) for [well-known lists](#builtin-queries)
-* **Composable** multiple source lists can be used in a single search
+* **Composable** multiple location lists can be used in a single search
 * **Extensible** able to search any list with custom queries
 
 ## Requirements
@@ -157,9 +157,38 @@ Builin queries have a standardized interface. Each builtin can be accessed via t
 
 ---
 
+#### `changelist`
+
+Filter, match, and iterate over Neovim's [`:h changelist`](https://neovim.io/doc/user/motion.html#changelist).
+
+**Defaults**
+
+- **`opts.start`**: current change index
+- **`opts.direction`**: `"backward"`
+- **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
+
+**Content**
+
+- **`type`**: `"changelist"`
+- **`buffer`**: `0`
+- **`cursor`**: the changelist `lnum` and `col`
+- **`select`**: uses native `g;` and `g,` to preserve changelist ordering
+- **`direction`**: the search [direction](#portaldirection)
+- **`distance`**: the absolute distance between the start and current changelist entry
+
+<details>
+<summary><b>Examples</b></summary>
+
+```lua
+-- Open a default search for the changelist
+require("portal.builtin").changelist.tunnel()
+```
+
+</details>
+
 #### `jumplist`
 
-Filter, match, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/user/motion.html#jump-motions).
+Filter, match, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/user/motion.html#jumplist).
 
 **Defaults**
 
@@ -280,7 +309,7 @@ A **portal** is a labelled floating window showing a snippet of some buffer. The
 
 ## Search
 
-To begin a search, a [query](#portalquery) (or list of queries) must be provided to portal. Each query will contain a [filtered](#filters) source [iterator](#iterators) and (optionally) one or more [slots](#slots) to match against.
+To begin a search, a [query](#portalquery) (or list of queries) must be provided to portal. Each query will contain a [filtered](#filters) location list [iterator](#iterators) and (optionally) one or more [slots](#slots) to match against.
 
 ### Filters
 
@@ -340,7 +369,7 @@ require("portal.builtin").jumplist({
 
 ### Iterators
 
-All searches are performed over an input source list. Portal uses declarative **iterators** to prepare (`map`), refine (`filter`), match (`reduce`), and `collect` list search results. Iterators can be used to create custom queries.
+All searches are performed over an input location list. Portal uses declarative **iterators** to prepare (`map`), refine (`filter`), match (`reduce`), and `collect` list search results. Iterators can be used to create custom queries.
 
 <details>
 <summary><b>Available operations</b></summary>
