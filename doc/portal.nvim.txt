@@ -26,8 +26,8 @@ INTRODUCTION                            *portal.nvim-portal.nvim-introduction*
 
   Look at you, sailing through [neovim] majestically, like an eagle… piloting a
   blimp.
-Portal is a plugin that aims to build upon and enhance existing lists
-(e.g. jumplist, quickfix list, etc.) and their associated motions
+Portal is a plugin that aims to build upon and enhance existing location lists
+(e.g. jumplist, changelist, quickfix list, etc.) and their associated motions
 (e.g. `<c-o>` and `<c-i>`) by presenting jump locations to the user in the
 form of |portal.nvim-portals|.
 
@@ -39,7 +39,7 @@ FEATURES                                    *portal.nvim-portal.nvim-features*
 
 - **Labelled** |portal.nvim-portals| for immediate movement to a portal location
 - **Customizable** |portal.nvim-filters| and |portal.nvim-slots| for |portal.nvim-well-known-lists|
-- **Composable** multiple source lists can be used in a single search
+- **Composable** multiple location lists can be used in a single search
 - **Extensible** able to search any list with custom queries
 
 
@@ -182,6 +182,35 @@ in |portal.nvim-`portaltunnel`|.
 
 ------------------------------------------------------------------------------
 
+CHANGELIST
+
+Filter, match, and iterate over Neovim’s |`:h changelist`|.
+
+**Defaults**
+
+
+- **opts.start**current change index
+- **opts.direction**`"backward"`
+- **opts.max_results**`math.min(settings.max_results, settings.labels)`
+
+**Content**
+
+
+- **type**`"changelist"`
+- **buffer**`0`
+- **cursor**the changelist `lnum` and `col`
+- **select**uses native `g;` and `g,` to preserve changelist ordering
+- **direction**the search |portal.nvim-direction|
+- **distance**the absolute distance between the start and current changelist entry
+
+Examples ~
+
+>lua
+    -- Open a default search for the changelist
+    require("portal.builtin").changelist.tunnel()
+<
+
+
 JUMPLIST
 
 Filter, match, and iterate over Neovim’s |`:h jumplist`|.
@@ -305,7 +334,7 @@ buffer’s name or the result’s index.
 SEARCH                                        *portal.nvim-portal.nvim-search*
 
 To begin a search, a |portal.nvim-query| (or list of queries) must be provided
-to portal. Each query will contain a |portal.nvim-filtered| source
+to portal. Each query will contain a |portal.nvim-filtered| location list
 |portal.nvim-iterator| and (optionally) one or more |portal.nvim-slots| to
 match against.
 
@@ -369,7 +398,7 @@ Examples ~
 
 ITERATORS ~
 
-All searches are performed over an input source list. Portal uses declarative
+All searches are performed over an input location list. Portal uses declarative
 **iterators** to prepare (`map`), refine (`filter`), match (`reduce`), and
 `collect` list search results. Iterators can be used to create custom queries.
 
