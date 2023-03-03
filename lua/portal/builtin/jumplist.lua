@@ -19,11 +19,11 @@ local function generate(opts, settings)
         slots = nil,
     }, opts or {})
 
-        -- stylua: ignore
-        local iter = Iterator:new(jumplist)
-            :start_at(opts.start)
-            :skip(1)
-            :take(settings.lookback)
+    -- stylua: ignore
+    local iter = Iterator:new(jumplist)
+        :start_at(opts.start)
+        :skip(1)
+        :take(settings.lookback)
 
     if opts.direction == Search.direction.backward then
         iter = iter:reverse()
