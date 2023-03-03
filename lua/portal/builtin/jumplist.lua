@@ -5,9 +5,6 @@ local function generate(opts, settings)
 
     local jumplist, start = unpack(vim.fn.getjumplist())
 
-    -- Hack: the start index has the possibility to move past the
-    -- end of the jumplist. When that happens, simply add a dummy
-    -- item to the end of the jumplist iterator
     if start == #jumplist then
         table.insert(jumplist, {})
     end
@@ -16,7 +13,6 @@ local function generate(opts, settings)
         start = start + 1,
         direction = "backward",
         max_results = math.min(settings.max_results, #settings.labels),
-        slots = nil,
     }, opts or {})
 
     -- stylua: ignore

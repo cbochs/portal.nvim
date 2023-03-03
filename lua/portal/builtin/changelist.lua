@@ -3,13 +3,17 @@ local function generate(opts, settings)
     local Iterator = require("portal.iterator")
     local Search = require("portal.search")
 
-    local buffer = 0
-    local changelist = vim.fn.getchangelist(buffer)
+    local changelist, start = unpack(vim.fn.getchangelist())
+
+    if start == #changelist then
+        table.insert(changelist, {})
+    end
 
     opts = vim.tbl_extend("force", {
+        start = start + 1,
         direction = "backward",
         max_results = math.min(settings.max_results, #settings.labels),
-    }, opts)
+    }, opts or {})
 
     -- stylua: ignore
     local iter = Iterator:new(changelist)
@@ -38,11 +42,13 @@ local function generate(opts, settings)
         }
     end)
 
-    if opts.start then
-        iter = iter:start_at(opts.start)
+    iter = iter:filter(settings.filter)
+
+    if opts.filter then
+        iter = iter:filter(opts.filter)
     end
-    if opts.direction == Search.direction.backward then
-        iter = iter:reverse()
+    if not opts.slots then
+        iter = iter:take(opts.max_results)
     end
 
     return {
