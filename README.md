@@ -15,9 +15,9 @@ See the [quickstart](#quickstart) section to get started.
 ## Features
 
 * **Labelled** [portals](#portals) for immediate movement to a portal location
-* **Customizable** [filters](#filters) and [slots](#slots) for a number of [well-known lists](#builtin-queries)
-* **Extensible** able to search virtually any list type
-* **Integration** with [grapple.nvim](https://github.com/cbochs/grapple.nvim) for additional query options
+* **Customizable** [filters](#filters) and [slots](#slots) for [well-known lists](#builtin-queries)
+* **Composable** multiple source lists can be used in a single search
+* **Extensible** able to search any list with custom queries
 
 ## Requirements
 
@@ -37,9 +37,9 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 **Next steps**
 
 - Check out the [default settings](#settings)
-- Explore the available [builtin](#builtin-queries) lists
-- Add a custom [filter](#filters) or [slot list](#slots)
-- Build a custom portal provider
+- Explore the available [builtin](#builtin-queries) queries
+- Tune your search results with a custom [filter](#filters) or [slot list](#slots)
+- Try combining multiple queries using the [`Portal API`](#portal-api)
 
 ## Installation
 
@@ -278,7 +278,7 @@ A **portal** is a labelled floating window showing a snippet of some buffer. The
 
 <img width="1043" alt="portal_screenshot" src="https://user-images.githubusercontent.com/2467016/222313082-8ae51576-5497-40e8-88d9-466ca504e22d.png">
 
-## Portal Search
+## Search
 
 To begin a search, a [query](#portalquery) (or list of queries) must be provided to portal. Each query will contain a [filtered](#filters) source [iterator](#iterators) and (optionally) one or more [slots](#slots) to match against.
 
@@ -323,7 +323,7 @@ require("portal.builtin").jumplist({
 
 ### Slots
 
-To search for an exact set of results, one or more **slots** may be provided to a query. Each slot will be attempt to be matched with its exact order (and index) preserved.
+To search for an exact set of results, one or more **slots** may be provided to a query. Each slot will attempt to be matched with its exact order (and index) preserved.
 
 <details>
 <summary><b>Examples</b></summary>
