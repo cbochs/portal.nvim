@@ -6,10 +6,6 @@ local DEFAULT_SETTINGS = {
     ---@type "debug" | "info" | "warn" | "error"
     log_level = "warn",
 
-    ---The default query used when searching some lists
-    ---@type Portal.Predicate[]
-    slots = nil,
-
     -- stylua: ignore
     ---The base filter that is applied to every search.
     ---@type Portal.Predicate

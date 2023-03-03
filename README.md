@@ -92,10 +92,6 @@ require("portal").setup({
     ---@type "debug" | "info" | "warn" | "error"
     log_level = "warn",
 
-    ---The default query used when searching some lists
-    ---@type Portal.Predicate[]
-    query = nil,
-
     ---The base filter that is applied to every search.
     ---@type Portal.Predicate
     filter = function(v) return vim.api.nvim_buf_is_valid(v.buffer) end,
@@ -168,7 +164,6 @@ Filter, query, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/u
 - **`opts.start`**: current jump index
 - **`opts.direction`**: `"backward"`
 - **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
-- **`opts.query`**: `settings.query`
 
 **Result content**
 
@@ -191,7 +186,7 @@ require("portal.builtin").jumplist.tunnel()
 -- 1. A jump that is in the same buffer as the current buffer
 -- 2. A jump that is in a buffer that has been modified
 require("portal.builtin").jumplist.tunnel_backward({
-    query = {
+    slots = {
         function(value) return value.buffer == vim.fn.bufnr() end,
         function(value) return vim.api.nvim_buf_get_option(value.buffer, "modified") end,
     }
@@ -219,7 +214,6 @@ Filter, query, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/us
 - **`opts.start`**: `1`
 - **`opts.direction`**: `"forward"`
 - **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
-- **`opts.query`**: `nil`
 
 **Result content**
 
@@ -337,7 +331,7 @@ A **query predicate** provides a mechanism to picking out an _exact_ set of port
 -- Try to match one result where the buffer is different than the
 -- current buffer
 require("portal.builtin").jumplist({
-    query = function(v) return v.buffer ~= vim.fn.bufnr() end
+    slots = function(v) return v.buffer ~= vim.fn.bufnr() end
 })
 ```
 
