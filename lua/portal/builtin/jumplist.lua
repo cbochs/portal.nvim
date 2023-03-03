@@ -16,7 +16,7 @@ local function generate(opts, settings)
         start = start + 1,
         direction = "backward",
         max_results = math.min(settings.max_results, #settings.labels),
-        query = settings.query,
+        slots = nil,
     }, opts or {})
 
         -- stylua: ignore
@@ -51,13 +51,13 @@ local function generate(opts, settings)
     if opts.filter then
         iter = iter:filter(opts.filter)
     end
-    if not opts.query then
+    if not opts.slots then
         iter = iter:take(opts.max_results)
     end
 
     return {
         source = iter,
-        predicates = opts.query,
+        slots = opts.slots,
     }
 end
 

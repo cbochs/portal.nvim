@@ -15,7 +15,7 @@ See the [quickstart](#quickstart) section to get started.
 ## Features
 
 * **Labelled** [portals](#portals) for immediate movement to a portal location
-* **Customizable** [filters](#filters) and [queries](#query-predicates) for a number of [well-known lists](#builtin-queries)
+* **Customizable** [filters](#filters) and [slots](#slots) for a number of [well-known lists](#builtin-queries)
 * **Extensible** able to search virtually any list type
 * **Integration** with [grapple.nvim](https://github.com/cbochs/grapple.nvim) for additional query options
 
@@ -38,7 +38,7 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 
 - Check out the [default settings](#settings)
 - Explore the available [builtin](#builtin-queries) lists
-- Add a custom [filter](#filters) or [query](#query-predicates)
+- Add a custom [filter](#filters) or [slot list](#slots)
 - Build a custom portal provider
 
 ## Installation
@@ -170,7 +170,7 @@ Filter, query, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/u
 - **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
 - **`opts.query`**: `settings.query`
 
-**Content**
+**Result content**
 
 - **`type`**: `"jumplist"`
 - **`buffer`**: the jumplist `bufnr`
@@ -221,7 +221,7 @@ Filter, query, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/us
 - **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
 - **`opts.query`**: `nil`
 
-**Content**
+**Result content**
 
 - **`type`**: `"quickfix"`
 - **`buffer`**: the quickfix `bufnr`
@@ -284,7 +284,7 @@ A **portal** is a labelled floating window showing a snippet of some buffer. The
 
 ## Portal Search
 
-To begin a search, a [query](#portalquery) must be provided to portal. This query will contain a **[filtered](#filters)** list source (some [iterator](#iterators)), and optionally a set of **[query "predicates"](#query-predicates)** to match against.
+To begin a search, a [query](#portalquery) must be provided to portal. This query will contain a **[filtered](#filters)** list source (some [iterator](#iterators)), and optionally a set of **[slots](#slots)** to match against.
 
 ### Filters
 
@@ -325,8 +325,9 @@ require("portal.builtin").jumplist({
 
 </details>
 
-### Query Predicates
+### Slots
 
+<!-- TODO: update query / query predicates as slots -->
 A **query predicate** provides a mechanism to picking out an _exact_ set of portal search results.
 
 <details>
@@ -376,6 +377,7 @@ Operations which return a collection (list or table) of values.
 - `Iterator.collect(): T[]`
 - `Iterator.collect_table(): table`
 - `Iterator.reduce(reducer: fun(acc, val, i): any, initial_state: any)`
+- `Iterator.flatten()`
 
 </details>
 
@@ -441,7 +443,7 @@ Options available for tuning a search query. See the [builtins](#builtin-queries
 - **`direction`**: [`Portal.Direction`](#portaldirection)
 - **`max_results`**: `integer`
 - **`filter`**: [`Portal.SearchPredicate`](#portalsearchpredicate)
-- **`query`**: [`Portal.Query[]`](#portalsearchpredicate)
+- **`slots`**: [`Portal.Query[]`](#portalsearchpredicate)
 
 ### `Portal.Direction`
 
@@ -465,7 +467,7 @@ Named tuple of `(source, predicates)`.
 **Type**: `table`
 
 - **`source`**: [`Portal.Iterator`](#iterators)
-- **`predicates`**: [`Portal.SearchPredicate[]`](#portalsearchpredicate) | `nil`
+- **`slots`**: [`Portal.SearchPredicate[]`](#portalsearchpredicate) | `nil`
 
 ### `Portal.Content`
 
@@ -481,7 +483,7 @@ Named tuple of `(type, buffer, cursor, select)` used in opening and selecting a 
 
 ### `Portal.Predicate`
 
-Basic function type used for [filtering](#filters) and [querying](#query-predicates) an iterator.
+Basic function type used for [filtering](#filters) and [querying](#slots) an iterator.
 
 **Type**: `fun(v: any): boolean`
 

@@ -9,7 +9,7 @@ return function(opts, settings)
         start = 1,
         direction = "forward",
         max_results = math.min(settings.max_results, #settings.labels),
-        query = nil,
+        slots = nil,
     }, opts or {})
 
         -- stylua: ignore
@@ -38,12 +38,12 @@ return function(opts, settings)
     if opts.filter then
         iter = iter:filter(opts.filter)
     end
-    if not opts.query then
+    if not opts.slots then
         iter = iter:take(opts.max_results)
     end
 
     return {
         source = iter,
-        predicates = opts.query,
+        slots = opts.slots,
     }
 end

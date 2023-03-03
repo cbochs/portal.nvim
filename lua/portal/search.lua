@@ -8,11 +8,11 @@ local Search = {}
 ---@field direction Portal.Direction
 ---@field max_results integer
 ---@field filter Portal.SearchPredicate
----@field query Portal.Query[]
+---@field slots Portal.SearchPredicate[]
 
 ---@class Portal.Query
 ---@field source Portal.Iterator
----@field predicates Portal.SearchPredicate[] | nil
+---@field slots Portal.SearchPredicate[] | nil
 
 ---@alias Portal.SearchPredicate fun(v: Portal.Content): boolean
 
@@ -26,17 +26,17 @@ Search.direction = {
 ---@param query Portal.Query
 ---@return T[]
 function Search.search(query)
-    local predicates = query.predicates
-    if not predicates then
+    local slots = query.slots
+    if not slots then
         return query.source:collect()
     end
 
-    if type(predicates) == "function" then
-        predicates = { predicates }
+    if type(slots) == "function" then
+        slots = { slots }
     end
 
     local results = query.source:reduce(function(acc, value)
-        for i, predicate in ipairs(predicates) do
+        for i, predicate in ipairs(slots) do
             if not acc[i] and predicate(value) then
                 acc[i] = value
                 break

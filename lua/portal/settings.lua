@@ -8,7 +8,7 @@ local DEFAULT_SETTINGS = {
 
     ---The default query used when searching some lists
     ---@type Portal.Predicate[]
-    query = nil,
+    slots = nil,
 
     -- stylua: ignore
     ---The base filter that is applied to every search.
