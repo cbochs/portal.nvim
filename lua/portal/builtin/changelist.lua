@@ -13,12 +13,10 @@ local function generate(opts, settings)
 
     -- stylua: ignore
     local iter = Iterator:new(changelist)
-        :reverse()
+        :start_at(opts.start)
+        :skip(1)
         :take(settings.lookback)
 
-    if opts.start then
-        iter = iter:start_at(opts.start)
-    end
     if opts.direction == Search.direction.backward then
         iter = iter:reverse()
     end
@@ -36,7 +34,7 @@ local function generate(opts, settings)
                 vim.api.nvim_feedkeys(content.distance .. keycode, "n", false)
             end,
             direction = opts.direction,
-            distance = math.abs((opts.start or 1) - i),
+            distance = math.abs(opts.start - i),
         }
     end)
 
