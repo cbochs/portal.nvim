@@ -159,7 +159,7 @@ Builin queries have a standardized interface. Each builtin can be accessed via t
 
 #### `jumplist`
 
-Filter, query, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/user/motion.html#jump-motions).
+Filter, match, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/user/motion.html#jump-motions).
 
 **Defaults**
 
@@ -209,7 +209,7 @@ require("portal.builtin").jumplist.tunnel_forward({
 
 #### `quickfix`
 
-Filter, query, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/user/quickfix.html) list.
+Filter, match, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/user/quickfix.html) list.
 
 **Defaults**
 
