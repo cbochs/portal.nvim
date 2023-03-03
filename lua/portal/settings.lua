@@ -8,10 +8,10 @@ local DEFAULT_SETTINGS = {
 
     -- stylua: ignore
     ---The base filter that is applied to every search.
-    ---@type Portal.Predicate
+    ---@type Portal.SearchPredicate
     filter = function(v) return vim.api.nvim_buf_is_valid(v.buffer) end,
 
-    ---The maximum number of results that can be returned when no query is given.
+    ---The maximum number of results that can be returned.
     ---@type integer
     max_results = 4,
 
@@ -20,7 +20,7 @@ local DEFAULT_SETTINGS = {
     lookback = 100,
 
     ---An ordered list of keys for labelling portals.
-    ---Labels will be applied in order, or to match queried results.
+    ---Labels will be applied in order, or to match slotted results.
     ---@type string[]
     labels = { "j", "k", "h", "l" },
 

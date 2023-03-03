@@ -8,7 +8,7 @@ local Search = {}
 ---@field direction Portal.Direction
 ---@field max_results integer
 ---@field filter Portal.SearchPredicate
----@field slots Portal.SearchPredicate[]
+---@field slots Portal.SearchPredicate[] | nil
 
 ---@class Portal.Query
 ---@field source Portal.Iterator
