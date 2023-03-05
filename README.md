@@ -92,14 +92,13 @@ require("portal").setup({
     ---@type "debug" | "info" | "warn" | "error"
     log_level = "warn",
 
-    -- stylua: ignore
-    ---The base filter that is applied to every search.
-    ---@type Portal.SearchPredicate
-    filter = function(v) return vim.api.nvim_buf_is_valid(v.buffer) end,
+    ---The base filter applied to every search.
+    ---@type Portal.SearchPredicate | nil
+    filter = nil,
 
-    ---The maximum number of results that can be returned.
-    ---@type integer
-    max_results = 4,
+    ---The maximum number of results for any search.
+    ---@type integer | nil
+    max_results = nil,
 
     ---The maximum number of items that can be searched.
     ---@type integer
@@ -120,9 +119,9 @@ require("portal").setup({
     ---The raw window options used for the portal window
     window_options = {
         relative = "cursor",
-        width = 80, -- implement as "min/max width",
-        height = 3, -- implement as "context lines"
-        col = 2, -- implement as "offset"
+        width = 80,
+        height = 3,
+        col = 2,
         focusable = false,
         border = "single",
         noautocmd = true,
@@ -142,7 +141,7 @@ require("portal").setup({
 
 Builin queries have a standardized interface. Each builtin can be accessed via the `Portal` command or lua API.
 
-**Overview**: the `tunnel` method provides the default entry point for searching a builtin; the `tunnel_forward` and `tunnel_backward` are convenience methods for easy keybinds; and the `query` method builds a [query](#portalquery) for use in [`portal#tunnel`](#portaltunnel).
+**Overview**: the `tunnel` method provides the default entry point for searching a location list; the `tunnel_forward` and `tunnel_backward` are convenience methods for easy keybinds; and the `query` method builds a [query](#portalquery) for use in [`portal#tunnel`](#portaltunnel).
 
 **Command**: `:Portal {builtin} [direction]`
 
@@ -165,7 +164,7 @@ Filter, match, and iterate over Neovim's [`:h changelist`](https://neovim.io/doc
 
 - **`opts.start`**: current change index
 - **`opts.direction`**: `"backward"`
-- **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
+- **`opts.max_results`**: `#settings.labels`
 
 **Content**
 
@@ -194,7 +193,7 @@ Filter, match, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/u
 
 - **`opts.start`**: current jump index
 - **`opts.direction`**: `"backward"`
-- **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
+- **`opts.max_results`**: `#settings.labels`
 
 **Content**
 
@@ -244,7 +243,7 @@ Filter, match, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/us
 
 - **`opts.start`**: `1`
 - **`opts.direction`**: `"forward"`
-- **`opts.max_results`**: `math.min(settings.max_results, #settings.labels)`
+- **`opts.max_results`**: `#settings.labels`
 
 **Content**
 
@@ -362,6 +361,15 @@ To search for an exact set of results, one or more **slots** may be provided to 
 -- current buffer
 require("portal.builtin").jumplist({
     slots = function(v) return v.buffer ~= vim.fn.bufnr() end
+})
+
+-- Try to match two results where the buffer is different than the
+-- current buffer
+require("portal.builtin").jumplist({
+    slots = {
+        function(v) return v.buffer ~= vim.fn.bufnr() end,
+        function(v) return v.buffer ~= vim.fn.bufnr() end,
+    }
 })
 ```
 
