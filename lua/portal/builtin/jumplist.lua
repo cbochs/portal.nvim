@@ -12,8 +12,12 @@ local function generate(opts, settings)
     opts = vim.tbl_extend("force", {
         start = start + 1,
         direction = "backward",
-        max_results = math.min(settings.max_results, #settings.labels),
+        max_results = #settings.labels,
     }, opts or {})
+
+    if settings.max_results then
+        opts.max_results = math.min(opts.max_results, settings.max_results)
+    end
 
     -- stylua: ignore
     local iter = Iterator:new(jumplist)
@@ -42,8 +46,12 @@ local function generate(opts, settings)
         }
     end)
 
-    iter = iter:filter(settings.filter)
-
+    iter = iter:filter(function(v)
+        return vim.api.nvim_buf_is_valid(v.buffer)
+    end)
+    if settings.filter then
+        iter = iter:filter(settings.filter)
+    end
     if opts.filter then
         iter = iter:filter(opts.filter)
     end
