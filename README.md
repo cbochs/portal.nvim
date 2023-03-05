@@ -142,7 +142,7 @@ require("portal").setup({
 
 Builin queries have a standardized interface. Each builtin can be accessed via the `Portal` command or lua API.
 
-**Overview**: the `tunnel` method provides the default entry point for searching a builtin; the `tunnel_forward` and `tunnel_backward` are convenience methods for easy keybinds; and the `query` method builds a [query](#portalquery) for use in [`portal#tunnel`](#portaltunnel).
+**Overview**: the `tunnel` method provides the default entry point for searching a location list; the `tunnel_forward` and `tunnel_backward` are convenience methods for easy keybinds; and the `query` method builds a [query](#portalquery) for use in [`portal#tunnel`](#portaltunnel).
 
 **Command**: `:Portal {builtin} [direction]`
 
