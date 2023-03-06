@@ -3,12 +3,12 @@ local function generator(opts, settings)
     local Iterator = require("portal.iterator")
     local Search = require("portal.search")
 
-    local ok, _ = require("harpoon")
+    local ok, _ = require("grapple")
     if not ok then
-        require("portal.log").error("Unable to load 'harpoon'. Please ensure that harpoon is installed.")
+        require("portal.log").error("Unable to load 'grapple'. Please ensure that grapple.nvim is installed.")
     end
 
-    local marks = require("harpoon").get_mark_config().marks
+    local tags = require("grapple").tags()
 
     opts = vim.tbl_extend("force", {
         direction = "forward",
@@ -20,7 +20,7 @@ local function generator(opts, settings)
     end
 
     -- stylua: ignore
-    local iter = Iterator:new(marks)
+    local iter = Iterator:new(tags)
         :take(settings.lookback)
 
     if opts.start then
@@ -30,12 +30,12 @@ local function generator(opts, settings)
         iter = iter:reverse()
     end
 
-    iter = iter:map(function(v, i)
+    iter = iter:map(function(v, _)
         local buffer
-        if vim.fn.bufexists(v.filename) ~= 0 then
-            buffer = vim.fn.bufnr(v.filename)
+        if vim.fn.bufexists(v.file_path) ~= 0 then
+            buffer = vim.fn.bufnr(v.file_path)
         else
-            buffer = vim.fn.bufadd(v.filename)
+            buffer = vim.fn.bufadd(v.file_path)
         end
 
         if buffer == vim.fn.bufnr() then
@@ -43,13 +43,13 @@ local function generator(opts, settings)
         end
 
         return {
-            type = "harpoon",
+            type = "grapple",
             buffer = buffer,
-            cursor = { row = v.row, col = v.col },
+            cursor = { row = v.cursor[1], col = v.cursor[2] },
             select = function(content)
-                require("harpoon.ui").nav_file(content.index)
+                require("grapple").select({ key = content.key })
             end,
-            index = i,
+            key = v.key,
         }
     end)
 

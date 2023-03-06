@@ -185,6 +185,34 @@ require("portal.builtin").changelist.tunnel()
 
 </details>
 
+#### `grapple`
+
+Filter, match, and iterate over tagged files from [harpoon](https://github.com/cbochs/grapple).
+
+**Defaults**
+
+- **`opts.start`**: `1`
+- **`opts.direction`**: `"forward"`
+- **`opts.max_results`**: `#settings.labels`
+
+**Content**
+
+- **`type`**: `"harpoon"`
+- **`buffer`**: the tags's `bufnr`
+- **`cursor`**: the tags's `row` and `col`
+- **`select`**: uses `grapple#select`
+- **`key`**: the tags's key
+
+<details>
+<summary><b>Examples</b></summary>
+
+```lua
+-- Open a default search for grapples's tags
+require("portal.builtin").grapple.tunnel()
+```
+
+</details>
+
 #### `harpoon`
 
 Filter, match, and iterate over marked files from [harpoon](https://github.com/ThePrimeagen/harpoon).
@@ -200,7 +228,7 @@ Filter, match, and iterate over marked files from [harpoon](https://github.com/T
 - **`type`**: `"harpoon"`
 - **`buffer`**: the mark's `bufnr`
 - **`cursor`**: the mark's `row` and `col`
-- **`select`**: uses `harpoon.ui#nav_file` to select
+- **`select`**: uses `harpoon.ui#nav_file`
 - **`index`**: the mark's index
 
 <details>
