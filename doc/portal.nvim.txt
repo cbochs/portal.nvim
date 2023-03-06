@@ -210,6 +210,35 @@ Examples ~
 <
 
 
+GRAPPLE
+
+Filter, match, and iterate over tagged files from harpoon
+<https://github.com/cbochs/grapple>.
+
+**Defaults**
+
+
+- **opts.start**`1`
+- **opts.direction**`"forward"`
+- **opts.max_results**`settings.labels`
+
+**Content**
+
+
+- **type**`"harpoon"`
+- **buffer**the tags’s `bufnr`
+- **cursor**the tags’s `row` and `col`
+- **select**uses `grappleselect`
+- **key**the tags’s key
+
+Examples ~
+
+>lua
+    -- Open a default search for grapples's tags
+    require("portal.builtin").grapple.tunnel()
+<
+
+
 HARPOON
 
 Filter, match, and iterate over marked files from harpoon
@@ -228,7 +257,7 @@ Filter, match, and iterate over marked files from harpoon
 - **type**`"harpoon"`
 - **buffer**the mark’s `bufnr`
 - **cursor**the mark’s `row` and `col`
-- **select**uses `harpoon.uinav_file` to select
+- **select**uses `harpoon.uinav_file`
 - **index**the mark’s index
 
 Examples ~
