@@ -50,7 +50,10 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 {
     "cbochs/portal.nvim",
     -- Ootional dependencies
-    dependencies = { "cbochs/grapple.nvim" },
+    dependencies = {
+        "cbochs/grapple.nvim",
+        "ThePrimeagen/harpoon"
+    },
 }
 ```
 
@@ -63,7 +66,10 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 use {
     "cbochs/portal.nvim",
     -- Optional dependencies
-    requires = { "cbochs/grapple.nvim" },
+    requires = {
+        "cbochs/grapple.nvim",
+        "ThePrimeagen/harpoon"
+    },
 }
 ```
 
@@ -76,6 +82,7 @@ use {
 Plug "cbochs/portal.nvim"
 " Optional dependencies
 Plug "cbochs/grapple.nvim"
+Plug "ThePrimeagen/harpoon"
 ```
 
 </details>
@@ -187,7 +194,7 @@ require("portal.builtin").changelist.tunnel()
 
 #### `grapple`
 
-Filter, match, and iterate over tagged files from [harpoon](https://github.com/cbochs/grapple).
+Filter, match, and iterate over tagged files from [grapple](https://github.com/cbochs/grapple.nvim).
 
 **Defaults**
 
@@ -197,11 +204,11 @@ Filter, match, and iterate over tagged files from [harpoon](https://github.com/c
 
 **Content**
 
-- **`type`**: `"harpoon"`
-- **`buffer`**: the tags's `bufnr`
-- **`cursor`**: the tags's `row` and `col`
+- **`type`**: `"grapple"`
+- **`buffer`**: the file tags's `bufnr`
+- **`cursor`**: the file tags's `row` and `col`
 - **`select`**: uses `grapple#select`
-- **`key`**: the tags's key
+- **`key`**: the file tags's key
 
 <details>
 <summary><b>Examples</b></summary>
@@ -226,10 +233,10 @@ Filter, match, and iterate over marked files from [harpoon](https://github.com/T
 **Content**
 
 - **`type`**: `"harpoon"`
-- **`buffer`**: the mark's `bufnr`
-- **`cursor`**: the mark's `row` and `col`
+- **`buffer`**: the file mark's `bufnr`
+- **`cursor`**: the file mark's `row` and `col`
 - **`select`**: uses `harpoon.ui#nav_file`
-- **`index`**: the mark's index
+- **`index`**: the file mark's index
 
 <details>
 <summary><b>Examples</b></summary>
