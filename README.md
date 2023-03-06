@@ -185,6 +185,34 @@ require("portal.builtin").changelist.tunnel()
 
 </details>
 
+#### `harpoon`
+
+Filter, match, and iterate over marked files from [harpoon](https://github.com/ThePrimeagen/harpoon).
+
+**Defaults**
+
+- **`opts.start`**: `1`
+- **`opts.direction`**: `"forward"`
+- **`opts.max_results`**: `#settings.labels`
+
+**Content**
+
+- **`type`**: `"harpoon"`
+- **`buffer`**: the mark's `bufnr`
+- **`cursor`**: the mark's `row` and `col`
+- **`select`**: uses `harpoon.ui#nav_file` to select
+- **`index`**: the mark's index
+
+<details>
+<summary><b>Examples</b></summary>
+
+```lua
+-- Open a default search for harpoon's marks
+require("portal.builtin").harpoon.tunnel()
+```
+
+</details>
+
 #### `jumplist`
 
 Filter, match, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/user/motion.html#jumplist).
