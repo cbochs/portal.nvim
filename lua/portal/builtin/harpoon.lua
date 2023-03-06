@@ -43,7 +43,7 @@ local function generator(opts, settings)
             buffer = buffer,
             cursor = { row = v.row, col = v.col },
             select = function(content)
-                require("harpoon").nav_file(content.index)
+                require("harpoon.ui").nav_file(content.index)
             end,
             index = i,
         }
