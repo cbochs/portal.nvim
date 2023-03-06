@@ -1,4 +1,4 @@
-*portal.nvim.txt*          For NVIM v0.8.0          Last change: 2023 March 05
+*portal.nvim.txt*          For NVIM v0.8.0          Last change: 2023 March 06
 
 ==============================================================================
 Table of Contents                              *portal.nvim-table-of-contents*
@@ -207,6 +207,35 @@ Examples ~
 >lua
     -- Open a default search for the changelist
     require("portal.builtin").changelist.tunnel()
+<
+
+
+HARPOON
+
+Filter, match, and iterate over marked files from harpoon
+<https://github.com/ThePrimeagen/harpoon>.
+
+**Defaults**
+
+
+- **opts.start**`1`
+- **opts.direction**`"forward"`
+- **opts.max_results**`settings.labels`
+
+**Content**
+
+
+- **type**`"harpoon"`
+- **buffer**the mark’s `bufnr`
+- **cursor**the mark’s `row` and `col`
+- **select**uses `harpoon.uinav_file` to select
+- **index**the mark’s index
+
+Examples ~
+
+>lua
+    -- Open a default search for harpoon's marks
+    require("portal.builtin").harpoon.tunnel()
 <
 
 
