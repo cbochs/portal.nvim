@@ -5,7 +5,7 @@ local function generator(opts, settings)
 
     local ok, _ = require("harpoon")
     if not ok then
-        error("harpoon is not installed")
+        require("portal.log").error("Unable to load 'harpoon'. Please ensure that harpoon is installed.")
     end
 
     local marks = require("harpoon").get_mark_config().marks
