@@ -13,6 +13,7 @@ function Commands.create()
         complete = function(_, cmd_line, _)
             local builtins = {
                 "changelist",
+                "grapple",
                 "harpoon",
                 "jumplist",
                 "quickfix",
