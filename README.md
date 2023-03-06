@@ -49,7 +49,7 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 ```lua
 {
     "cbochs/portal.nvim",
-    -- Ootional dependencies
+    -- Optional dependencies
     dependencies = {
         "cbochs/grapple.nvim",
         "ThePrimeagen/harpoon"
