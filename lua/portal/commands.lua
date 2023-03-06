@@ -11,7 +11,12 @@ function Commands.create()
         desc = "Open portals",
         nargs = "*",
         complete = function(_, cmd_line, _)
-            local builtins = { "changelist", "jumplist", "quickfix" }
+            local builtins = {
+                "changelist",
+                "harpoon",
+                "jumplist",
+                "quickfix",
+            }
             local directions = { "forward", "backward" }
 
             local line_split = vim.split(cmd_line, "%s+")
