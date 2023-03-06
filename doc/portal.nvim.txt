@@ -77,7 +77,7 @@ lazy.nvim ~
 >lua
     {
         "cbochs/portal.nvim",
-        -- Ootional dependencies
+        -- Optional dependencies
         dependencies = {
             "cbochs/grapple.nvim",
             "ThePrimeagen/harpoon"
