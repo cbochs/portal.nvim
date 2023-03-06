@@ -38,6 +38,10 @@ local function generator(opts, settings)
             buffer = vim.fn.bufadd(v.filename)
         end
 
+        if buffer == vim.fn.bufnr() then
+            return nil
+        end
+
         return {
             type = "harpoon",
             buffer = buffer,
