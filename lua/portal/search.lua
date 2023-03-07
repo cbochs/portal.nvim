@@ -101,6 +101,7 @@ end
 
 ---@param windows Portal.Window[]
 ---@param escape_keys string[]
+---@return Portal.Window | nil
 function Search.select(windows, escape_keys)
     if vim.tbl_isempty(windows) then
         return
@@ -118,16 +119,11 @@ function Search.select(windows, escape_keys)
         end
         for _, window in ipairs(windows) do
             if window:has_label(char) then
-                window:select()
-                goto done
+                return window
             end
         end
     end
     ::done::
-
-    for _, window in ipairs(windows) do
-        window:close()
-    end
 end
 
 return Search

@@ -45,7 +45,15 @@ function Portal.tunnel(queries)
     end
 
     local windows = Search.open(results, Settings.labels, Settings.window_options)
-    Search.select(windows, Settings.escape)
+
+    local selected_window = Search.select(windows, Settings.escape)
+    if selected_window ~= nil then
+        selected_window:select()
+    end
+
+    for _, window in ipairs(windows) do
+        window:close()
+    end
 end
 
 return Portal
