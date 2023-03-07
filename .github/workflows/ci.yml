@@ -1,28 +1,54 @@
-name: continuous integration
+name: ci
 
 on:
   push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
 
 jobs:
-  style:
+  check-style:
     runs-on: ubuntu-latest
-    name: check code style
     steps:
-      - uses: actions/checkout@v2
-      - uses: JohnnyMorganz/stylua-action@v1
+      - uses: actions/checkout@v3
+      - uses: JohnnyMorganz/stylua-action@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          version: v0.15.0
+          version: v0.16.1
           args: --check .
 
-  linting:
+  check-lint:
     runs-on: ubuntu-latest
-    name: check code linting
     steps:
       - uses: actions/checkout@v3
       - uses: lunarmodules/luacheck@v1
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: install neovim
+      shell: bash
+      run: |
+        wget -q https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.deb -O /tmp/nvim.deb
+        sudo dpkg -i /tmp/nvim.deb
+    - name: run tests
+      run: |
+        nvim --version
+        make test
+
+  generate-vimdoc:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: kdheepak/panvimdoc@main
+        with:
+          vimdoc: portal.nvim
+          version: "Neovim >= v0.8.0"
+          demojify: true
+          docmappingprojectname: false
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'chore(docs): auto generate vimdoc'
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"

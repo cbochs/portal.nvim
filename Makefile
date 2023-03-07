@@ -3,7 +3,16 @@ ifneq ($(strip $(spec)),)
 endif
 
 test:
-	echo $(spec_file)
-	nvim --headless --clean --noplugin \
-		-u "tests/minimal_init.vim" \
-		-c "PlenaryBustedDirectory tests/spec/$(spec_file) { minimal_init = 'tests/minimal_init.vim' }"
+	nvim --headless \
+		-u "tests/init.lua" \
+		-c "PlenaryBustedDirectory tests/spec/$(spec_file) { minimal_init = 'tests/init.lua', sequential = true }"
+
+clean:
+	rm -rf .tests
+
+local-ci:
+	act \
+		--container-architecture linux/amd64 \
+		--secret GITHUB_TOKEN \
+		--job "$(job)" \
+		--rm

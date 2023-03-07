@@ -3,8 +3,7 @@ describe("settings", function()
         local settings = require("portal.settings")
         assert.equals("warn", settings.log_level)
 
-        assert.is_nil(settings.query)
-        assert.not_nil(settings.filter)
+        assert.is_nil(settings.filter)
         assert.equals(100, settings.lookback)
         assert.are.same({ "j", "k", "h", "l" }, settings.labels)
 
