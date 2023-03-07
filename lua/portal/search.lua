@@ -63,7 +63,7 @@ function Search.open(results, labels, window_options)
 
     local windows = {}
 
-    local max_index = math.max(unpack(vim.tbl_keys(results)))
+    local max_index = math.min(math.max(unpack(vim.tbl_keys(results))), #labels)
     local cur_row = 0
 
     for i = 1, max_index do
