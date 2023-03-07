@@ -11,25 +11,26 @@ function Commands.create()
         desc = "Open portals",
         nargs = "*",
         complete = function(_, cmd_line, _)
-            local builtins = {
-                "changelist",
-                "grapple",
-                "harpoon",
-                "jumplist",
-                "quickfix",
-            }
-            local directions = { "forward", "backward" }
-
             local line_split = vim.split(cmd_line, "%s+")
             local n = #line_split - 2
 
             if n == 0 then
+                local builtins = {
+                    "changelist",
+                    "grapple",
+                    "harpoon",
+                    "jumplist",
+                    "quickfix",
+                }
+
                 return vim.tbl_filter(function(val)
                     return vim.startswith(val, line_split[2])
                 end, builtins)
             end
 
             if n == 1 then
+                local directions = { "forward", "backward" }
+
                 return vim.tbl_filter(function(val)
                     return vim.startswith(val, line_split[3])
                 end, directions)
