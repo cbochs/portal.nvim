@@ -1,6 +1,6 @@
 # Portal.nvim
 
-![portal_showcase3 mov](https://user-images.githubusercontent.com/2467016/222644459-264e22e7-496a-4d4e-bfcb-e96efda0003d.gif)
+![portal_showcase](https://user-images.githubusercontent.com/2467016/222644459-264e22e7-496a-4d4e-bfcb-e96efda0003d.gif)
 
 _Theme: [kanagawa](https://github.com/rebelot/kanagawa.nvim)_
 
@@ -522,6 +522,16 @@ Iterator:rrepeat(1)
 ```
 
 </details>
+
+## Highlight Groups
+
+A few highlight groups are available for customizing the look of Portal.
+
+| Group          | Description            | Default       |
+|----------------|------------------------|---------------|
+| `PortalLabel`  | Portal label (extmark) | `Cursor`      |
+| `PortalBorder` | Floating window border | `FloatBorder` |
+| `PoralTitle`   | Floating window title  | `FloatTitle`  |
 
 ## Portal Types
 
