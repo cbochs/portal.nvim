@@ -31,6 +31,10 @@ local function generator(opts, settings)
     end
 
     iter = iter:map(function(v, _)
+        if not v.cursor then
+            return nil
+        end
+
         local buffer
         if vim.fn.bufexists(v.file_path) ~= 0 then
             buffer = vim.fn.bufnr(v.file_path)
