@@ -527,11 +527,12 @@ Iterator:rrepeat(1)
 
 A few highlight groups are available for customizing the look of Portal.
 
-| Group          | Description            | Default       |
-|----------------|------------------------|---------------|
-| `PortalLabel`  | Portal label (extmark) | `Cursor`      |
-| `PortalBorder` | Floating window border | `FloatBorder` |
-| `PoralTitle`   | Floating window title  | `FloatTitle`  |
+| Group          | Description                | Default       |
+|----------------|----------------------------|---------------|
+| `PortalLabel`  | Portal label (extmark)     | `Search`      |
+| `PoralTitle`   | Floating window title      | `FloatTitle`  |
+| `PortalBorder` | Floating window border     | `FloatBorder` |
+| `PortalNormal` | Floating window background | `NormalFloat` |
 
 ## Portal Types
 
