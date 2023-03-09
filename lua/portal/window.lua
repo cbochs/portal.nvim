@@ -32,7 +32,10 @@ Window.__index = Window
 
 local namespace = vim.api.nvim_create_namespace("portal")
 
-vim.api.nvim_set_hl(0, "PortalLabel", { link = "Search" })
+vim.api.nvim_set_hl(0, "PortalLabel", { link = "Search", default = true })
+vim.api.nvim_set_hl(0, "PortalTitle", { link = "FloatTitle", default = true })
+vim.api.nvim_set_hl(0, "PortalBorder", { link = "FloatBorder", default = true })
+vim.api.nvim_set_hl(0, "PortalNormal", { link = "NormalFloat", default = true })
 
 ---@param content Portal.Content
 ---@param options Portal.WindowOptions
@@ -82,6 +85,16 @@ function Window:open()
     end
 
     self.state.window = vim.api.nvim_open_win(self.state.buffer, false, self.options)
+
+    vim.api.nvim_win_set_option(
+        self.state.window,
+        "winhighlight",
+        table.concat({
+            ("%s:%s"):format("FloatTitle", "PortalTitle"),
+            ("%s:%s"):format("FloatBorder", "PortalBorder"),
+            ("%s:%s"):format("NormalFloat", "PortalNormal"),
+        }, ",")
+    )
 
     self.state.cursor = self.content.cursor
     self.state.cursor = { self.content.cursor.row, self.content.cursor.col }
