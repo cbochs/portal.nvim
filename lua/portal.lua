@@ -22,10 +22,14 @@ function Portal.setup(overrides)
 end
 
 ---@param queries Portal.Query[]
-function Portal.tunnel(queries)
+---@return Portal.Content
+function Portal.search(queries)
     local Iterator = require("portal.iterator")
     local Search = require("portal.search")
-    local Settings = require("portal.settings")
+
+    if not queries then
+        error("Must provide at least one query to Portal search")
+    end
 
     -- Wrap a single query as a single item list
     -- Note: tables have length 0
@@ -43,6 +47,16 @@ function Portal.tunnel(queries)
     else
         results = results[1]
     end
+
+    return results
+end
+
+---@param queries Portal.Query[]
+function Portal.tunnel(queries)
+    local Search = require("portal.search")
+    local Settings = require("portal.settings")
+
+    local results = Portal.search(queries)
 
     local windows = Search.open(results, Settings.labels, Settings.window_options)
 
