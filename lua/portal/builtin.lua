@@ -24,6 +24,12 @@ setmetatable(Builtin, {
                 return generator(opts or {}, Settings)
             end,
 
+            search = function(opts)
+                local Portal = require("portal")
+                local query = Builtin[name].query(opts)
+                return Portal.search(query)
+            end,
+
             ---@type Portal.Tunnel
             tunnel = function(opts)
                 local Portal = require("portal")
