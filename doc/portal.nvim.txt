@@ -1,4 +1,4 @@
-*portal.nvim.txt*        For Neovim >= v0.8.0       Last change: 2023 March 09
+*portal.nvim.txt*        For Neovim >= v0.8.0       Last change: 2023 March 23
 
 ==============================================================================
 Table of Contents                              *portal.nvim-table-of-contents*
@@ -170,20 +170,22 @@ Builtin Queries and Examples ~
 Builin queries have a standardized interface. Each builtin can be accessed via
 the `Portal` command or lua API.
 
-**Overview**the `tunnel` method provides the default entry point for searching
-a location list; the `tunnel_forward` and `tunnel_backward` are convenience
-methods for easy keybinds; and the `query` method builds a |portal.nvim-query|
-for use in |portal.nvim-`portaltunnel`|.
+**Overview**the `tunnel` method provides the default entry point for using
+Portal for a location list; the `tunnel_forward` and `tunnel_backward` are
+convenience methods for easy keybinds; the `search` method returns the results
+of a query; and the `query` method builds a |portal.nvim-query| for use in
+|portal.nvim-`portaltunnel`| or |portal.nvim-`portalsearch`|.
 
 **Command**`:Portal {builtin} [direction]`
 
 **API**`require("portal.builtin").{builtin}`
 
 
-- `{builtin}.tunnel(opts)`
-- `{builtin}.tunnel_forward(opts)`
-- `{builtin}.tunnel_backward(opts)`
 - `{builtin}.query(opts)`
+- `{builtin}.search(opts)`
+- `{builtin}.tunnel(opts)`
+- `{builtin}.tunnel_backward(opts)`
+- `{builtin}.tunnel_forward(opts)`
 
 **opts?**|portal.nvim-`portal.searchoptions`|
 
@@ -359,6 +361,29 @@ PORTAL API ~
 Portal API and Examples ~
 
 
+PORTALSEARCH
+
+The top-level method used for searching a location list query.
+
+**API**`require("portal").search(queries)`
+
+**queries**|portal.nvim-`portal.query[]`|
+
+Examples ~
+
+>lua
+    -- Return the results of a query over the jumplist and quickfix list
+    local search_results = require("portal").search({
+        require("portal.builtin").jumplist.query()
+        require("portal.builtin").quickfix.query(),
+    })
+    
+    -- Select the first location from the list of results
+    local first_portal = search_results[1]
+    first_portal.select()
+<
+
+
 PORTALTUNNEL
 
 The top-level method used for searching, opening, and selecting portals.
@@ -376,13 +401,10 @@ Examples ~
     
     
     -- Search both the jumplist and quickfix list
-    local jumplist = require("portal.builtin").jumplist
-    local jumplist_query = jumplist.query({ max_results = 1 })
-    
-    local quickfix = require("portal.builtin").quickfix
-    local quickfix_query = quickfix.query({ max_results = 1 })
-    
-    require("portal").tunnel({ jumplist_query, quickfix_query })
+    require("portal").tunnel({
+        require("portal.builtin").jumplist.query({ max_results = 1 })
+        require("portal.builtin").quickfix.query({ max_results = 1 }),
+    })
 <
 
 
