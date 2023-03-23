@@ -374,13 +374,10 @@ require("portal").tunnel(query)
 
 
 -- Search both the jumplist and quickfix list
-local jumplist = require("portal.builtin").jumplist
-local jumplist_query = jumplist.query({ max_results = 1 })
-
-local quickfix = require("portal.builtin").quickfix
-local quickfix_query = quickfix.query({ max_results = 1 })
-
-require("portal").tunnel({ jumplist_query, quickfix_query })
+require("portal").tunnel({
+    require("portal.builtin").jumplist.query({ max_results = 1 })
+    require("portal.builtin").quickfix.query({ max_results = 1 }),
+})
 ```
 
 </details>
