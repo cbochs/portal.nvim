@@ -139,6 +139,9 @@ Default Settings ~
         ---@type string[]
         labels = { "j", "k", "h", "l" },
     
+        ---Select the first portal when there is only one result.
+        select_first = false,
+    
         ---Keys used for exiting portal selection. Disable with [{key}] = false
         ---to `false`.
         ---@type table<string, boolean>
