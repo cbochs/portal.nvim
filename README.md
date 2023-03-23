@@ -148,16 +148,17 @@ require("portal").setup({
 
 Builin queries have a standardized interface. Each builtin can be accessed via the `Portal` command or lua API.
 
-**Overview**: the `tunnel` method provides the default entry point for searching a location list; the `tunnel_forward` and `tunnel_backward` are convenience methods for easy keybinds; and the `query` method builds a [query](#portalquery) for use in [`portal#tunnel`](#portaltunnel).
+**Overview**: the `tunnel` method provides the default entry point for using Portal for a location list; the `tunnel_forward` and `tunnel_backward` are convenience methods for easy keybinds; the `search` method returns the results of a query; and the `query` method builds a [query](#portalquery) for use in [`portal#tunnel`](#portaltunnel) or [`portal#search`](#portalsearch).
 
 **Command**: `:Portal {builtin} [direction]`
 
 **API**: `require("portal.builtin").{builtin}`
 
-- `{builtin}.tunnel(opts)`
-- `{builtin}.tunnel_forward(opts)`
-- `{builtin}.tunnel_backward(opts)`
 - `{builtin}.query(opts)`
+- `{builtin}.search(opts)`
+- `{builtin}.tunnel(opts)`
+- `{builtin}.tunnel_backward(opts)`
+- `{builtin}.tunnel_forward(opts)`
 
 **`opts?`**: [`Portal.SearchOptions`](#portalsearchoptions)
 
@@ -331,6 +332,29 @@ require("portal.builtin").quickfix.tunnel()
 
 <details>
 <summary>Portal API and Examples</summary>
+
+#### `portal#search`
+
+The top-level method used for searching a location list query.
+
+**API**: `require("portal").search(queries)`
+
+**`queries`**: [`Portal.Query[]`](#portalquery)
+
+<details>
+<summary><b>Examples</b></summary>
+
+```lua
+-- Return the results of a simple query over the jumplist
+local query = require("portal.builtiln").jumplist.query()
+local search_results = require("portal").search(query)
+
+-- Select a location from a list of results
+local first_portal = search_results[1]
+first_portal.select()
+```
+
+</details>
 
 #### `portal#tunnel`
 
