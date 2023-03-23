@@ -345,11 +345,13 @@ The top-level method used for searching a location list query.
 <summary><b>Examples</b></summary>
 
 ```lua
--- Return the results of a simple query over the jumplist
-local query = require("portal.builtiln").jumplist.query()
-local search_results = require("portal").search(query)
+-- Return the results of a query over the jumplist and quickfix list
+local search_results = require("portal").search({
+    require("portal.builtin").jumplist.query()
+    require("portal.builtin").quickfix.query(),
+})
 
--- Select a location from a list of results
+-- Select the first location from the list of results
 local first_portal = search_results[1]
 first_portal.select()
 ```
