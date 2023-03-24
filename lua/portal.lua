@@ -22,7 +22,7 @@ function Portal.setup(overrides)
 end
 
 ---@param queries Portal.Query[]
----@return Portal.Content
+---@return Portal.Content[]
 function Portal.search(queries)
     local Iterator = require("portal.iterator")
     local Search = require("portal.search")
