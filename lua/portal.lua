@@ -59,7 +59,7 @@ function Portal.tunnel(queries)
     local results = Portal.search(queries)
 
     if Settings.select_first and #results == 1 then
-        results[1].select(results[1])
+        results[1]:select()
         return
     end
 
