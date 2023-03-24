@@ -625,8 +625,8 @@ Used for indicating whether a search should be performed forwards or backwards.
 
 PORTAL.SEARCHPREDICATE ~
 
-A specialized |portal.nvim-predicate| where the value argument provided is a
-|portal.nvim-`portal.content`| result.
+A |portal.nvim-predicate| where the argument provided is an instance of
+|portal.nvim-`portal.content`|.
 
 **Type**`fun(c: Portal.Content): boolean`
 
