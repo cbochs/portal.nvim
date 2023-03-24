@@ -1,5 +1,6 @@
 ---@type Portal.QueryGenerator
 local function generator(opts, settings)
+    local Content = require("portal.content")
     local Iterator = require("portal.iterator")
     local Search = require("portal.search")
 
@@ -42,15 +43,17 @@ local function generator(opts, settings)
             return nil
         end
 
-        return {
+        return Content:new({
             type = "harpoon",
             buffer = buffer,
             cursor = { row = v.row, col = v.col },
-            select = function(content)
-                require("harpoon.ui").nav_file(content.index)
+            callback = function(content)
+                require("harpoon.ui").nav_file(content.extra.index)
             end,
-            index = i,
-        }
+            extra = {
+                index = i,
+            },
+        })
     end)
 
     iter = iter:filter(function(v)

@@ -7,12 +7,6 @@ local log = require("portal.log")
 local Window = {}
 Window.__index = Window
 
----@class Portal.Content
----@field type string
----@field buffer integer
----@field cursor { row: integer, col: integer }
----@field select fun(c: Portal.Content)
-
 ---@class Portal.WindowOptions
 ---@field title string
 ---@field relative string
@@ -41,21 +35,14 @@ vim.api.nvim_set_hl(0, "PortalNormal", { link = "NormalFloat", default = true })
 ---@param options Portal.WindowOptions
 ---@return Portal.Window
 function Window:new(content, options)
-    if not content.buffer or not vim.api.nvim_buf_is_valid(content.buffer) then
-        log.error(("Window.new: invalid buffer %s"):format(content.buffer))
-    end
-    if not content.cursor or not content.cursor.row or not content.cursor.col then
-        log.error(("Window.new: cursor is not present or valid in %s"):format(vim.inspect(content)))
-    end
-    if not content.select then
-        log.error(("Window.new: select is not present."):format(vim.inspect(content)))
-    end
+    assert(vim.api.nvim_buf_is_valid(content.buffer), ("Portal: invalid buffer %s"):format(content.buffer))
 
     local window = {
         content = content,
         options = options,
         state = nil,
     }
+
     setmetatable(window, self)
     return window
 end
@@ -147,7 +134,7 @@ function Window:select()
         log.warn("Window.select: window is not open.")
         return
     end
-    self.content.select(self.content)
+    self.content:select()
 end
 
 function Window:close()

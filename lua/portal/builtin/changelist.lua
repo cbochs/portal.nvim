@@ -1,5 +1,6 @@
 ---@type Portal.QueryGenerator
 local function generate(opts, settings)
+    local Content = require("portal.content")
     local Iterator = require("portal.iterator")
     local Search = require("portal.search")
 
@@ -30,20 +31,22 @@ local function generate(opts, settings)
     end
 
     iter = iter:map(function(v, i)
-        return {
+        return Content:new({
             type = "changelist",
             buffer = 0,
             cursor = { row = v.lnum, col = v.col },
-            select = function(content)
+            callback = function(content)
                 local keycode = vim.api.nvim_replace_termcodes("g;", true, false, true)
-                if content.direction == "forward" then
+                if content.extra.direction == "forward" then
                     keycode = vim.api.nvim_replace_termcodes("g,", true, false, true)
                 end
-                vim.api.nvim_feedkeys(content.distance .. keycode, "n", false)
+                vim.api.nvim_feedkeys(content.extra.distance .. keycode, "n", false)
             end,
-            direction = opts.direction,
-            distance = math.abs(opts.start - i),
-        }
+            extra = {
+                direction = opts.direction,
+                distance = math.abs(opts.start - i),
+            },
+        })
     end)
 
     iter = iter:filter(function(v)
