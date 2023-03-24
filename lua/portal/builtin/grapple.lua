@@ -1,5 +1,6 @@
 ---@type Portal.QueryGenerator
 local function generator(opts, settings)
+    local Content = require("portal.content")
     local Iterator = require("portal.iterator")
     local Search = require("portal.search")
 
@@ -46,15 +47,17 @@ local function generator(opts, settings)
             return nil
         end
 
-        return {
+        return Content:new({
             type = "grapple",
             buffer = buffer,
             cursor = { row = v.cursor[1], col = v.cursor[2] },
-            select = function(content)
-                require("grapple").select({ key = content.key })
+            callback = function(content)
+                require("grapple").select({ key = content.extra.key })
             end,
-            key = v.key,
-        }
+            extra = {
+                key = v.key,
+            },
+        })
     end)
 
     iter = iter:filter(function(v)

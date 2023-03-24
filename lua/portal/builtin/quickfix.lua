@@ -1,5 +1,6 @@
 ---@type Portal.QueryGenerator
 local function generator(opts, settings)
+    local Content = require("portal.content")
     local Iterator = require("portal.iterator")
     local Search = require("portal.search")
 
@@ -26,15 +27,15 @@ local function generator(opts, settings)
     end
 
     iter = iter:map(function(v, _)
-        return {
+        return Content:new({
             type = "quickfix",
             buffer = v.bufnr,
             cursor = { row = v.lnum, col = v.col },
-            select = function(content)
+            callback = function(content)
                 vim.api.nvim_win_set_buf(0, content.buffer)
                 vim.api.nvim_win_set_cursor(0, { content.cursor.row, content.cursor.col })
             end,
-        }
+        })
     end)
 
     iter = iter:filter(function(v)
