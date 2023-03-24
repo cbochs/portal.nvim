@@ -588,7 +588,7 @@ Used for indicating whether a search should be performed forwards or backwards.
 
 ### `Portal.SearchPredicate`
 
-A specialized [predicate](#portalpredicate) where the value argument provided is a [`Portal.Content`](#portalcontent) result.
+A [predicate](#portalpredicate) where the argument provided is an instance of [`Portal.Content`](#portalcontent).
 
 **Type**: `fun(c: Portal.Content): boolean`
 
