@@ -658,7 +658,7 @@ additional fields are present.
 - **type**`string`
 - **buffer**`integer`
 - **cursor**`{ row: integer, col: integer }`
-- **extra**`{ row: integer, col: integer }`
+- **extra**`table`
 - **:select()**`fun(c: Portal.Content)`
 
 
