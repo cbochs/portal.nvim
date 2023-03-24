@@ -182,9 +182,9 @@ Filter, match, and iterate over Neovim's [`:h changelist`](https://neovim.io/doc
 - **`type`**: `"changelist"`
 - **`buffer`**: `0`
 - **`cursor`**: the changelist `lnum` and `col`
-- **`select`**: uses native `g;` and `g,` to preserve changelist ordering
-- **`direction`**: the search [direction](#portaldirection)
-- **`distance`**: the absolute distance between the start and current changelist entry
+- **`extra.direction`**: the search [direction](#portaldirection)
+- **`extra.distance`**: the absolute distance between the start and current changelist entry
+- **`:select()`**: uses native `g;` and `g,` to preserve changelist ordering
 
 <details>
 <summary><b>Examples</b></summary>
@@ -211,8 +211,8 @@ Filter, match, and iterate over tagged files from [grapple](https://github.com/c
 - **`type`**: `"grapple"`
 - **`buffer`**: the file tags's `bufnr`
 - **`cursor`**: the file tags's `row` and `col`
-- **`select`**: uses `grapple#select`
-- **`key`**: the file tags's key
+- **`extra.key`**: the file tags's key
+- **`:select()`**: uses `grapple#select`
 
 <details>
 <summary><b>Examples</b></summary>
@@ -239,8 +239,8 @@ Filter, match, and iterate over marked files from [harpoon](https://github.com/T
 - **`type`**: `"harpoon"`
 - **`buffer`**: the file mark's `bufnr`
 - **`cursor`**: the file mark's `row` and `col`
-- **`select`**: uses `harpoon.ui#nav_file`
-- **`index`**: the file mark's index
+- **`extra.index`**: the file mark's index
+- **`:select()`**: uses `harpoon.ui#nav_file`
 
 <details>
 <summary><b>Examples</b></summary>
@@ -267,9 +267,9 @@ Filter, match, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/u
 - **`type`**: `"jumplist"`
 - **`buffer`**: the jumplist `bufnr`
 - **`cursor`**: the jumplist `lnum` and `col`
-- **`select`**: uses native `<c-o>` and `<c-i>` to preserve jumplist ordering
-- **`direction`**: the search [direction](#portaldirection)
-- **`distance`**: the absolute distance between the start and current jumplist entry
+- **`extra.direction`**: the search [direction](#portaldirection)
+- **`extra.distance`**: the absolute distance between the start and current jumplist entry
+- **`:select()`**: uses native `<c-o>` and `<c-i>` to preserve jumplist ordering
 
 <details>
 <summary><b>Examples</b></summary>
@@ -317,7 +317,7 @@ Filter, match, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/us
 - **`type`**: `"quickfix"`
 - **`buffer`**: the quickfix `bufnr`
 - **`cursor`**: the quickfix `lnum` and `col`
-- **`select`**: uses `nvim_win_set_cursor` for selection
+- **`:select()`**: uses `nvim_win_set_cursor` for selection
 
 <details>
 <summary><b>Examples</b></summary>
@@ -356,7 +356,7 @@ local search_results = require("portal").search({
 
 -- Select the first location from the list of results
 local first_portal = search_results[1]
-first_portal.select()
+first_portal:select()
 ```
 
 </details>
@@ -603,15 +603,15 @@ Named tuple of `(source, slots)`. Used as the input to [`portal#tunnel`](#portal
 
 ### `Portal.Content`
 
-Named tuple of `(type, buffer, cursor, select)` used in opening and selecting a portal location. **May contain** any additional data to aide in filtering, querying, and selecting a portal. See the [builtins](#builtin-queries) section for information on which additional fields are present.
+A object with the fields `(type, buffer, cursor)` and a `:select()` method used for opening and selecting a portal location. Extra data is available in the `extra` field and can be used to aide in filtering, querying, and selecting a portal. See the [builtins](#builtin-queries) section for information on which additional fields are present.
 
 **Type**: `table`
 
 - **`type`**: `string`
 - **`buffer`**: `integer`
 - **`cursor`**: `{ row: integer, col: integer }`
-- **`select`**: `fun(c: Portal.Content)`
-- **anything else**
+- **`extra`**: `{ row: integer, col: integer }`
+- **`:select()`**: `fun(c: Portal.Content)`
 
 ### `Portal.Predicate`
 
