@@ -610,7 +610,7 @@ A object with the fields `(type, buffer, cursor)` and a `:select()` method used 
 - **`type`**: `string`
 - **`buffer`**: `integer`
 - **`cursor`**: `{ row: integer, col: integer }`
-- **`extra`**: `{ row: integer, col: integer }`
+- **`extra`**: `table`
 - **`:select()`**: `fun(c: Portal.Content)`
 
 ### `Portal.Predicate`
