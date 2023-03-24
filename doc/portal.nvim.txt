@@ -1,4 +1,4 @@
-*portal.nvim.txt*        For Neovim >= v0.8.0       Last change: 2023 March 23
+*portal.nvim.txt*        For Neovim >= v0.8.0       Last change: 2023 March 24
 
 ==============================================================================
 Table of Contents                              *portal.nvim-table-of-contents*
@@ -211,9 +211,9 @@ Filter, match, and iterate over Neovim’s |`:h changelist`|.
 - **type**`"changelist"`
 - **buffer**`0`
 - **cursor**the changelist `lnum` and `col`
-- **select**uses native `g;` and `g,` to preserve changelist ordering
-- **direction**the search |portal.nvim-direction|
-- **distance**the absolute distance between the start and current changelist entry
+- **extra.direction**the search |portal.nvim-direction|
+- **extra.distance**the absolute distance between the start and current changelist entry
+- **:select()**uses native `g;` and `g,` to preserve changelist ordering
 
 Examples ~
 
@@ -241,8 +241,8 @@ Filter, match, and iterate over tagged files from grapple
 - **type**`"grapple"`
 - **buffer**the file tags’s `bufnr`
 - **cursor**the file tags’s `row` and `col`
-- **select**uses `grappleselect`
-- **key**the file tags’s key
+- **extra.key**the file tags’s key
+- **:select()**uses `grappleselect`
 
 Examples ~
 
@@ -270,8 +270,8 @@ Filter, match, and iterate over marked files from harpoon
 - **type**`"harpoon"`
 - **buffer**the file mark’s `bufnr`
 - **cursor**the file mark’s `row` and `col`
-- **select**uses `harpoon.uinav_file`
-- **index**the file mark’s index
+- **extra.index**the file mark’s index
+- **:select()**uses `harpoon.uinav_file`
 
 Examples ~
 
@@ -298,9 +298,9 @@ Filter, match, and iterate over Neovim’s |`:h jumplist`|.
 - **type**`"jumplist"`
 - **buffer**the jumplist `bufnr`
 - **cursor**the jumplist `lnum` and `col`
-- **select**uses native `<c-o>` and `<c-i>` to preserve jumplist ordering
-- **direction**the search |portal.nvim-direction|
-- **distance**the absolute distance between the start and current jumplist entry
+- **extra.direction**the search |portal.nvim-direction|
+- **extra.distance**the absolute distance between the start and current jumplist entry
+- **:select()**uses native `<c-o>` and `<c-i>` to preserve jumplist ordering
 
 Examples ~
 
@@ -349,7 +349,7 @@ Filter, match, and iterate over Neovim’s `:h quickfix`
 - **type**`"quickfix"`
 - **buffer**the quickfix `bufnr`
 - **cursor**the quickfix `lnum` and `col`
-- **select**uses `nvim_win_set_cursor` for selection
+- **:select()**uses `nvim_win_set_cursor` for selection
 
 Examples ~
 
@@ -383,7 +383,7 @@ Examples ~
     
     -- Select the first location from the list of results
     local first_portal = search_results[1]
-    first_portal.select()
+    first_portal:select()
 <
 
 
@@ -646,10 +646,11 @@ iterator will be simply be collected and presented as the search results.
 
 PORTAL.CONTENT ~
 
-Named tuple of `(type, buffer, cursor, select)` used in opening and selecting a
-portal location. **May contain** any additional data to aide in filtering,
-querying, and selecting a portal. See the |portal.nvim-builtins| section for
-information on which additional fields are present.
+A object with the fields `(type, buffer, cursor)` and a `:select()` method used
+for opening and selecting a portal location. Extra data is available in the
+`extra` field and can be used to aide in filtering, querying, and selecting a
+portal. See the |portal.nvim-builtins| section for information on which
+additional fields are present.
 
 **Type**`table`
 
@@ -657,8 +658,8 @@ information on which additional fields are present.
 - **type**`string`
 - **buffer**`integer`
 - **cursor**`{ row: integer, col: integer }`
-- **select**`fun(c: Portal.Content)`
-- **anything else**
+- **extra**`{ row: integer, col: integer }`
+- **:select()**`fun(c: Portal.Content)`
 
 
 PORTAL.PREDICATE ~
