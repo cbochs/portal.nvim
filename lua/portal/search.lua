@@ -74,7 +74,8 @@ function Search.open(results, labels, window_options)
     end
 
     local function compute_initial_offset()
-        local height_offset = 0
+        local row_offset = 0
+
         local height_step = window_options.height + 2
         local total_height = vim.tbl_count(results) * height_step
 
@@ -83,17 +84,17 @@ function Search.open(results, labels, window_options)
         local line_difference = (bottom_line - current_line)
 
         if line_difference < total_height then
-            height_offset = line_difference - total_height
+            row_offset = line_difference - total_height
         end
 
-        return height_offset
+        return row_offset
     end
 
     local windows = {}
 
     local cur_row = 0
     local max_index = compute_max_index()
-    local height_offset = compute_initial_offset()
+    local row_offset = compute_initial_offset()
 
     for i = 1, max_index do
         -- stylua: ignore
@@ -103,7 +104,7 @@ function Search.open(results, labels, window_options)
 
         cur_row = cur_row + 1
         window_options = vim.deepcopy(window_options)
-        window_options.row = height_offset + (cur_row - 1) * (window_options.height + 2)
+        window_options.row = row_offset + (cur_row - 1) * (window_options.height + 2)
 
         if vim.fn.has("nvim-0.9") == 1 then
             window_options.title = window_title(result)
