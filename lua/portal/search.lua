@@ -61,27 +61,52 @@ function Search.open(results, labels, window_options)
         log.warn("Search.open: found more results than available labels.")
     end
 
+    local function window_title(result)
+        local title = vim.fs.basename(vim.api.nvim_buf_get_name(result.buffer))
+        if title == "" then
+            title = "Result"
+        end
+        return ("[%s] %s"):format(result.type, title)
+    end
+
+    local function compute_max_index()
+        return math.min(math.max(unpack(vim.tbl_keys(results))), #labels)
+    end
+
+    local function compute_initial_offset()
+        local height_offset = 0
+        local height_step = window_options.height + 2
+        local total_height = vim.tbl_count(results) * height_step
+
+        local current_line = vim.fn.line(".")
+        local bottom_line = vim.fn.line("w$")
+        local line_difference = (bottom_line - current_line)
+
+        if line_difference < total_height then
+            height_offset = line_difference - total_height
+        end
+
+        return height_offset
+    end
+
     local windows = {}
 
-    local max_index = math.min(math.max(unpack(vim.tbl_keys(results))), #labels)
     local cur_row = 0
+    local max_index = compute_max_index()
+    local height_offset = compute_initial_offset()
 
     for i = 1, max_index do
+        -- stylua: ignore
+        if not results[i] then goto continue end
+
         local result = results[i]
-        if not result then
-            goto continue
-        end
 
         cur_row = cur_row + 1
         window_options = vim.deepcopy(window_options)
-        window_options.row = (cur_row - 1) * (window_options.height + 2)
+        window_options.row = height_offset + (cur_row - 1) * (window_options.height + 2)
 
         if vim.fn.has("nvim-0.9") == 1 then
-            local title = vim.fs.basename(vim.api.nvim_buf_get_name(result.buffer))
-            if title == "" then
-                title = "Result"
-            end
-            window_options.title = ("[%s] %s"):format(result.type, title)
+            window_options.title = window_title(result)
         end
 
         local window = Window:new(result, window_options)
