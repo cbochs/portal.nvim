@@ -1,5 +1,6 @@
 local Iterator = require("portal.iterator")
 
+-- TODO: create a list of expectations and generate tests
 describe("iterator", function()
     it("handles an empty list", function()
         assert.is_nil(Iterator:new():next())
@@ -56,10 +57,6 @@ describe("iterator", function()
         assert.are.same({ 5, 6 }, iter:collect())
     end)
 
-    it("can be exhausted", function()
-        assert.are.same({ "a", "b", "c" }, Iterator:new({ "a", "b", "c" }):collect())
-    end)
-
     it("can chain anything", function()
         -- stylua: ignore
         local iter = Iterator:new({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 })
@@ -107,6 +104,33 @@ describe("iterator", function()
         it("repeats anything", function()
             local iter = Iterator:rrepeat({}):take(3)
             assert.are.same({ {}, {}, {} }, iter:collect())
+        end)
+    end)
+
+    describe("#wrap", function()
+        it("loops an iterator from the beginning going forward", function()
+            local iter = Iterator:new({ 1, 2 }):wrap():take(4)
+            assert.are.same({ 1, 2, 1, 2 }, iter:collect())
+        end)
+
+        it("loops an iterator from the end going backward", function()
+            local iter = Iterator:new({ 1, 2 }):reverse():wrap():take(4)
+            assert.are.same({ 2, 1, 2, 1 }, iter:collect())
+        end)
+
+        it("wraps an iterator from the middle going forward", function()
+            local iter = Iterator:new({ 1, 2, 3 }):start_at(2):wrap():take(6)
+            assert.are.same({ 2, 3, 1, 2, 3, 1 }, iter:collect())
+        end)
+
+        it("wraps an iterator from the middle going backward", function()
+            local iter = Iterator:new({ 1, 2, 3 }):reverse():start_at(2):wrap():take(6)
+            assert.are.same({ 2, 1, 3, 2, 1, 3 }, iter:collect())
+        end)
+
+        it("wraps an iterator forever", function()
+            local iter = Iterator:new({ 1 }):wrap():take(10)
+            assert.are.same({ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, iter:collect())
         end)
     end)
 

@@ -17,7 +17,7 @@ function Iterator:new(iterable)
 
     if iterable then
         iterator = {
-            iterable = iterable or {},
+            iterable = iterable,
             step = 1,
             start_index = 1,
             explicit_start = false,
@@ -103,6 +103,18 @@ local function root_iter(start_iter)
     end
 end
 
+---@return integer
+function Iterator:size()
+    local iter = root_iter(self)
+    return #iter.iterable
+end
+
+---@return integer
+function Iterator:step_size()
+    local iter = root_iter(self)
+    return iter.step
+end
+
 ---@param n integer
 ---@return Portal.Iterator
 function Iterator:start_at(n)
@@ -148,6 +160,30 @@ end
 -- luacheck: ignore
 function Iterator:rrepeat(value)
     return Repeat:new(value)
+end
+
+---@class Portal.WrapAdapter
+---@field iterator Portal.Iterator
+local Wrap = Iterator:new()
+Wrap.__index = Wrap
+
+function Wrap:new(iterator)
+    local wrap = { iterator = iterator }
+    setmetatable(wrap, self)
+    return wrap
+end
+
+function Wrap:next(index)
+    if index == 1 and self:step_size() < 0 then
+        index = self:size() + 1
+    elseif index == self:size() and self:step_size() > 0 then
+        index = 0
+    end
+    return self.iterator:next(index)
+end
+
+function Iterator:wrap()
+    return Wrap:new(self)
 end
 
 ---@class Portal.SkipAdapter
