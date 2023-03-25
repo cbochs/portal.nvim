@@ -520,6 +520,7 @@ Operations which return an iterator.
 - `Iterator.start_at(n: integer)`
 - `Iterator.reverse()`
 - `Iterator.rrepeat(value: any)`
+- `Iterator.wrap()`
 - `Iterator.skip(n: integer)`
 - `Iterator.step_by(n: integer)`
 - `Iterator.take(n: integer)`
