@@ -13,18 +13,27 @@ Iterator.__index = Iterator
 ---@param iterable? table
 ---@return Portal.Iterator
 function Iterator:new(iterable)
-    local iterator = {
-        iterable = iterable or {},
-        step = 1,
-        start_index = 1,
-        explicit_start = false,
-    }
+    local iterator = {}
+
+    if iterable then
+        iterator = {
+            iterable = iterable or {},
+            step = 1,
+            start_index = 1,
+            explicit_start = false,
+        }
+    end
+
     setmetatable(iterator, self)
     return iterator
 end
 
 ---@param index? integer
 function Iterator:next(index)
+    if not self.iterable then
+        return nil
+    end
+
     if not index then
         index = self.start_index - self.step
     end
@@ -97,9 +106,7 @@ end
 ---@param n integer
 ---@return Portal.Iterator
 function Iterator:start_at(n)
-    if n == nil then
-        log.error("Iterator.start_at: start index cannot be nil.")
-    end
+    assert(n, "Iterator.start_at: start index cannot be nil.")
     local iter = root_iter(self)
     iter.start_index = n
     iter.explicit_start = true
@@ -150,17 +157,8 @@ local Skip = Iterator:new()
 Skip.__index = Skip
 
 function Skip:new(iterator, n)
-    if n == nil then
-        log.error("Iterator.skip: skipped items 'n' cannot be nil.")
-    end
-    if n < 0 then
-        log.error("Iterator.skip: 'n' must be a non-negative integer.")
-    end
-
-    local skip = {
-        iterator = iterator,
-        n = n,
-    }
+    assert(n and n >= 0, "Iterator.skip: 'n' must be a non-negative integer.")
+    local skip = { iterator = iterator, n = n }
     setmetatable(skip, self)
     return skip
 end
@@ -190,18 +188,8 @@ local StepBy = Iterator:new()
 StepBy.__index = StepBy
 
 function StepBy:new(iterator, n)
-    if n == nil then
-        log.error("Iterator.step_by: step size 'n' cannot be nil.")
-    end
-    if n <= 0 then
-        log.error("Iterator.step_by: 'n' must be a positive integer.")
-    end
-
-    local step_by = {
-        iterator = iterator,
-        n = n,
-        count = -1,
-    }
+    assert(n and n > 0, "Iterator.step_by: 'n' must be a positive integer")
+    local step_by = { iterator = iterator, n = n, count = -1 }
     setmetatable(step_by, self)
     return step_by
 end
@@ -236,14 +224,8 @@ Filter.__index = Filter
 ---@param predicate Portal.Predicate
 ---@return Portal.Iterator
 function Filter:new(iterator, predicate)
-    if predicate == nil then
-        log.error("Iterator.filter: predicate function cannot be nil.")
-    end
-
-    local filter = {
-        iterator = iterator,
-        predicate = predicate,
-    }
+    assert(predicate, "Iterator.filter: predicate function cannot be nil.")
+    local filter = { iterator = iterator, predicate = predicate }
     setmetatable(filter, self)
     return filter
 end
@@ -278,17 +260,8 @@ Take.__index = Take
 ---@param n integer
 ---@return Portal.Iterator
 function Take:new(iterator, n)
-    if n == nil then
-        log.error("Iterator.take: predicate function cannot be nil.")
-    end
-    if n < 0 then
-        log.error("Iterator.take: 'n' must be a non-negative integer.")
-    end
-
-    local take = {
-        iterator = iterator,
-        n = n,
-    }
+    assert(n and n >= 0, "Iterator.take: 'n' must be a non-negative integer.")
+    local take = { iterator = iterator, n = n }
     setmetatable(take, self)
     return take
 end
@@ -324,14 +297,8 @@ Map.__index = Map
 ---@param f fun(value: any): any
 ---@return Portal.Iterator
 function Map:new(iterator, f)
-    if f == nil then
-        log.error("Iterator.map: map function cannot be nil.")
-    end
-
-    local map = {
-        iterator = iterator,
-        f = f,
-    }
+    assert(f, "Iterator.map: map function cannot be nil.")
+    local map = { iterator = iterator, f = f }
     setmetatable(map, self)
     return map
 end
