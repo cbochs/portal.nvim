@@ -84,6 +84,11 @@ function Settings.update(overrides)
     _settings.labels = replace_termcodes(_settings.labels)
 end
 
+--- @return Portal.Settings
+function Settings.as_table()
+    return vim.tbl_deep_extend("keep", _settings, {})
+end
+
 setmetatable(Settings, {
     __index = function(_, index)
         return _settings[index]

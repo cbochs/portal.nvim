@@ -52,20 +52,22 @@ function Portal.search(queries)
 end
 
 ---@param queries Portal.Query[]
-function Portal.tunnel(queries)
+---@param overrides Portal.Settings
+function Portal.tunnel(queries, overrides)
     local Search = require("portal.search")
     local Settings = require("portal.settings")
 
+    local settings = vim.tbl_deep_extend("force", Settings.as_table(), overrides or {})
     local results = Portal.search(queries)
 
-    if Settings.select_first and #results == 1 then
+    if settings.select_first and #results == 1 then
         results[1]:select()
         return
     end
 
-    local windows = Search.open(results, Settings.labels, Settings.window_options)
+    local windows = Search.open(results, settings.labels, settings.window_options)
 
-    local selected_window = Search.select(windows, Settings.escape)
+    local selected_window = Search.select(windows, settings.escape)
     if selected_window ~= nil then
         selected_window:select()
     end
