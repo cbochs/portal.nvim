@@ -461,7 +461,7 @@ Examples ~
             if root_files > 0 then
                 local root_dir = vim.fs.dirname(root_files[1])
                 local file_path = vim.api.nvim_buf_get_name(v.buffer)
-                return string.find(file_path, root_dir, 1, true) ~= nil
+                return string.match(file_path, ("^%s"):format(root_dir)) ~= nil
             end
             return true
         end
