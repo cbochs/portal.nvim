@@ -79,9 +79,12 @@ function Search.open(results, labels, window_options)
         local height_step = window_options.height + 2
         local total_height = vim.tbl_count(results) * height_step
 
-        local current_line = vim.fn.line(".")
-        local bottom_line = vim.fn.line("w$")
-        local line_difference = (bottom_line - current_line)
+        local win_height = vim.api.nvim_win_get_height(0)
+        local win_current_line = vim.fn.line(".")
+        local win_top_line = vim.fn.line("w0")
+        local win_bottom_line = win_top_line + win_height
+
+        local line_difference = win_bottom_line - win_current_line
 
         if line_difference < total_height then
             row_offset = line_difference - total_height
