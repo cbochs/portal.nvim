@@ -1,4 +1,4 @@
-*portal.nvim.txt*        For Neovim >= v0.8.0       Last change: 2023 March 25
+*portal.nvim.txt*      For Neovim >= v0.8.0      Last change: 2024 February 11
 
 ==============================================================================
 Table of Contents                              *portal.nvim-table-of-contents*
@@ -37,7 +37,6 @@ See the |portal.nvim-quickstart| section to get started.
 
 FEATURES                                    *portal.nvim-portal.nvim-features*
 
-
 - **Labelled** |portal.nvim-portals| for immediate movement to a portal location
 - **Customizable** |portal.nvim-filters| and |portal.nvim-slots| for |portal.nvim-well-known-lists|
 - **Composable** multiple location lists can be used in a single search
@@ -46,13 +45,11 @@ FEATURES                                    *portal.nvim-portal.nvim-features*
 
 REQUIREMENTS                            *portal.nvim-portal.nvim-requirements*
 
-
 - Neovim >= 0.8 <https://github.com/neovim/neovim/releases/tag/v0.8.0>
 - Neovim >= 0.9 - optional, for floating window title <https://github.com/neovim/neovim/issues/17458>
 
 
 QUICKSTART                                *portal.nvim-portal.nvim-quickstart*
-
 
 - |portal.nvim-install| Portal.nvim using your preferred package manager
 - Add keybinds for opening portals, both forwards and backwards
@@ -63,7 +60,6 @@ QUICKSTART                                *portal.nvim-portal.nvim-quickstart*
 <
 
 **Next steps**
-
 
 - Check out the |portal.nvim-default-settings|
 - Explore the available |portal.nvim-builtin| queries
@@ -113,7 +109,7 @@ SETTINGS                                    *portal.nvim-portal.nvim-settings*
 
 The following are the default settings for Portal. **Setup is not required**,
 but settings may be overridden by passing them as table arguments to the
-`portalsetup` function.
+`portal#setup` function.
 
 Default Settings ~
 
@@ -177,12 +173,11 @@ the `Portal` command or lua API.
 Portal for a location list; the `tunnel_forward` and `tunnel_backward` are
 convenience methods for easy keybinds; the `search` method returns the results
 of a query; and the `query` method builds a |portal.nvim-query| for use in
-|portal.nvim-`portaltunnel`| or |portal.nvim-`portalsearch`|.
+|portal.nvim-`portal#tunnel`| or |portal.nvim-`portal#search`|.
 
 **Command**`:Portal {builtin} [direction]`
 
 **API**`require("portal.builtin").{builtin}`
-
 
 - `{builtin}.query(opts)`
 - `{builtin}.search(opts)`
@@ -196,17 +191,15 @@ of a query; and the `query` method builds a |portal.nvim-query| for use in
 
 CHANGELIST
 
-Filter, match, and iterate over Neovim’s |`:h changelist`|.
+Filter, match, and iterate over Neovim’s ||changelist||.
 
 **Defaults**
 
-
 - **opts.start**current change index
 - **opts.direction**`"backward"`
-- **opts.max_results**`settings.labels`
+- **opts.max_results**`#settings.labels`
 
 **Content**
-
 
 - **type**`"changelist"`
 - **buffer**`0`
@@ -230,19 +223,17 @@ Filter, match, and iterate over tagged files from grapple
 
 **Defaults**
 
-
 - **opts.start**`1`
 - **opts.direction**`"forward"`
-- **opts.max_results**`settings.labels`
+- **opts.max_results**`#settings.labels`
 
 **Content**
-
 
 - **type**`"grapple"`
 - **buffer**the file tags’s `bufnr`
 - **cursor**the file tags’s `row` and `col`
 - **extra.key**the file tags’s key
-- **:select()**uses `grappleselect`
+- **:select()**uses `grapple#select`
 
 Examples ~
 
@@ -259,19 +250,17 @@ Filter, match, and iterate over marked files from harpoon
 
 **Defaults**
 
-
 - **opts.start**`1`
 - **opts.direction**`"forward"`
-- **opts.max_results**`settings.labels`
+- **opts.max_results**`#settings.labels`
 
 **Content**
-
 
 - **type**`"harpoon"`
 - **buffer**the file mark’s `bufnr`
 - **cursor**the file mark’s `row` and `col`
 - **extra.index**the file mark’s index
-- **:select()**uses `harpoon.uinav_file`
+- **:select()**uses `harpoon.ui#nav_file`
 
 Examples ~
 
@@ -283,17 +272,15 @@ Examples ~
 
 JUMPLIST
 
-Filter, match, and iterate over Neovim’s |`:h jumplist`|.
+Filter, match, and iterate over Neovim’s ||jumplist||.
 
 **Defaults**
 
-
 - **opts.start**current jump index
 - **opts.direction**`"backward"`
-- **opts.max_results**`settings.labels`
+- **opts.max_results**`#settings.labels`
 
 **Content**
-
 
 - **type**`"jumplist"`
 - **buffer**the jumplist `bufnr`
@@ -333,18 +320,16 @@ Examples ~
 
 QUICKFIX
 
-Filter, match, and iterate over Neovim’s `:h quickfix`
+Filter, match, and iterate over Neovim’s |quickfix|
 <http://neovim.io/doc/user/quickfix.html> list.
 
 **Defaults**
 
-
 - **opts.start**`1`
 - **opts.direction**`"forward"`
-- **opts.max_results**`settings.labels`
+- **opts.max_results**`#settings.labels`
 
 **Content**
-
 
 - **type**`"quickfix"`
 - **buffer**the quickfix `bufnr`
@@ -364,7 +349,7 @@ PORTAL API ~
 Portal API and Examples ~
 
 
-PORTALSEARCH
+PORTAL#SEARCH
 
 The top-level method used for searching a location list query.
 
@@ -387,7 +372,7 @@ Examples ~
 <
 
 
-PORTALTUNNEL
+PORTAL#TUNNEL
 
 The top-level method used for searching, opening, and selecting portals.
 
@@ -458,10 +443,10 @@ Examples ~
     require("portal.builtin").jumplist({
         filter = function(v)
             local root_files = vim.fs.find({ ".git" }, { upward = true })
-            if root_files > 0 then
+            if #root_files > 0 then
                 local root_dir = vim.fs.dirname(root_files[1])
                 local file_path = vim.api.nvim_buf_get_name(v.buffer)
-                return string.match(file_path, ("^%s"):format(root_dir)) ~= nil
+                return string.find(file_path, root_dir, 1, true) ~= nil
             end
             return true
         end
@@ -508,14 +493,12 @@ Available operations ~
 Operations which return a lua-style <https://www.lua.org/pil/7.3.html>
 iterator.
 
-
 - `Iterator.next(index?: number)`
 - `Iterator.iter()`
 
 **Chainable operations**
 
 Operations which return an iterator.
-
 
 - `Iterator.start_at(n: integer)`
 - `Iterator.reverse()`
@@ -530,7 +513,6 @@ Operations which return an iterator.
 **Collect operations**
 
 Operations which return a collection (list or table) of values.
-
 
 - `Iterator.collect(): T[]`
 - `Iterator.collect_table(): table`
@@ -567,12 +549,12 @@ Examples ~
     -- Create a filtered and mapped table { 4, 6 }
     Iterator:new({ 1, 2, 3})
         :filter(function(v) return v > 1 end)
-        :map(function(v) return v  2 end)
+        :map(function(v) return v * 2 end)
         :collect()
     
     -- Create the same filtered and mapped table { 4, 6 }
     Iterator:new({ 1, 2, 3 })
-        :map(function(v) if v > 1 then return v  2 end end)
+        :map(function(v) if v > 1 then return v * 2 end end)
         :collect()
     
     -- Create the repeated list { 1, 1, 1 }
@@ -605,7 +587,6 @@ section for information regarding search option defaults.
 
 **Type**`table`
 
-
 - **start**`integer`
 - **direction**|portal.nvim-`portal.direction`|
 - **max_results**`integer`
@@ -618,7 +599,6 @@ PORTAL.DIRECTION ~
 Used for indicating whether a search should be performed forwards or backwards.
 
 **Type**`enum`
-
 
 - **"forward"**
 - **"backward"**
@@ -635,11 +615,10 @@ A |portal.nvim-predicate| where the argument provided is an instance of
 PORTAL.QUERY ~
 
 Named tuple of `(source, slots)`. Used as the input to
-|portal.nvim-`portaltunnel`|. When no `slots` are present, the `source`
+|portal.nvim-`portal#tunnel`|. When no `slots` are present, the `source`
 iterator will be simply be collected and presented as the search results.
 
 **Type**`table`
-
 
 - **source**|portal.nvim-`portal.iterator`|
 - **slots**|portal.nvim-`portal.searchpredicate[]`| | `nil`
@@ -654,7 +633,6 @@ portal. See the |portal.nvim-builtins| section for information on which
 additional fields are present.
 
 **Type**`table`
-
 
 - **type**`string`
 - **buffer**`integer`
