@@ -4,9 +4,9 @@ local function generator(opts, settings)
     local Iterator = require("portal.iterator")
     local Search = require("portal.search")
 
-    local ok, _ = require("harpoon")
+    local ok, _ = pcall(require, "harpoon")
     if not ok then
-        require("portal.log").error("Unable to load 'harpoon'. Please ensure that harpoon is installed.")
+        return require("portal.log").error("Unable to load 'harpoon'. Please ensure that harpoon is installed.")
     end
 
     local marks = require("harpoon").get_mark_config().marks
