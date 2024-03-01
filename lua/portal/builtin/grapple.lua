@@ -4,9 +4,9 @@ local function generator(opts, settings)
     local Iterator = require("portal.iterator")
     local Search = require("portal.search")
 
-    local ok, _ = require("grapple")
+    local ok, _ = pcall(require, "grapple")
     if not ok then
-        require("portal.log").error("Unable to load 'grapple'. Please ensure that grapple.nvim is installed.")
+        return require("portal.log").error("Unable to load 'grapple'. Please ensure that grapple.nvim is installed.")
     end
 
     local tags = require("grapple").tags()
@@ -37,10 +37,10 @@ local function generator(opts, settings)
         end
 
         local buffer
-        if vim.fn.bufexists(v.file_path) ~= 0 then
-            buffer = vim.fn.bufnr(v.file_path)
+        if vim.fn.bufexists(v.path) ~= 0 then
+            buffer = vim.fn.bufnr(v.path)
         else
-            buffer = vim.fn.bufadd(v.file_path)
+            buffer = vim.fn.bufadd(v.path)
         end
 
         if buffer == vim.fn.bufnr() then
@@ -52,10 +52,10 @@ local function generator(opts, settings)
             buffer = buffer,
             cursor = { row = v.cursor[1], col = v.cursor[2] },
             callback = function(content)
-                require("grapple").select({ key = content.extra.key })
+                require("grapple").select({ path = content.extra.path })
             end,
             extra = {
-                key = v.key,
+                path = v.path,
             },
         })
     end)
