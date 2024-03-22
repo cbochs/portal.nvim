@@ -1,4 +1,4 @@
-*portal.nvim.txt*        For Neovim >= v0.8.0       Last change: 2024 March 01
+*portal.nvim.txt*        For Neovim >= v0.8.0       Last change: 2024 March 22
 
 ==============================================================================
 Table of Contents                              *portal.nvim-table-of-contents*
