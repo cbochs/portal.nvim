@@ -52,7 +52,7 @@ end
 ---@param labels string[]
 ---@param window_options Portal.WindowOptions
 ---@return Portal.Window[]
-function Search.open(results, labels, window_options)
+function Search.portals(results, labels, window_options)
     if vim.tbl_isempty(results) then
         vim.notify("Portal: empty search results")
         return {}
@@ -113,17 +113,12 @@ function Search.open(results, labels, window_options)
             window_options.title = window_title(result)
         end
 
-        local window = Window:new(result, window_options)
-        window:open()
-        window:label(labels[i])
+        local window = Window:new(labels[i], result, window_options)
 
         table.insert(windows, window)
 
         ::continue::
     end
-
-    -- Force UI to redraw to ensure windows appear before user input
-    vim.cmd("redraw")
 
     return windows
 end

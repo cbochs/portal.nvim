@@ -1,6 +1,7 @@
 local log = require("portal.log")
 
 ---@class Portal.Window
+---@field label string
 ---@field content Portal.Content
 ---@field options Portal.WindowOptions
 ---@field state Portal.WindowState
@@ -22,7 +23,6 @@ Window.__index = Window
 ---@field buffer integer | any
 ---@field extmark integer | any
 ---@field cursor integer[]
----@field label string
 
 local namespace = vim.api.nvim_create_namespace("portal")
 
@@ -31,13 +31,15 @@ vim.api.nvim_set_hl(0, "PortalTitle", { link = "FloatTitle", default = true })
 vim.api.nvim_set_hl(0, "PortalBorder", { link = "FloatBorder", default = true })
 vim.api.nvim_set_hl(0, "PortalNormal", { link = "NormalFloat", default = true })
 
+---@param label string
 ---@param content Portal.Content
 ---@param options Portal.WindowOptions
 ---@return Portal.Window
-function Window:new(content, options)
+function Window:new(label, content, options)
     assert(vim.api.nvim_buf_is_valid(content.buffer), ("Portal: invalid buffer %s"):format(content.buffer))
 
     local window = {
+        label = label,
         content = content,
         options = options,
         state = nil,
@@ -94,18 +96,16 @@ function Window:open()
     vim.api.nvim_win_set_cursor(self.state.window, self.state.cursor)
 end
 
-function Window:label(label)
+function Window:add_label()
     if not self.state then
         log.error("Window.label: window is not open.")
     end
-
-    self.state.label = label
 
     local cursor = { self.state.cursor[1] - 1, self.state.cursor[2] }
     local row = cursor[1]
     local col = cursor[2]
     local id = nil
-    local virt_text = { { (" %s "):format(label), "PortalLabel" } }
+    local virt_text = { { (" %s "):format(self.label), "PortalLabel" } }
 
     local extmarks = vim.api.nvim_buf_get_extmarks(self.state.buffer, namespace, cursor, cursor, { details = true })
     if not vim.tbl_isempty(extmarks) then
@@ -126,7 +126,7 @@ function Window:label(label)
 end
 
 function Window:has_label(label)
-    return self.state.label == label
+    return self.label == label
 end
 
 function Window:select()

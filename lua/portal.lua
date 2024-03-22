@@ -22,6 +22,32 @@ function Portal.setup(overrides)
 end
 
 ---@param queries Portal.Query[]
+---@param overrides? Portal.Settings
+function Portal.tunnel(queries, overrides)
+    local Search = require("portal.search")
+    local Settings = require("portal.settings")
+
+    local settings = vim.tbl_deep_extend("force", Settings.as_table(), overrides or {})
+    local results = Portal.search(queries)
+
+    if settings.select_first and #results == 1 then
+        results[1]:select()
+        return
+    end
+
+    local windows = Portal.portals(results, settings)
+
+    Portal.open(windows)
+
+    local selected = Search.select(windows, settings.escape)
+    if selected ~= nil then
+        selected:select()
+    end
+
+    Portal.close(windows)
+end
+
+---@param queries Portal.Query[]
 ---@return Portal.Content[]
 function Portal.search(queries)
     local Iterator = require("portal.iterator")
@@ -51,44 +77,38 @@ function Portal.search(queries)
     return results
 end
 
----@param queries Portal.Query[]
+---@param results Portal.Content[]
 ---@param overrides? Portal.Settings
-function Portal.tunnel(queries, overrides)
+---@return Portal.Window[]
+function Portal.portals(results, overrides)
     local Search = require("portal.search")
     local Settings = require("portal.settings")
 
     local settings = vim.tbl_deep_extend("force", Settings.as_table(), overrides or {})
-    local results = Portal.search(queries)
+    local windows = Search.portals(results, settings.labels, settings.window_options)
 
-    if settings.select_first and #results == 1 then
-        results[1]:select()
-        return
+    return windows
+end
+
+---@param windows Portal.Window[]
+function Portal.open(windows)
+    for _, window in ipairs(windows) do
+        window:open()
+        window:add_label()
     end
 
-    local windows = Search.open(results, settings.labels, settings.window_options)
+    -- Force UI to redraw to ensure windows appear before user input
+    vim.cmd("redraw")
+end
 
-    local selected_window = Search.select(windows, settings.escape)
-    if selected_window ~= nil then
-        selected_window:select()
-    end
-
+---@param windows Portal.Window[]
+function Portal.close(windows)
     for _, window in ipairs(windows) do
         window:close()
     end
-end
 
----@param queries Portal.Query[]
----@param overrides? Portal.Settings
----@return Portal.Window
-function Portal.open(queries, overrides)
-    local Search = require("portal.search")
-    local Settings = require("portal.settings")
-
-    local settings = vim.tbl_deep_extend("force", Settings.as_table(), overrides or {})
-    local results = Portal.search(queries)
-    local windows = Search.open(results, settings.labels, settings.window_options)
-
-    return windows
+    -- Force UI to redraw to ensure windows appear before user input
+    vim.cmd("redraw")
 end
 
 return Portal
