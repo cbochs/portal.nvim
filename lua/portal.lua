@@ -52,7 +52,7 @@ function Portal.search(queries)
 end
 
 ---@param queries Portal.Query[]
----@param overrides Portal.Settings
+---@param overrides? Portal.Settings
 function Portal.tunnel(queries, overrides)
     local Search = require("portal.search")
     local Settings = require("portal.settings")
@@ -75,6 +75,20 @@ function Portal.tunnel(queries, overrides)
     for _, window in ipairs(windows) do
         window:close()
     end
+end
+
+---@param queries Portal.Query[]
+---@param overrides? Portal.Settings
+---@return Portal.Window
+function Portal.open(queries, overrides)
+    local Search = require("portal.search")
+    local Settings = require("portal.settings")
+
+    local settings = vim.tbl_deep_extend("force", Settings.as_table(), overrides or {})
+    local results = Portal.search(queries)
+    local windows = Search.open(results, settings.labels, settings.window_options)
+
+    return windows
 end
 
 return Portal
