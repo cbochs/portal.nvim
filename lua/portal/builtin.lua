@@ -11,42 +11,57 @@ setmetatable(Builtin, {
             return rawget(t, name)
         end
 
-        ---@type boolean, Portal.QueryGenerator
-        local ok, generator = pcall(require, ("portal.builtin.%s"):format(name))
-        if not ok then
-            log.warn(("Unable to load builtin %s"):format(name))
+        local generator
+        if pcall(require, ("portal.builtin.%s"):format(name)) then
+            -- Portal provides this as a builtin
+            generator = require(("portal.builtin.%s"):format(name))
+        elseif pcall(require, ("portal.extension.%s"):format(name)) then
+            -- Plugin provides this as an extension
+            generator = require(("portal.extension.%s"):format(name))
+        end
+
+        if not generator then
+            log.warn(("Unable to load builtin or extension %s"):format(name))
             return
         end
 
-        local builtin = {
+        local builtin = setmetatable({
+            ---@param opts Portal.SearchOptions
+            ---@return Portal.Query
             query = function(opts)
                 local Settings = require("portal.settings")
                 return generator(opts or {}, Settings)
             end,
 
+            ---@param opts Portal.SearchOptions
+            ---@return Portal.Content[]
             search = function(opts)
                 local Portal = require("portal")
                 local query = Builtin[name].query(opts)
                 return Portal.search(query)
             end,
 
-            ---@type Portal.Tunnel
+            ---@param opts Portal.SearchOptions
             tunnel = function(opts)
                 local Portal = require("portal")
                 local query = Builtin[name].query(opts)
                 Portal.tunnel(query)
             end,
 
-            ---@type Portal.Tunnel
+            ---@param opts Portal.SearchOptions
             tunnel_forward = function(opts)
                 Builtin[name].tunnel(vim.tbl_extend("force", opts or {}, { direction = "forward" }))
             end,
 
-            ---@type Portal.Tunnel
+            ---@param opts Portal.SearchOptions
             tunnel_backward = function(opts)
                 Builtin[name].tunnel(vim.tbl_extend("force", opts or {}, { direction = "backward" }))
             end,
-        }
+        }, {
+            __call = function(t, ...)
+                t.tunnel(...)
+            end,
+        })
 
         rawset(t, name, builtin)
 
