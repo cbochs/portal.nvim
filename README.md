@@ -14,15 +14,15 @@ See the [quickstart](#quickstart) section to get started.
 
 ## Features
 
-* **Labelled** [portals](#portals) for immediate movement to a portal location
-* **Customizable** [filters](#filters) and [slots](#slots) for [well-known lists](#builtin-queries)
-* **Composable** multiple location lists can be used in a single search
-* **Extensible** able to search any list with custom queries
+- **Labelled** [portals](#portals) for immediate movement to a portal location
+- **Customizable** [filters](#filters) and [slots](#slots) for [well-known lists](#builtin-queries)
+- **Composable** multiple location lists can be used in a single search
+- **Extensible** able to search any list with custom queries
 
 ## Requirements
 
-* [Neovim >= 0.8](https://github.com/neovim/neovim/releases/tag/v0.8.0)
-* Neovim >= 0.9 - optional, for [floating window title](https://github.com/neovim/neovim/issues/17458)
+- [Neovim >= 0.8](https://github.com/neovim/neovim/releases/tag/v0.8.0)
+- Neovim >= 0.9 - optional, for [floating window title](https://github.com/neovim/neovim/issues/17458)
 
 ## Quickstart
 
@@ -144,7 +144,6 @@ require("portal").setup({
 ## Usage
 
 ### Builtin Queries
-
 
 <details>
 <summary>Builtin Queries and Examples</summary>
@@ -336,38 +335,14 @@ require("portal.builtin").quickfix.tunnel()
 <details>
 <summary>Portal API and Examples</summary>
 
-#### `portal#search`
-
-The top-level method used for searching a location list query.
-
-**API**: `require("portal").search(queries)`
-
-**`queries`**: [`Portal.Query[]`](#portalquery)
-
-<details>
-<summary><b>Examples</b></summary>
-
-```lua
--- Return the results of a query over the jumplist and quickfix list
-local search_results = require("portal").search({
-    require("portal.builtin").jumplist.query()
-    require("portal.builtin").quickfix.query(),
-})
-
--- Select the first location from the list of results
-local first_portal = search_results[1]
-first_portal:select()
-```
-
-</details>
-
 #### `portal#tunnel`
 
-The top-level method used for searching, opening, and selecting portals.
+Search, open, and select a portal from a given query.
 
-**API**: `require("portal").tunnel(queries)`
+**API**: `require("portal").tunnel(queries, overrides)`
 
 **`queries`**: [`Portal.Query[]`](#portalquery)
+**`overrides`**: [`Portal.Settings`](#settings)
 
 <details>
 <summary><b>Examples</b></summary>
@@ -386,6 +361,80 @@ require("portal").tunnel({
 ```
 
 </details>
+
+#### `portal#search`
+
+Complete a search for a given query and return the results
+
+**API**: `require("portal").search(queries)`
+
+**`queries`**: [`Portal.Query[]`](#portalquery)
+
+**`returns`**: [`portal.content[]`](#portalcontent)
+
+<details>
+<summary><b>Examples</b></summary>
+
+```lua
+-- Return the results of a query over the jumplist and quickfix list
+local results = require("portal").search({
+    require("portal.builtin").jumplist.query()
+    require("portal.builtin").quickfix.query(),
+})
+
+-- Select the first location from the list of results
+results[1]:select()
+```
+
+</details>
+
+#### `portal#portals`
+
+Create portals (windows) for a given set of search results. By default portals will not be open.
+
+**API**: `require("portal").portals(queries, overrides)`
+
+**`results`**: [`Portal.Content[]`](#portalcontent)
+**`overrides`**: [`Portal.Settings`](#settings)
+
+**`returns`**: [`portal.window[]`](#portalwindow)
+
+<details>
+<summary><b>Examples</b></summary>
+
+```lua
+-- Return the results of a query over the jumplist and quickfix list
+local query = require("portal.builtin").jumplist.query()
+local results = require("portal").search(query)
+local windows = require("portal").portals(results)
+
+-- Open the portal windows
+require("portal").open(windows)
+
+-- Select the first location from the list of portal windows
+windows[1]:select()
+
+-- Close the portal windows
+require("portal").close(windows)
+```
+
+</details>
+
+#### `portal#open`
+
+Open a given list of portal (windows). Preferred over a for-loop as it forces a UI redraw.
+
+**API**: `require("portal").open(windows)`
+
+**`results`**: [`Portal.Window[]`](#portalwindow)
+
+#### `portal#close`
+
+Close a given list of portal (windows). Preferred over a for-loop as it forces a UI redraw.
+
+**API**: `require("portal").close(windows)`
+
+**`results`**: [`Portal.Window[]`](#portalwindow)
 
 </details>
 
@@ -555,7 +604,7 @@ Iterator:rrepeat(1)
 A few highlight groups are available for customizing the look of Portal.
 
 | Group          | Description                | Default       |
-|----------------|----------------------------|---------------|
+| -------------- | -------------------------- | ------------- |
 | `PortalLabel`  | Portal label (extmark)     | `Search`      |
 | `PoralTitle`   | Floating window title      | `FloatTitle`  |
 | `PortalBorder` | Floating window border     | `FloatBorder` |
@@ -604,15 +653,25 @@ Named tuple of `(source, slots)`. Used as the input to [`portal#tunnel`](#portal
 
 ### `Portal.Content`
 
-A object with the fields `(type, buffer, cursor)` and a `:select()` method used for opening and selecting a portal location. Extra data is available in the `extra` field and can be used to aide in filtering, querying, and selecting a portal. See the [builtins](#builtin-queries) section for information on which additional fields are present.
+An object with the fields `(type, buffer, cursor)` and a `:select()` method used for opening and selecting a portal location. Extra data is available in the `extra` field and can be used to aide in filtering, querying, and selecting a portal. See the [builtins](#builtin-queries) section for information on which additional fields are present.
 
-**Type**: `table`
+**Type**: `object`
 
 - **`type`**: `string`
 - **`buffer`**: `integer`
 - **`cursor`**: `{ row: integer, col: integer }`
 - **`extra`**: `table`
-- **`:select()`**: `fun(c: Portal.Content)`
+- **`:select()`**
+
+### `Portal.Window`
+
+A wrapper object around some [`Portal.Content`](#portalcontent).
+
+**Type**: `object`
+
+- **`:select()`**
+- **`:open()`**
+- **`:close()`**
 
 ### `Portal.Predicate`
 
