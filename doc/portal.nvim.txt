@@ -349,36 +349,14 @@ PORTAL API ~
 Portal API and Examples ~
 
 
-PORTAL#SEARCH
-
-The top-level method used for searching a location list query.
-
-**API**`require("portal").search(queries)`
-
-**queries**|portal.nvim-`portal.query[]`|
-
-Examples ~
-
->lua
-    -- Return the results of a query over the jumplist and quickfix list
-    local search_results = require("portal").search({
-        require("portal.builtin").jumplist.query()
-        require("portal.builtin").quickfix.query(),
-    })
-    
-    -- Select the first location from the list of results
-    local first_portal = search_results[1]
-    first_portal:select()
-<
-
-
 PORTAL#TUNNEL
 
-The top-level method used for searching, opening, and selecting portals.
+Search, open, and select a portal from a given query.
 
-**API**`require("portal").tunnel(queries)`
+**API**`require("portal").tunnel(queries, overrides)`
 
 **queries**|portal.nvim-`portal.query[]`|
+**overrides**|portal.nvim-`portal.settings`|
 
 Examples ~
 
@@ -394,6 +372,81 @@ Examples ~
         require("portal.builtin").quickfix.query({ max_results = 1 }),
     })
 <
+
+
+PORTAL#SEARCH
+
+Complete a search for a given query and return the results
+
+**API**`require("portal").search(queries)`
+
+**queries**|portal.nvim-`portal.query[]`|
+
+**returns**|portal.nvim-`portal.content[]`|
+
+Examples ~
+
+>lua
+    -- Return the results of a query over the jumplist and quickfix list
+    local results = require("portal").search({
+        require("portal.builtin").jumplist.query()
+        require("portal.builtin").quickfix.query(),
+    })
+    
+    -- Select the first location from the list of results
+    results[1]:select()
+<
+
+
+PORTAL#PORTALS
+
+Create portals (windows) for a given set of search results. By default portals
+will not be open.
+
+**API**`require("portal").portals(queries, overrides)`
+
+**results**|portal.nvim-`portal.content[]`|
+**overrides**|portal.nvim-`portal.settings`|
+
+**returns**|portal.nvim-`portal.window[]`|
+
+Examples ~
+
+>lua
+    -- Return the results of a query over the jumplist and quickfix list
+    local query = require("portal.builtin").jumplist.query()
+    local results = require("portal").search(query)
+    local windows = require("portal").portals(results)
+    
+    -- Open the portal windows
+    require("portal").open(windows)
+    
+    -- Select the first location from the list of portal windows
+    windows[1]:select()
+    
+    -- Close the portal windows
+    require("portal").close(windows)
+<
+
+
+PORTAL#OPEN
+
+Open a given list of portal (windows). Preferred over a for-loop as it forces a
+UI redraw.
+
+**API**`require("portal").open(windows)`
+
+**results**|portal.nvim-`portal.window[]`|
+
+
+PORTAL#CLOSE
+
+Close a given list of portal (windows). Preferred over a for-loop as it forces
+a UI redraw.
+
+**API**`require("portal").close(windows)`
+
+**results**|portal.nvim-`portal.window[]`|
 
 
 PORTALS                                      *portal.nvim-portal.nvim-portals*
@@ -626,19 +679,30 @@ iterator will be simply be collected and presented as the search results.
 
 PORTAL.CONTENT ~
 
-A object with the fields `(type, buffer, cursor)` and a `:select()` method used
-for opening and selecting a portal location. Extra data is available in the
-`extra` field and can be used to aide in filtering, querying, and selecting a
-portal. See the |portal.nvim-builtins| section for information on which
+An object with the fields `(type, buffer, cursor)` and a `:select()` method
+used for opening and selecting a portal location. Extra data is available in
+the `extra` field and can be used to aide in filtering, querying, and selecting
+a portal. See the |portal.nvim-builtins| section for information on which
 additional fields are present.
 
-**Type**`table`
+**Type**`object`
 
 - **type**`string`
 - **buffer**`integer`
 - **cursor**`{ row: integer, col: integer }`
 - **extra**`table`
-- **:select()**`fun(c: Portal.Content)`
+- **:select()**
+
+
+PORTAL.WINDOW ~
+
+A wrapper object around some |portal.nvim-`portal.content`|.
+
+**Type**`object`
+
+- **:select()**
+- **:open()**
+- **:close()**
 
 
 PORTAL.PREDICATE ~
