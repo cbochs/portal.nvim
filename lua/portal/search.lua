@@ -45,14 +45,6 @@ function Search.portals(results, labels, win_opts)
         return {}
     end
 
-    local function window_title(result)
-        local title = vim.fs.basename(vim.api.nvim_buf_get_name(result.buffer))
-        if title == "" then
-            title = "Result"
-        end
-        return ("[%s] %s"):format(result.type, title)
-    end
-
     local function compute_max_index()
         return math.min(math.max(unpack(vim.tbl_keys(results))), #labels)
     end
@@ -96,7 +88,8 @@ function Search.portals(results, labels, win_opts)
         if type(win_opts.title) == "function" then
             win_opts.title = win_opts.title(result)
         else
-            win_opts.title = window_title(result)
+            win_opts.title = nil
+            win_opts.title_pos = nil
         end
 
         local window = Window.new(result, labels[i], win_opts)
