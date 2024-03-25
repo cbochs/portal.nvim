@@ -1,9 +1,7 @@
-local log = require("portal.log")
+local Query = require("portal.query")
 
+---@type table<string, Portal.Builtin>
 local Builtin = {}
-
----@alias Portal.QueryGenerator fun(o: Portal.SearchOptions, s: Portal.Settings): Portal.Query
----@alias Portal.Tunnel fun(o: Portal.SearchOptions)
 
 setmetatable(Builtin, {
     __index = function(t, name)
@@ -11,6 +9,7 @@ setmetatable(Builtin, {
             return rawget(t, name)
         end
 
+        ---@type Portal.Generator
         local generator
         if pcall(require, ("portal.builtin.%s"):format(name)) then
             -- Portal provides this as a builtin
@@ -21,45 +20,57 @@ setmetatable(Builtin, {
         end
 
         if not generator then
-            log.warn(("Unable to load builtin or extension %s"):format(name))
             return
         end
 
+        ---@class Portal.Builtin
         local builtin = setmetatable({
-            ---@param opts Portal.SearchOptions
+            generator = generator,
+
+            ---@param opts? Portal.QueryOptions
+            ---@return Portal.Query
+            prepare = function(opts)
+                return Query.new(generator):prepare(opts)
+            end,
+
+            ---@deprecated
+            ---@param opts? Portal.QueryOptions
             ---@return Portal.Query
             query = function(opts)
-                local Settings = require("portal.settings")
-                return generator(opts or {}, Settings)
+                vim.notify("Portal: 'query' has been renamed to 'prepare'", vim.log.levels.WARN)
+                return Query.new(generator):prepare(opts)
             end,
 
-            ---@param opts Portal.SearchOptions
+            ---@param slots? Portal.Slots
+            ---@param opts? Portal.QueryOptions
             ---@return Portal.Content[]
-            search = function(opts)
-                local Portal = require("portal")
-                local query = Builtin[name].query(opts)
-                return Portal.search(query)
+            search = function(slots, opts)
+                local query = Query.new(generator)
+                return require("portal").search(query, slots, opts)
             end,
 
-            ---@param opts Portal.SearchOptions
+            ---@param opts? Portal.Options
             tunnel = function(opts)
-                local Portal = require("portal")
-                local query = Builtin[name].query(opts)
-                Portal.tunnel(query)
+                local query = Query.new(generator)
+                require("portal").tunnel(query, opts)
             end,
 
-            ---@param opts Portal.SearchOptions
+            ---@param opts? Portal.Options
             tunnel_forward = function(opts)
-                Builtin[name].tunnel(vim.tbl_extend("force", opts or {}, { direction = "forward" }))
+                local query = Query.new(generator)
+                opts = vim.tbl_deep_extend("force", opts or {}, { query = { reverse = false } })
+                require("portal").tunnel(query, opts)
             end,
 
-            ---@param opts Portal.SearchOptions
+            ---@param opts? Portal.Options
             tunnel_backward = function(opts)
-                Builtin[name].tunnel(vim.tbl_extend("force", opts or {}, { direction = "backward" }))
+                local query = Query.new(generator)
+                opts = vim.tbl_deep_extend("force", opts or {}, { query = { reverse = true } })
+                require("portal").tunnel(query, opts)
             end,
         }, {
-            __call = function(t, ...)
-                t.tunnel(...)
+            __call = function(tbl, ...)
+                return tbl.tunnel(...)
             end,
         })
 
