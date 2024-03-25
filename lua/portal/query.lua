@@ -27,7 +27,7 @@ end
 function Query:search(slots, opts)
     opts = vim.tbl_deep_extend("force", self.opts or {}, opts or {})
 
-    local iter = self.generator(self.opts)
+    local iter = self.generator(opts)
 
     if not slots then
         return iter:totable()
