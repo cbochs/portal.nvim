@@ -60,7 +60,11 @@ function Window:open()
         --
         -- Reference: https://github.com/cbochs/portal.nvim/issues/20
         --
+
+        local shortmess = vim.go.shortmess
+        vim.opt.shortmess:append("A")
         pcall(vim.fn.bufload, self.buf_id)
+        vim.opt.shortmess = shortmess
 
         if not vim.api.nvim_buf_is_loaded(self.buf_id) then
             error(string.format("Portal: failed to load: %s", self.content.buffer or self.content.path))
