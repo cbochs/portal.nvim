@@ -20,7 +20,7 @@ local Extension = {}
 ---@field extra? table
 
 ---@class Portal.QueryOptions
----@field start? integer
+---@field start? integer the absolute starting position
 ---@field skip? integer
 ---@field reverse? boolean
 ---@field lookback? integer maximum number of searched items
@@ -58,10 +58,11 @@ function Extension.register(extension)
         opts = vim.tbl_deep_extend("keep", opts or {}, defaults)
 
         if opts.reverse then
-            -- Assume the "start" is now a "tail" position that can fall past
-            -- the end of the list
-            opts.start = (#results - (opts.start - 1)) + 1
+            opts.start = #results - opts.start
         end
+
+        -- Clamp the starting position between 1 and #results
+        opts.start = math.max(1, math.min(#results, opts.start))
 
         ---@param result Portal.Result
         ---@return Portal.ExtendedResult
