@@ -1,11 +1,16 @@
-ifneq ($(strip $(spec)),)
-	spec_file = $(spec)_spec.lua
-endif
-
 test:
+	printf "\n======\n\n" ; \
+	nvim --version | head -n 1 && echo '' ; \
 	nvim --headless \
-		-u "tests/init.lua" \
-		-c "PlenaryBustedDirectory tests/spec/$(spec_file) { minimal_init = 'tests/init.lua', sequential = true }"
+		-u "tests/minimal_init.lua" \
+		-c "PlenaryBustedDirectory tests { minimal_init = 'tests/minimal_init.lua', sequential = true }"
+
+test_file:
+	printf "\n======\n\n" ; \
+	nvim --version | head -n 1 && echo '' ; \
+	nvim --headless \
+		-u "tests/minimal_init.lua" \
+		-c "PlenaryBustedDirectory $(FILE) { minimal_init = 'tests/minimal_init.lua', sequential = true }"
 
 clean:
 	rm -rf .tests
