@@ -44,7 +44,14 @@ local DEFAULT_SETTINGS = {
         noautocmd = true,
 
         ---@type string | fun(c: Portal.Content): string | nil
-        title = nil,
+        title = function(content)
+            local title = vim.fs.basename(content.path or vim.api.nvim_buf_get_name(content.buffer))
+            if title == "" then
+                title = "content"
+            end
+            return ("[%s] %s"):format(content.type, title)
+        end,
+
         title_pos = "center",
     },
 }
