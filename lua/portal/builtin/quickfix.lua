@@ -1,7 +1,7 @@
 return require("portal.extension").register({
     name = "quickfix",
 
-    ---@return Portal.Result[] results, Portal.QueryOptions? defaults
+    ---@return Portal.Result[] results, Portal.QueryOptions defaults
     generate = function()
         local quickfix = vim.fn.getqflist()
 
