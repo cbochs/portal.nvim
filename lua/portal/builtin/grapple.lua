@@ -1,11 +1,11 @@
 return require("portal.extension").register({
     name = "grapple",
 
-    ---@return Portal.Result[] results, Portal.QueryOptions? defaults
+    ---@return Portal.Result[] results, Portal.QueryOptions defaults
     generate = function()
         local ok, _ = pcall(require, "grapple")
         if not ok then
-            return {}
+            error("Portal: the 'grapple' builtin requires the plugin 'cbochs/grapple.nvim'")
         end
 
         local tags = require("grapple").tags()
