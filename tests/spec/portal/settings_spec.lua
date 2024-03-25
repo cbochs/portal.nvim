@@ -22,7 +22,9 @@ describe("settings", function()
             style = "minimal",
             noautocmd = true,
 
-            title = nil,
+            -- Exclude default title function from test
+            title = settings.win_opts.title,
+
             title_pos = "center",
         }, settings.win_opts)
     end)
