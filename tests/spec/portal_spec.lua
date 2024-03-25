@@ -14,12 +14,11 @@ describe("portal", function()
         end)
 
         it("returns results for multiple queries", function()
-            -- stylua: ignore
             assert.are.same(
-                { 1, 2, 3 },
+                { 1, 2, 3, 1, 2, 3 },
                 Portal.search({
-                    { source = Iterator:new({ 1 }) },
-                    { source = Iterator:new({ 2, 3 }) },
+                    Query.new(generator),
+                    Query.new(generator),
                 })
             )
         end)
