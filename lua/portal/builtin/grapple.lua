@@ -1,82 +1,45 @@
----@type Portal.QueryGenerator
-local function generator(opts, settings)
-    local Content = require("portal.content")
-    local Iterator = require("portal.iterator")
-    local Search = require("portal.search")
+return require("portal.extension").register({
+    name = "grapple",
 
-    local ok, _ = pcall(require, "grapple")
-    if not ok then
-        return require("portal.log").error("Unable to load 'grapple'. Please ensure that grapple.nvim is installed.")
-    end
-
-    local tags = require("grapple").tags()
-
-    opts = vim.tbl_extend("force", {
-        direction = "forward",
-        max_results = #settings.labels,
-    }, opts or {})
-
-    if settings.max_results then
-        opts.max_results = math.min(opts.max_results, settings.max_results)
-    end
-
-    -- stylua: ignore
-    local iter = Iterator:new(tags)
-        :take(settings.lookback)
-
-    if opts.start then
-        iter = iter:start_at(opts.start)
-    end
-    if opts.direction == Search.direction.backward then
-        iter = iter:reverse()
-    end
-
-    iter = iter:map(function(v, _)
-        if not v.cursor then
-            return nil
+    ---@return Portal.Result[] results, Portal.QueryOptions? defaults
+    generate = function()
+        local ok, _ = pcall(require, "grapple")
+        if not ok then
+            return {}
         end
 
-        local buffer
-        if vim.fn.bufexists(v.path) ~= 0 then
-            buffer = vim.fn.bufnr(v.path)
-        else
-            buffer = vim.fn.bufadd(v.path)
-        end
+        local tags = require("grapple").tags()
 
-        if buffer == vim.fn.bufnr() then
-            return nil
-        end
-
-        return Content:new({
-            type = "grapple",
-            buffer = buffer,
-            cursor = { row = v.cursor[1], col = v.cursor[2] },
-            callback = function(content)
-                require("grapple").select({ path = content.extra.path })
+        ---@type Portal.QueryOptions
+        ---@diagnostic disable-next-line: missing-fields
+        local defaults = {
+            direction = "forward",
+            filter = function(content)
+                return vim.api.nvim_buf_get_name(0) ~= content.path
             end,
-            extra = {
-                path = v.path,
-            },
-        })
-    end)
+        }
 
-    iter = iter:filter(function(v)
-        return vim.api.nvim_buf_is_valid(v.buffer)
-    end)
-    if settings.filter then
-        iter = iter:filter(settings.filter)
-    end
-    if opts.filter then
-        iter = iter:filter(opts.filter)
-    end
-    if not opts.slots then
-        iter = iter:take(opts.max_results)
-    end
+        return tags, defaults
+    end,
 
-    return {
-        source = iter,
-        slots = opts.slots,
-    }
-end
+    ---@param _ integer
+    ---@param extended_result Portal.ExtendedResult
+    ---@return Portal.Content
+    transform = function(_, extended_result)
+        local tag = extended_result.result
 
-return generator
+        ---@type Portal.Content
+        local content = {
+            type = "grapple",
+            path = tag.path,
+            cursor = tag.cursor,
+        }
+
+        return content
+    end,
+
+    ---@param content Portal.Content
+    select = function(content)
+        require("grapple").select({ path = content.path })
+    end,
+})
