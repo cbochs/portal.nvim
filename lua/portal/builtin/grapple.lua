@@ -32,7 +32,7 @@ return require("portal.extension").register({
         local content = {
             type = "grapple",
             path = tag.path,
-            cursor = tag.cursor,
+            cursor = tag.cursor or { 1, 0 },
         }
 
         return content
