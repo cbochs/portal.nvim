@@ -40,7 +40,7 @@ function Window:select()
 end
 
 function Window:open()
-    if self:open() then
+    if self:is_open() then
         return
     end
 
@@ -84,8 +84,8 @@ function Window:open()
     -- Place content cursor
     local line_count = vim.api.nvim_buf_line_count(self.buf_id)
     vim.api.nvim_win_set_cursor(self.win_id, {
-        math.min(self.content.cursor[0], line_count),
-        self.content.cursor[1],
+        math.min(self.content.cursor[1], line_count),
+        self.content.cursor[2],
     })
 
     -- Create the window label
