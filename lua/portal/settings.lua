@@ -17,7 +17,7 @@ local DEFAULT_SETTINGS = {
 
     ---@alias Portal.Slots integer | Portal.Predicate | Portal.Predicate[]
 
-    -- TODO: Explain slots
+    -- TODO: explain slots
     ---The maximum number of results for any search.
     ---
     ---@type Portal.Slots
@@ -27,6 +27,7 @@ local DEFAULT_SETTINGS = {
     ---@type Portal.Predicate | nil
     filter = nil,
 
+    -- TODO: explain lookback
     lookback = 100,
 
     ---The raw window options used for the portal window
