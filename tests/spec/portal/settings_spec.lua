@@ -1,21 +1,29 @@
+local Settings = require("portal.settings")
+
 describe("settings", function()
     it("has the correct defaults", function()
-        local settings = require("portal.settings")
-        assert.equals("warn", settings.log_level)
+        local settings = Settings.new()
 
-        assert.is_nil(settings.filter)
-        assert.equals(100, settings.lookback)
         assert.are.same({ "j", "k", "h", "l" }, settings.labels)
+        assert.are.same(false, settings.select_first)
+        assert.are.same(nil, settings.slots)
+        assert.are.same(nil, settings.filter)
+        assert.equals(100, settings.lookback)
 
-        local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
-        assert.are.same({ esc }, settings.escape)
+        assert.are.same({
+            width = 80,
+            height = 3,
 
-        assert.equals("cursor", settings.window_options.relative)
-        assert.equals(80, settings.window_options.width)
-        assert.equals(3, settings.window_options.height)
-        assert.equals(2, settings.window_options.col)
-        assert.equals(false, settings.window_options.focusable)
-        assert.equals("single", settings.window_options.border)
-        assert.equals(true, settings.window_options.noautocmd)
+            relative = "cursor",
+            col = 2,
+
+            focusable = false,
+            border = "single",
+            style = "minimal",
+            noautocmd = true,
+
+            title = nil,
+            title_pos = "center",
+        }, settings.win_opts)
     end)
 end)

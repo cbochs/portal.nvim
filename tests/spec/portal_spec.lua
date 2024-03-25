@@ -1,21 +1,16 @@
-local Iterator = require("portal.iterator")
+local Iter = require("portal.iterator")
+local Query = require("portal.query")
 local Portal = require("portal")
+
+local function generator()
+    return Iter.iter({ 1, 2, 3 })
+end
 
 describe("portal", function()
     describe("#search", function()
-        it("does not allow an empty search", function()
-            -- stylua: ignore
-            assert.error(
-                function () Portal.search() end,
-                "Must provide at least one query to Portal search"
-            )
-        end)
-
         it("returns results for a single query", function()
-            -- stylua: ignore
-            assert.are.same({ 1, 2, 3 }, Portal.search({
-                source = Iterator:new({ 1, 2, 3 }),
-            }))
+            local query = Query.new(generator)
+            assert.are.same({ 1, 2, 3 }, Portal.search(query))
         end)
 
         it("returns results for multiple queries", function()
