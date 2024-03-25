@@ -1,7 +1,7 @@
 return require("portal.extension").register({
     name = "jumplist",
 
-    ---@return Portal.Result[] results, Portal.QueryOptions? defaults
+    ---@return Portal.Result[] results, Portal.QueryOptions defaults
     generate = function()
         local Iter = require("portal.iterator")
 
@@ -22,7 +22,9 @@ return require("portal.extension").register({
                 dist = math.abs(index - position),
             }
 
-            return result
+            if result.dist > 0 then
+                return result
+            end
         end
 
         -- stylua: ignore
@@ -31,8 +33,8 @@ return require("portal.extension").register({
             :map(extend_jumplist)
             :totable()
 
-        ---@type Portal.QueryOptions
         local defaults = {
+            start = position,
             reverse = true,
             filter = function(content)
                 return vim.api.nvim_buf_is_valid(content.buffer)
@@ -68,8 +70,8 @@ return require("portal.extension").register({
     select = function(content)
         -- stylua: ignore
         local keycode = content.extra.reverse
-            and vim.api.nvim_replace_termcodes("<c-i>", true, false, true)
-            or vim.api.nvim_replace_termcodes("<c-o>", true, false, true)
+            and vim.api.nvim_replace_termcodes("<c-o>", true, false, true)
+            or vim.api.nvim_replace_termcodes("<c-i>", true, false, true)
 
         vim.api.nvim_feedkeys(content.extra.dist .. keycode, "n", false)
     end,
