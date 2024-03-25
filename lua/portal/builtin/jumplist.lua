@@ -15,6 +15,7 @@ return require("portal.extension").register({
 
         ---@param index integer
         ---@param item vim.fn.getjumplist.ret.item
+        ---@return Portal.JumplistResult
         local function extend_jumplist(index, item)
             ---@class Portal.JumplistResult
             local result = {
@@ -22,9 +23,7 @@ return require("portal.extension").register({
                 dist = math.abs(index - position),
             }
 
-            if result.dist > 0 then
-                return result
-            end
+            return result
         end
 
         -- stylua: ignore
@@ -37,7 +36,7 @@ return require("portal.extension").register({
             start = position,
             reverse = true,
             filter = function(content)
-                return vim.api.nvim_buf_is_valid(content.buffer)
+                return content.extra.dist ~= 0 and vim.api.nvim_buf_is_valid(content.buffer)
             end,
         }
 
