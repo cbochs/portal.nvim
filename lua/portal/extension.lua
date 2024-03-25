@@ -1,7 +1,7 @@
 ---@class Portal.Extension
 ---@field name string
----@field generate fun(): Portal.Result[], Portal.QueryOptions?
----@field transform fun(r: Portal.Result, index: integer): Portal.Content
+---@field generate fun(): Portal.Result[], Portal.QueryOptions
+---@field transform fun(r: Portal.Result, i: integer): Portal.Content
 ---@field select fun(c: Portal.Content)
 local Extension = {}
 
@@ -56,6 +56,12 @@ function Extension.register(extension)
         })
 
         opts = vim.tbl_deep_extend("keep", opts or {}, defaults)
+
+        if opts.reverse then
+            -- Assume the "start" is now a "tail" position that can fall past
+            -- the end of the list
+            opts.start = (#results - (opts.start - 1)) + 1
+        end
 
         ---@param result Portal.Result
         ---@return Portal.ExtendedResult
