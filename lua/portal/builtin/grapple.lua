@@ -11,9 +11,7 @@ return require("portal.extension").register({
         local tags = require("grapple").tags()
 
         ---@type Portal.QueryOptions
-        ---@diagnostic disable-next-line: missing-fields
         local defaults = {
-            direction = "forward",
             filter = function(content)
                 return vim.api.nvim_buf_get_name(0) ~= content.path
             end,
