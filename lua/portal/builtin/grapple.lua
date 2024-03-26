@@ -28,9 +28,8 @@ return require("portal.extension").register({
 
         ---@type Portal.Content
         local content = {
-            type = "grapple",
             path = tag.path,
-            cursor = tag.cursor or { 1, 0 },
+            cursor = tag.cursor,
         }
 
         return content

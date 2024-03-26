@@ -53,7 +53,6 @@ return require("portal.extension").register({
 
         ---@type Portal.Content
         local content = {
-            type = "jumplist",
             buffer = result.item.bufnr,
             cursor = { result.item.lnum, result.item.col },
             extra = {

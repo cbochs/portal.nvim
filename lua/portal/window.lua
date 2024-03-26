@@ -87,19 +87,21 @@ function Window:open()
 
     -- Place content cursor
     local line_count = vim.api.nvim_buf_line_count(self.buf_id)
+    local cursor = self.content.cursor or { 1, 0 }
+
     vim.api.nvim_win_set_cursor(self.win_id, {
-        math.min(self.content.cursor[1], line_count),
-        self.content.cursor[2],
+        math.min(cursor[1], line_count),
+        cursor[2],
     })
 
     -- Create the window label
-    local cursor = { self.content.cursor[1] - 1, self.content.cursor[2] } -- (0, 0)-indexed cursor
+    local api_cursor = { self.content.cursor[1] - 1, self.content.cursor[2] } -- (0, 0)-indexed cursor
     local id = nil
-    local row = cursor[1]
-    local col = cursor[2]
+    local row = api_cursor[1]
+    local col = api_cursor[2]
     local virt_text = { { (" %s "):format(self.label), "PortalLabel" } }
 
-    local extmarks = vim.api.nvim_buf_get_extmarks(self.buf_id, WINDOW_NS, cursor, cursor, { details = true })
+    local extmarks = vim.api.nvim_buf_get_extmarks(self.buf_id, WINDOW_NS, api_cursor, api_cursor, { details = true })
     if not vim.tbl_isempty(extmarks) then
         local extmark = extmarks[1]
         id = extmark[1]

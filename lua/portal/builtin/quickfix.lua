@@ -22,7 +22,6 @@ return require("portal.extension").register({
         local result = extended_result.result
 
         return {
-            type = "quickfix",
             buffer = result.bufnr,
             cursor = { result.lnum, result.col },
         }
