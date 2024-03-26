@@ -6,8 +6,7 @@ end
 
 ---@class Portal.Settings
 local DEFAULT_SETTINGS = {
-    ---An ordered list of keys for labelling portals. Labels will applied in
-    ---order, according to their index.
+    ---Ordered list of keys for labelling portals
     ---@type string[]
     labels = { "j", "k", "h", "l" },
 
@@ -15,22 +14,21 @@ local DEFAULT_SETTINGS = {
     ---@type boolean
     select_first = false,
 
-    ---@alias Portal.Slots integer | Portal.Predicate | Portal.Predicate[]
-
-    -- TODO: explain slots
-    ---The maximum number of results for any search.
-    ---
-    ---@type Portal.Slots
+    ---The maximum number of results to return or a list of predicates to match
+    ---or "fill". By default, uses the number of labels as a maximum number of
+    ---results. See the Slots section for more information.
+    ---@type Portal.Slots | nil
     slots = nil,
 
-    ---The base filter applied to every search.
+    ---The default filter to be applied to every search result.
     ---@type Portal.Predicate | nil
     filter = nil,
 
-    -- TODO: explain lookback
+    ---The maximum number of results to consider when performing a Portal query
+    ---@type integer
     lookback = 100,
 
-    ---The raw window options used for the portal window
+    ---Window options for Portal windows
     ---@type vim.api.keyset.win_config
     win_opts = {
         width = 80,
