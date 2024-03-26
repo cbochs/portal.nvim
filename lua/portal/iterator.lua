@@ -41,8 +41,14 @@ local function sanitize(t)
     return t
 end
 
+---@param tbl table | function | Portal.Iter
 ---@return Portal.Iter
 function ListIter.new(tbl)
+    if getmetatable(tbl) == ListIter then
+        ---@cast tbl Portal.Iter
+        return tbl
+    end
+
     return setmetatable({
         _table = tbl,
         _head = 1,
@@ -65,6 +71,15 @@ function ListIter:next()
 
         return unpack(val)
     end
+end
+
+function ListIter:inspect()
+    vim.print({
+        table = self._table,
+        head = self._head,
+        tail = self._tail,
+    })
+    return self
 end
 
 ---@return integer

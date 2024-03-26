@@ -10,8 +10,7 @@ end
 ---@field labels? string[]
 ---@field select_first? boolean
 ---@field win_opts? vim.api.keyset.win_config
----@field slots? Portal.Slots
----@field search? Portal.QueryOptions
+---@field search? Portal.SearchOptions
 
 ---@param windows Portal.Window[]
 ---@return Portal.Window | nil selected_window
@@ -41,10 +40,14 @@ function Portal.tunnel(queries, opts)
         labels = Settings.labels,
         select_first = Settings.select_first,
         win_opts = Settings.win_opts,
-        slots = Settings.slots or #Settings.labels,
+        search = {
+            filter = Settings.filter,
+            limit = #Settings.labels,
+            slots = Settings.slots,
+        },
     })
 
-    local results = Portal.search(queries, opts.slots, opts.search)
+    local results = Portal.search(queries, opts.search)
     if #results == 0 then
         vim.notify("Portal: empty search results")
     end
@@ -67,26 +70,11 @@ function Portal.tunnel(queries, opts)
 end
 
 ---@param queries Portal.Query | Portal.Query[]
----@param slots? Portal.Slots
----@param opts? Portal.QueryOptions
+---@param opts? Portal.SearchOptions
 ---@return Portal.Content[]
-function Portal.search(queries, slots, opts)
-    local Query = require("portal.query")
+function Portal.search(queries, opts)
     local Search = require("portal.search")
-    local Settings = require("portal.settings")
-
-    -- Wrap a single query as a list
-    if getmetatable(queries) == Query then
-        queries = { queries }
-    end
-
-    slots = slots or Settings.slots or #Settings.labels
-
-    opts = vim.tbl_deep_extend("keep", opts or {}, {
-        filter = Settings.filter,
-    })
-
-    return Search.search(queries, slots, opts)
+    return Search.search(queries, opts)
 end
 
 ---@param results Portal.Content[]

@@ -1,13 +1,8 @@
 local Iter = require("portal.iterator")
 
----@alias Portal.Generator fun(...): Portal.Iter, Portal.QueryOptions? | Portal.ExtendedGenerator
-
----@class Portal.ExtendedGenerator
----@field generate fun(...): Portal.Iter, Portal.QueryOptions?
----@field transform fun(i: integer, r: Portal.Result): Portal.Content
-
 ---@class Portal.Query
 ---@field generator Portal.Generator
+---@field transformer Portal.Transformer
 ---@field opts? Portal.QueryOptions
 local Query = {}
 Query.__index = Query
@@ -20,6 +15,23 @@ Query.__index = Query
 ---@field limit? integer maximum number of returned results
 ---@field filter? Portal.Predicate
 
+---@alias Portal.Iterable table | function | Portal.Iter
+---@alias Portal.Generator fun(): Portal.Iterable, Portal.QueryOptions?
+---@alias Portal.Transformer fun(i: integer, r: Portal.Result): Portal.Content?
+---@alias Portal.Result any
+
+---@class Portal.ExtendedResult
+---@field result Portal.Result
+---@field opts Portal.QueryOptions
+
+---@class Portal.Content
+---@field type string
+---@field buffer? integer
+---@field path? string
+---@field cursor integer[] (1, 0)-indexed cursor position
+---@field select? fun(c: Portal.Content)
+---@field extra? table
+
 ---@param opts Portal.QueryOptions
 ---@return fun(r: Portal.Result): Portal.ExtendedResult
 local function extend_result(opts)
@@ -31,21 +43,15 @@ local function extend_result(opts)
     end
 end
 
-local function passthrough()
-    return true
-end
-
 ---@param generator Portal.Generator
+---@param transformer? Portal.Transformer
 ---@return Portal.Query
-function Query.new(generator)
+function Query.new(generator, transformer)
     return setmetatable({
         generator = generator,
+        transformer = transformer,
         opts = nil,
     }, Query)
-end
-
-function Query:is_extended()
-    return type(self.generator) == "table"
 end
 
 ---@param opts? Portal.QueryOptions
@@ -57,12 +63,9 @@ end
 
 ---@return Portal.Iter
 function Query:search()
-    local iter, defaults
-    if self:is_extended() then
-        iter, defaults = self.generator.generate()
-    else
-        iter, defaults = self.generator()
-    end
+    local results, defaults = self.generator()
+
+    local iter = Iter.iter(results)
 
     defaults = defaults or {}
 
@@ -104,11 +107,11 @@ function Query:search()
     iter:skip(opts.start - 1)
         :skip(opts.skip)
 
-    if self:is_extended() then
+    if self.transformer then
         -- stylua: ignore
         iter:map(extend_result(opts))
             :enumerate()
-            :map(self.generator.transform)
+            :map(self.transformer)
     end
 
     if default_filter then
