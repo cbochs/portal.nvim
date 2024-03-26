@@ -67,6 +67,11 @@ function ListIter:next()
     end
 end
 
+---@return integer
+function ListIter:len()
+    return self._tail - self._head
+end
+
 ---@param fn fun(...): ...
 ---@return Portal.Iter
 function ListIter:map(fn)
