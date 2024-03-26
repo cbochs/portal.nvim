@@ -4,7 +4,26 @@ local Window = require("portal.window")
 
 local Search = {}
 
----@param queries Portal.Query | Portal.Query[]
+---The maximum number of results to return or a list of predicates to match
+---or "fill". By default, uses the number of labels as a maximum number of
+---results. See the Slots section for more information.
+---@alias Portal.Slots integer | Portal.Predicate | Portal.Predicate[]
+
+---@param slots Portal.Predicate[]
+---@return function
+local function match_slots(slots)
+    return function(filled, content)
+        for i, predicate in ipairs(slots) do
+            if not filled[i] and predicate(content) then
+                filled[i] = content
+                break
+            end
+        end
+        return filled
+    end
+end
+
+---@param queries Portal.Query[]
 ---@param slots? Portal.Slots
 ---@param opts? Portal.QueryOptions
 ---@return table
@@ -12,22 +31,33 @@ function Search.search(queries, slots, opts)
     vim.validate({
         queries = { queries, "table" },
         slots = { slots, { "number", "function", "table", "nil" } },
-        opts = { opts, { "table", "nil" } },
     })
 
-    -- Wrap a single query as a single item list
-    if getmetatable(queries) == Query then
-        queries = { queries }
-    end
 
     -- stylua: ignore
-    local results = Iter.iter(queries)
-        :map(function(q) return q, slots, opts end)
+    local iter = Iter.iter(queries)
         :map(Query.search)
+        :map(Iter.totable)
         :flatten()
-        :totable()
 
-    return results
+    if opts then
+        for _, query in ipairs(queries) do
+            query:prepare(opts)
+        end
+    end
+
+    -- Wrap a single slot predicate as a list
+    if type(slots) == "function" then
+        slots = { slots }
+    end
+
+    if type(slots) == "table" then
+        return iter:fold({}, match_slots(slots))
+    elseif type(slots) == "number" then
+        return iter:take(slots):totable()
+    else
+        return iter:totable()
+    end
 end
 
 ---@param results Portal.Content[]

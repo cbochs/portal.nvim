@@ -1,62 +1,111 @@
+local Iter = require("portal.iterator")
+
+---@alias Portal.Generator fun(...): Portal.Iter, Portal.QueryOptions? | Portal.ExtendedGenerator
+
+---@class Portal.ExtendedGenerator
+---@field generate fun(...): Portal.Iter, Portal.QueryOptions?
+---@field transform fun(i: integer, r: Portal.Result): Portal.Content
+
 ---@class Portal.Query
----@field generator Portal.Generator
+---@field generator Portal.ExtendedGenerator
 ---@field opts? Portal.QueryOptions
 local Query = {}
 Query.__index = Query
 
----@param opts? Portal.QueryOptions
+---@class Portal.QueryOptions
+---@field start? integer the absolute starting position
+---@field skip? integer
+---@field reverse? boolean
+---@field lookback? integer maximum number of searched items
+---@field filter? Portal.Predicate
+
+---@param opts Portal.QueryOptions
+---@return fun(r: Portal.Result): Portal.ExtendedResult
+local function extend_result(opts)
+    return function(result)
+        return {
+            result = result,
+            opts = opts,
+        }
+    end
+end
+
+---@param _ integer
+---@param extended_result Portal.ExtendedResult
+---@return Portal.Result
+local function unextend_result(_, extended_result)
+    return extended_result.result
+end
+
+local function passthrough()
+    return true
+end
+
 ---@param generator Portal.Generator
 ---@return Portal.Query
-function Query.new(generator, opts)
+function Query.new(generator)
+    ---@diagnostic disable-next-line: cast-local-type
+    generator = type(generator) == "table" and generator
+        or {
+            generate = generator,
+            transform = unextend_result,
+        }
+
     return setmetatable({
         generator = generator,
-        opts = opts,
+        opts = nil,
     }, Query)
 end
 
 ---@param opts? Portal.QueryOptions
 ---@return Portal.Query
 function Query:prepare(opts)
-    self.opts = opts
+    self.opts = vim.tbl_deep_extend("force", self.opts or {}, opts or {})
     return self
 end
 
----@param slots? Portal.Slots
----@param opts? Portal.QueryOptions
----@return table
-function Query:search(slots, opts)
-    opts = vim.tbl_deep_extend("force", self.opts or {}, opts or {})
+---@return Portal.Iter
+function Query:search()
+    local iter, defaults = self.generator.generate()
 
-    local iter = self.generator(opts)
+    defaults = vim.tbl_deep_extend("keep", defaults or {}, {
+        start = 1,
+        skip = 0,
+        reverse = false,
+        filter = passthrough,
+    })
 
-    if not slots then
-        return iter:totable()
-    elseif type(slots) == "number" then
-        ---@cast slots integer
-        return iter:take(slots):totable()
-    else
-        if type(slots) == "function" then
-            slots = { slots }
-        end
+    local opts = vim.tbl_deep_extend("keep", self.opts or {}, defaults or {})
 
-        ---@diagnostic disable-next-line: cast-type-mismatch
-        ---@cast slots Portal.Predicate[]
+    -- Assume: iterator must be a double-ended (ListIter) to reverse
+    if opts.reverse then
+        opts.start = iter:len() - opts.start
 
-        ---@param filled table<integer, Portal.Content>
-        ---@param content Portal.Content
-        ---@return table<integer, Portal.Content>
-        local function match_slots(filled, content)
-            for i, predicate in ipairs(slots) do
-                if not filled[i] and predicate(content) then
-                    filled[i] = content
-                    break
-                end
-            end
-            return filled
-        end
-
-        return iter:fold({}, match_slots)
+        -- Clamp the starting position to the end of the results
+        opts.start = math.min(iter:len(), opts.start)
     end
+
+    -- Clamp the starting position to the beginning of the results
+    opts.start = math.max(1, opts.start)
+
+    if opts.reverse then
+        iter:rev()
+    end
+
+    if opts.lookback then
+        iter:take(opts.lookback)
+    end
+
+    -- Prepare iterator
+    iter:skip(opts.start - 1)
+        :skip(opts.skip)
+        :map(extend_result(opts))
+        :enumerate()
+        :map(self.generator.transform)
+        :filter(defaults.filter)
+        :filter(opts.filter)
+
+    return iter
 end
 
 return Query
