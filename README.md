@@ -2,7 +2,7 @@
 
 ![portal_showcase](https://user-images.githubusercontent.com/2467016/222644459-264e22e7-496a-4d4e-bfcb-e96efda0003d.gif)
 
-_Theme: [kanagawa](https://github.com/rebelot/kanagawa.nvim)_
+Theme: [kanagawa](https://github.com/rebelot/kanagawa.nvim)
 
 ## Introduction
 
@@ -15,14 +15,13 @@ See the [quickstart](#quickstart) section to get started.
 ## Features
 
 - **Labelled** [portals](#portals) for immediate movement to a portal location
-- **Customizable** [filters](#filters) and [slots](#slots) for [well-known lists](#builtin-queries)
-- **Composable** multiple location lists can be used in a single search
+- **Builtin** [queries](#builtin-queries) which can be filtered and refined
+- **Composable** multiple lists can be used in a single search
 - **Extensible** able to search any list with custom queries
 
 ## Requirements
 
-- [Neovim >= 0.8](https://github.com/neovim/neovim/releases/tag/v0.8.0)
-- Neovim >= 0.9 - optional, for [floating window title](https://github.com/neovim/neovim/issues/17458)
+- [Neovim >= 0.9](https://github.com/neovim/neovim/releases/tag/v0.9.0)
 
 ## Quickstart
 
@@ -38,8 +37,7 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 
 - Check out the [default settings](#settings)
 - Explore the available [builtin](#builtin-queries) queries
-- Tune your search results with a custom [filter](#filters) or [slot list](#slots)
-- Try combining multiple queries using the [Portal API](#portal-api)
+- Combine multiple queries using the [Portal API](#portal-api)
 
 ## Installation
 
@@ -47,14 +45,7 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 <summary>lazy.nvim</summary>
 
 ```lua
-{
-    "cbochs/portal.nvim",
-    -- Optional dependencies
-    dependencies = {
-        "cbochs/grapple.nvim",
-        "ThePrimeagen/harpoon"
-    },
-}
+{ "cbochs/portal.nvim" }
 ```
 
 </details>
@@ -63,14 +54,7 @@ vim.keymap.set("n", "<leader>i", "<cmd>Portal jumplist forward<cr>")
 <summary>packer</summary>
 
 ```lua
-use {
-    "cbochs/portal.nvim",
-    -- Optional dependencies
-    requires = {
-        "cbochs/grapple.nvim",
-        "ThePrimeagen/harpoon"
-    },
-}
+use { "cbochs/portal.nvim" }
 ```
 
 </details>
@@ -80,61 +64,59 @@ use {
 
 ```vim
 Plug "cbochs/portal.nvim"
-" Optional dependencies
-Plug "cbochs/grapple.nvim"
-Plug "ThePrimeagen/harpoon"
 ```
 
 </details>
 
 ## Settings
 
-The following are the default settings for Portal. **Setup is not required**, but settings may be overridden by passing them as table arguments to the `portal#setup` function.
+The following are the default settings for Portal. **Setup is not required**, but settings may be overridden by passing them as table arguments to the `Portal.setup` function.
 
 <details>
 <summary>Default Settings</summary>
 
 ```lua
 require("portal").setup({
-    ---@type "debug" | "info" | "warn" | "error"
-    log_level = "warn",
-
-    ---The base filter applied to every search.
-    ---@type Portal.SearchPredicate | nil
-    filter = nil,
-
-    ---The maximum number of results for any search.
-    ---@type integer | nil
-    max_results = nil,
-
-    ---The maximum number of items that can be searched.
-    ---@type integer
-    lookback = 100,
-
-    ---An ordered list of keys for labelling portals.
-    ---Labels will be applied in order, or to match slotted results.
+    ---Ordered list of keys for labelling portals
     ---@type string[]
     labels = { "j", "k", "h", "l" },
 
-    ---Select the first portal when there is only one result.
+    ---Select the first portal when there is only one result
+    ---@type boolean
     select_first = false,
 
-    ---Keys used for exiting portal selection. Disable with [{key}] = false
-    ---to `false`.
-    ---@type table<string, boolean>
-    escape = {
-        ["<esc>"] = true,
-    },
+    ---The maximum number of results to return or a list of predicates to match
+    ---or "fill". By default, uses the number of labels as a maximum number of
+    ---results. See the Slots section for more information.
+    ---@type Portal.Slots | nil
+    slots = nil,
 
-    ---The raw window options used for the portal window
-    window_options = {
-        relative = "cursor",
+    ---The default filter to be applied to every search result.
+    ---@type Portal.Predicate | nil
+    filter = nil,
+
+    ---The maximum number of results to consider when performing a Portal query
+    ---@type integer
+    lookback = 100,
+
+    ---Window options for Portal windows
+    ---@type vim.api.keyset.win_config
+    win_opts = {
         width = 80,
         height = 3,
+
+        relative = "cursor",
         col = 2,
+
         focusable = false,
         border = "single",
+        style = "minimal",
         noautocmd = true,
+
+        ---@type fun(c: Portal.Content): string | nil
+        title = nil,
+
+        title_pos = "center",
     },
 })
 ```
@@ -148,154 +130,78 @@ require("portal").setup({
 <details>
 <summary>Builtin Queries and Examples</summary>
 
-Builin queries have a standardized interface. Each builtin can be accessed via the `Portal` command or lua API.
+Builin queries have a standard interface. Each builtin can be accessed via the `Portal` command or lua API.
 
-**Overview**: the `tunnel` method provides the default entry point for using Portal for a location list; the `tunnel_forward` and `tunnel_backward` are convenience methods for easy keybinds; the `search` method returns the results of a query; and the `query` method builds a [query](#portalquery) for use in [`portal#tunnel`](#portaltunnel) or [`portal#search`](#portalsearch).
+**Overview**: the `tunnel` method provides the default entry point for using Portal for a location list; the `tunnel_forward` and `tunnel_backward` are convenience methods for easy keybinds; the `search` method returns the results of a query; and the `query` method builds a [query](#queries) for use in [`Portal.tunnel`](#portaltunnel) or [`Portal.search`](#portalsearch).
 
 **Command**: `:Portal {builtin} [direction]`
 
 **API**: `require("portal.builtin").{builtin}`
 
-- `{builtin}.query(opts)`
-- `{builtin}.search(opts)`
-- `{builtin}.tunnel(opts)`
-- `{builtin}.tunnel_backward(opts)`
-- `{builtin}.tunnel_forward(opts)`
-
-**`opts?`**: [`Portal.SearchOptions`](#portalsearchoptions)
+- `{builtin}.tunnel(opts)`: [`Portal.Options`](#portaloptions)
+- `{builtin}.tunnel_backward(opts)`: [`Portal.Options`](#portaloptions)
+- `{builtin}.tunnel_forward(opts)`: [`Portal.Options`](#portaloptions)
+- `{builtin}.search(opts)`: [`Portal.SearchOptions`](#portalsearchoptions)
+- `{builtin}.query(opts)`: [`Portal.QueryOptions`](#portalqueryoptions)
+- `{builtin}.extension`: [`Portal.Extension`](#extensions)
 
 ---
 
 #### `changelist`
 
-Filter, match, and iterate over Neovim's [`:h changelist`](https://neovim.io/doc/user/motion.html#changelist).
+Search Neovim's [`:h changelist`](https://neovim.io/doc/user/motion.html#changelist).
 
-**Defaults**
+**Defaults**: [`Portal.QueryOptions`](#portalqueryoptions)
 
-- **`opts.start`**: current change index
-- **`opts.direction`**: `"backward"`
-- **`opts.max_results`**: `#settings.labels`
+- **`start`**: current changelist index
+- **`reverse`**: `true`
 
-**Content**
+**Content**: [`Portal.Content`](#portalcontent)
 
 - **`type`**: `"changelist"`
 - **`buffer`**: `0`
-- **`cursor`**: the changelist `lnum` and `col`
-- **`extra.direction`**: the search [direction](#portaldirection)
-- **`extra.distance`**: the absolute distance between the start and current changelist entry
-- **`:select()`**: uses native `g;` and `g,` to preserve changelist ordering
+- **`cursor`**: the changelist `{ lnum, col }`
+- **`extra.reverse`**
+- **`extra.dist`**
+- **`:select()`**: uses `g;` or `g,`
 
 <details>
 <summary><b>Examples</b></summary>
 
 ```lua
--- Open a default search for the changelist
+-- Tunnel through the changelist
 require("portal.builtin").changelist.tunnel()
-```
-
-</details>
-
-#### `grapple`
-
-Filter, match, and iterate over tagged files from [grapple](https://github.com/cbochs/grapple.nvim).
-
-**Defaults**
-
-- **`opts.start`**: `1`
-- **`opts.direction`**: `"forward"`
-- **`opts.max_results`**: `#settings.labels`
-
-**Content**
-
-- **`type`**: `"grapple"`
-- **`buffer`**: the file tags's `bufnr`
-- **`cursor`**: the file tags's `row` and `col`
-- **`extra.key`**: the file tags's key
-- **`:select()`**: uses `grapple#select`
-
-<details>
-<summary><b>Examples</b></summary>
-
-```lua
--- Open a default search for grapples's tags
-require("portal.builtin").grapple.tunnel()
-```
-
-</details>
-
-#### `harpoon`
-
-Filter, match, and iterate over marked files from [harpoon](https://github.com/ThePrimeagen/harpoon).
-
-**Defaults**
-
-- **`opts.start`**: `1`
-- **`opts.direction`**: `"forward"`
-- **`opts.max_results`**: `#settings.labels`
-
-**Content**
-
-- **`type`**: `"harpoon"`
-- **`buffer`**: the file mark's `bufnr`
-- **`cursor`**: the file mark's `row` and `col`
-- **`extra.index`**: the file mark's index
-- **`:select()`**: uses `harpoon.ui#nav_file`
-
-<details>
-<summary><b>Examples</b></summary>
-
-```lua
--- Open a default search for harpoon's marks
-require("portal.builtin").harpoon.tunnel()
 ```
 
 </details>
 
 #### `jumplist`
 
-Filter, match, and iterate over Neovim's [`:h jumplist`](https://neovim.io/doc/user/motion.html#jumplist).
+Search Neovim's [`:h jumplist`](https://neovim.io/doc/user/motion.html#jumplist).
 
-**Defaults**
+**Defaults**: [`Portal.QueryOptions`](#portalqueryoptions)
 
-- **`opts.start`**: current jump index
-- **`opts.direction`**: `"backward"`
-- **`opts.max_results`**: `#settings.labels`
+- **`start`**: current jumplist index
+- **`reverse`**: `true`
 
-**Content**
+**Content**: [`Portal.Content`](#portalcontent)
 
 - **`type`**: `"jumplist"`
 - **`buffer`**: the jumplist `bufnr`
-- **`cursor`**: the jumplist `lnum` and `col`
-- **`extra.direction`**: the search [direction](#portaldirection)
-- **`extra.distance`**: the absolute distance between the start and current jumplist entry
-- **`:select()`**: uses native `<c-o>` and `<c-i>` to preserve jumplist ordering
+- **`cursor`**: the jumplist `{ lnum, col }`
+- **`extra.reverse`**
+- **`extra.dist`**
+- **`:select()`**: uses `<c-o>` or `<c-i>`
 
 <details>
 <summary><b>Examples</b></summary>
 
 ```lua
--- Open a default search for the jumplist
-require("portal.builtin").jumplist.tunnel()
-
--- Open a queried search for the jumplist going backwards (<c-o>)
--- Query for two jumps:
--- 1. A jump that is in the same buffer as the current buffer
--- 2. A jump that is in a buffer that has been modified
-require("portal.builtin").jumplist.tunnel_backward({
-    slots = {
-        function(value) return value.buffer == vim.fn.bufnr() end,
-        function(value) return vim.api.nvim_buf_get_option(value.buffer, "modified") end,
-    }
-})
-
--- Open a filtered search for the jumplist going forwards (<c-i>)
--- Filters the results based on whether the buffer has been tagged
--- by grapple.nvim or not. Return a maximum of two results.
-require("portal.builtin").jumplist.tunnel_forward({
-    max_results = 2,
-    filter = function(value)
-        return require("grapple").exists({ buffer = value.buffer })
-    end,
+-- Tunnel through the jumplist, skipping jumps in the current buffer
+require("portal.builtin").jumplist.tunnel({
+    filter = function(content)
+        return content.buffer ~= vim.fn.bufnr()
+    end
 })
 ```
 
@@ -303,26 +209,25 @@ require("portal.builtin").jumplist.tunnel_forward({
 
 #### `quickfix`
 
-Filter, match, and iterate over Neovim's [`:h quickfix`](http://neovim.io/doc/user/quickfix.html) list.
+Search Neovim's [`:h quickfix`](http://neovim.io/doc/user/quickfix.html) list.
 
-**Defaults**
+**Defaults**: [`Portal.QueryOptions`](#portalqueryoptions)
 
-- **`opts.start`**: `1`
-- **`opts.direction`**: `"forward"`
-- **`opts.max_results`**: `#settings.labels`
+- **`start`**: `1`
+- **`reverse`**: `false`
 
-**Content**
+**Content**: [`Portal.Content`](#portalcontent)
 
 - **`type`**: `"quickfix"`
 - **`buffer`**: the quickfix `bufnr`
-- **`cursor`**: the quickfix `lnum` and `col`
-- **`:select()`**: uses `nvim_win_set_cursor` for selection
+- **`cursor`**: the quickfix `{ lnum, col }`
+- **`:select()`**: uses `nvim_win_set_cursor`
 
 <details>
 <summary><b>Examples</b></summary>
 
 ```lua
--- Open portals for the quickfix list (from the top)
+-- Search the quickfix list
 require("portal.builtin").quickfix.tunnel()
 ```
 
@@ -335,40 +240,40 @@ require("portal.builtin").quickfix.tunnel()
 <details>
 <summary>Portal API and Examples</summary>
 
-#### `portal#tunnel`
+#### `Portal.tunnel`
 
 Search, open, and select a portal from a given query.
 
-**API**: `require("portal").tunnel(queries, overrides)`
+**API**: `require("portal").tunnel(queries, opts)`
 
-**`queries`**: [`Portal.Query[]`](#portalquery)
-**`overrides`**: [`Portal.Settings`](#settings)
+**`queries`**: [`Portal.Query[]`](#queries)
+**`opts`**: [`Portal.Options`](#portaloptions)
 
 <details>
 <summary><b>Examples</b></summary>
 
 ```lua
--- Run a simple filtered search over the jumplist
+-- Use a builtin query
 local query = require("portal.builtin").jumplist.query()
 require("portal").tunnel(query)
 
-
--- Search both the jumplist and quickfix list
+-- Search the jumplist for one portal, search the quickfix list for the remaining
 require("portal").tunnel({
-    require("portal.builtin").jumplist.query({ max_results = 1 })
-    require("portal.builtin").quickfix.query({ max_results = 1 }),
+    require("portal.builtin").jumplist.query({ limit = 1 })
+    require("portal.builtin").quickfix.query(),
 })
 ```
 
 </details>
 
-#### `portal#search`
+#### `Portal.search`
 
-Complete a search for a given query and return the results
+Complete a search for a given query and return the results.
 
-**API**: `require("portal").search(queries)`
+**API**: `require("portal").search(queries, opts)`
 
-**`queries`**: [`Portal.Query[]`](#portalquery)
+**`queries`**: [`Portal.Query[]`](#queries)
+**`opts?`**: [`Portal.SearchOptions`](#portalsearchoptions)
 
 **`returns`**: [`portal.content[]`](#portalcontent)
 
@@ -376,7 +281,7 @@ Complete a search for a given query and return the results
 <summary><b>Examples</b></summary>
 
 ```lua
--- Return the results of a query over the jumplist and quickfix list
+-- Perform a search over both the jumplist and quickfix list
 local results = require("portal").search({
     require("portal.builtin").jumplist.query()
     require("portal.builtin").quickfix.query(),
@@ -388,16 +293,17 @@ results[1]:select()
 
 </details>
 
-#### `portal#portals`
+#### `Portal.portals`
 
 Create portals (windows) for a given set of search results. By default portals will not be open.
 
-**API**: `require("portal").portals(queries, overrides)`
+**API**: `require("portal").portals(queries, labels, win_opts)`
 
 **`results`**: [`Portal.Content[]`](#portalcontent)
-**`overrides`**: [`Portal.Settings`](#settings)
+**`labels?`**: `string[]` (defaut: `settings.labels`)
+**`win_opts?`**: [:h api-win_config](https://neovim.io/doc/user/api.html#api-win_config) (default: `settings.win_opts`)
 
-**`returns`**: [`portal.window[]`](#portalwindow)
+**`returns`**: [`Portal.Window[]`](#portalwindow)
 
 <details>
 <summary><b>Examples</b></summary>
@@ -420,7 +326,7 @@ require("portal").close(windows)
 
 </details>
 
-#### `portal#open`
+#### `Portal.open`
 
 Open a given list of portal (windows). Preferred over a for-loop as it forces a UI redraw.
 
@@ -428,7 +334,7 @@ Open a given list of portal (windows). Preferred over a for-loop as it forces a 
 
 **`results`**: [`Portal.Window[]`](#portalwindow)
 
-#### `portal#close`
+#### `Portal.close`
 
 Close a given list of portal (windows). Preferred over a for-loop as it forces a UI redraw.
 
@@ -446,156 +352,182 @@ A **portal** is a labelled floating window showing a snippet of some buffer. The
 
 ## Search
 
-To begin a search, a [query](#portalquery) (or list of queries) must be provided to portal. Each query will contain a [filtered](#filters) location list [iterator](#iterators) and (optionally) one or more [slots](#slots) to match against.
+Each search begins with a [query](#queries) (or list of queries), and an optional set set of [search options](#portalsearchoptions) to use while performing the search. Once you h
 
-### Filters
+The next stage after building a query is performing a search.
 
-During a search, a **filter** may be applied to remove any unwanted results from being displayed. More specifically, a filter is a [predicate](#portalsearchpredicate) function which accepts some value and returns `true` or `false`, indicating whether that value should be kept or discarded.
+in building a query is specifying a set of options to refine your search results. This can be in the form of
+
+During a search, a **filter** may be applied to remove any unwanted results from being displayed. More specifically, a filter is a [predicate](#portalpredicate) function which accepts some value and returns `true` or `false`, indicating whether that value should be kept or discarded.
 
 <details>
 <summary><b>Examples</b></summary>
 
 ```lua
--- Filter for results that are in the same buffer
-require("portal.builtin").jumplist({
+
+-- Search for jumplist items in the same buffer
+require("portal.builtin").jumplist.search({
     filter = function(v) return v.buffer == vim.fn.bufnr() end
 })
 
--- Filter for results that are in a modified buffer
-require("portal.builtin").quickfix({
+-- Search for quickfix items which are in a modified buffer
+require("portal.builtin").quickfix.search({
     filter = function(v) return vim.api.nvim_buf_get_option(v.buffer, "modified") end
 })
 
--- Filter for buffers that have been tagged by grapple.nvim
-require("portal.builtin").quickfix({
-    filter = function(v) return require("grapple").exists({ buffer = v.buffer }) end
-})
+-- Search
+local queries = {
+    require("portal.query").new(function() return { 1, 2, 3 } end),
+    require("portal.query").new(function() return { 7, 8, 9 } end),
+}
+```
 
--- Filter for results that are in some "root" directory
-require("portal.builtin").jumplist({
-    filter = function(v)
-        local root_files = vim.fs.find({ ".git" }, { upward = true })
-        if #root_files > 0 then
-            local root_dir = vim.fs.dirname(root_files[1])
-            local file_path = vim.api.nvim_buf_get_name(v.buffer)
-            return string.find(file_path, root_dir, 1, true) ~= nil
-        end
-        return true
-    end
-})
+</details>
+
+### Queries
+
+A query is a relatively simple concept. It accepts a function that _generates_ results (some iterable) and returns an _iterator_ over those results. In fact, let's see just how that works:
+
+```lua
+local Query = require("portal.query")
+
+Query.new(function() return { 0, 2, 4 })
+    :prepare({ limit = 2 }) -- provide query options
+    :search() -- create an iterator over the results
+    :totable() -- collect the results
+-- Returns { 0, 2 }
+```
+
+This can be extended to any kind of list, whether it be the [`:h jumplist`](https://neovim.io/doc/user/motion.html#jumplist) or some an external plugin (e.g. [grapple.nvim's](https://github.com/cbochs/grapple.nvim) tags). Every [builtin](#builtin-queries) provides the appropriate query which can be used in [`Portal.tunnel`](#portaltunnel) and [`Portal.search`](#portalsearch). In addition, all [extensions](#extensions) are expected to provide a generating function to build queries from.
+
+**API**: `require("portal.query")`
+
+- `Query.new(g: Portal.Generator, t?: Portal.Transformer): Portal.Query`
+- `Query:prepare(opts?: Portal.QueryOptions): Portal.Query`
+- `Query:search(): Portal.Iter`
+
+Reference:
+
+- [`Portal.Generator`](#portalgenerator)
+- [`Portal.Transformer`](#portaltransformer)
+- [`Portal.QueryOptions`](#portalqueryoptions)
+
+<details>
+<summary><b>Examples</b></summary>
+
+```lua
+-- Create a quickfix query
+local query = require("portal.builtin").quickfix.query()
+
+-- Search the jumplist for the last 4 jumps
+require("portal.builtin").jumplist.query()
+    :prepare({ limit = 4 })
+    :search()
+    :totable()
 ```
 
 </details>
 
 ### Slots
 
-To search for an exact set of results, one or more **slots** may be provided to a query. Each slot will attempt to be matched with its exact order (and index) preserved.
-
 <details>
 <summary><b>Examples</b></summary>
 
 ```lua
--- Try to match one result where the buffer is different than the
--- current buffer
-require("portal.builtin").jumplist({
-    slots = function(v) return v.buffer ~= vim.fn.bufnr() end
-})
+-- Create search queries
+local queries = {
+    require("portal.query").new(function() return { 1, 2, 3 } end),
+    require("portal.query").new(function() return { 7, 8, 9 } end),
+}
 
--- Try to match two results where the buffer is different than the
--- current buffer
-require("portal.builtin").jumplist({
+-- Define slot
+require("portal").search(queries, {
     slots = {
-        function(v) return v.buffer ~= vim.fn.bufnr() end,
-        function(v) return v.buffer ~= vim.fn.bufnr() end,
+        function(v) return v > 1 end,
+        function(v) return v > 5 end,
+        function(v) return v > 8 end,
     }
 })
+
+
+-- Returns { 2, 7, 9 }
 ```
 
 </details>
 
-### Iterators
+## Extensions
 
-All searches are performed over an input location list. Portal uses declarative **iterators** to prepare (`map`), refine (`filter`), match (`reduce`), and `collect` list search results. Iterators can be used to create custom queries.
+**API**: `require("portal.extension")`
 
-<details>
-<summary><b>Available operations</b></summary>
+- `Extension.register(e: Portal.Extension): Portal.Extension`
 
-**Iterable operations**
+### `Portal.Extension`
 
-Operations which return a [lua-style](https://www.lua.org/pil/7.3.html) iterator.
+**Type**: `table`
 
-- `Iterator.next(index?: number)`
-- `Iterator.iter()`
+- **`name`**: `string`
+- **`generate`**: [`Portal.Generator`](#portalgenerator)
+- **`transform`**: [`Portal.Transformer`](#portaltransformer)
+- **`select`**: `fun(c: Portal.Content)`
 
-**Chainable operations**
+Reference:
 
-Operations which return an iterator.
-
-- `Iterator.start_at(n: integer)`
-- `Iterator.reverse()`
-- `Iterator.rrepeat(value: any)`
-- `Iterator.wrap()`
-- `Iterator.skip(n: integer)`
-- `Iterator.step_by(n: integer)`
-- `Iterator.take(n: integer)`
-- `Iterator.filter(f: fun(v: any): boolean)`
-- `Iterator.map(f: fun(v: any, i: any): any | nil`: filters `nil` values
-
-**Collect operations**
-
-Operations which return a collection (list or table) of values.
-
-- `Iterator.collect(): T[]`
-- `Iterator.collect_table(): table`
-- `Iterator.reduce(reducer: fun(acc, val, i): any, initial_state: any)`
-- `Iterator.flatten()`
-
-</details>
+- [`Portal.Content`](#portalcontent)
 
 <details>
 <summary><b>Examples</b></summary>
 
-```lua
-local Iterator = require("portal.iterator")
+````lua
+require("portal.extension").register({
+    ---The name of the extension. Builtin methods will be created automatically
+    ---when the extension is loaded by the user.
+    ---
+    ---```lua
+    ---require("portal.builtin").buffers.tunnel()
+    ---```
+    ---
+    ---@type string
+    name = "buffers",
 
--- Print all values in a list
-local iter = Iterator:new({ 1, 2, 3})
-for i, v in iter:iter() do
-    print(v)
-end
+    ---Create a list of results and an (optional) set of default query options
+    ---to apply.
+    ---@return Portal.Result[], Portal.QueryOptions?
+    generate = function()
+        local buffers = vim.api.nvim_list_bufs()
 
--- Create the list { 7, 8, 9 }
-Iterator:new({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 })
-    :start_at(7)
-    :take(3)
-    :collect()
+        local defaults = {
+            filter = function(content)
+                return vim.api.nvim_buf_is_loaded(content.buffer)
+            end
+        }
 
--- Create the list { 2, 4, 6, 8, 10 }
-Iterator:new({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 })
-    :filter(function(v) return v % 2 == 0 end)
-    :collect()
+        return buffers, defaults
+    end,
 
--- Create the table { a = 1, b = 2 }
-Iterator:new({ "a", "b" })
-    :map(function(v, i) return { v, i } end)
-    :collect_table()
+    ---Transform a result into content which can be queries, previewed, and
+    ---selected in Portal.
+    ---@param index integer
+    ---@param extended_result Portal.ExtendedResult
+    ---@return Portal.Content?
+    transform = function(index, extended_result)
+        local buffer = extended_result.result
+        local opts = extended_result.opts
 
--- Create a filtered and mapped table { 4, 6 }
-Iterator:new({ 1, 2, 3})
-    :filter(function(v) return v > 1 end)
-    :map(function(v) return v * 2 end)
-    :collect()
+        -- "type" is inferred from the extension's name
+        return {
+            buffer = buffer,
+            cursor = vim.api.nvim_buf_get_mark(buffer, '"') or { 1, 0 }
+        }
+    end
 
--- Create the same filtered and mapped table { 4, 6 }
-Iterator:new({ 1, 2, 3 })
-    :map(function(v) if v > 1 then return v * 2 end end)
-    :collect()
-
--- Create the repeated list { 1, 1, 1 }
-Iterator:rrepeat(1)
-    :take(3)
-    :collect()
-```
+    ---Given some content, it is up to the extension to provide the method of
+    ---navigating to that content once selected by the user.
+    ---@param content Portal.Content
+    select = function(content)
+        vim.api.nvim_win_set_buf(0, content.buffer)
+    end
+})
+````
 
 </details>
 
@@ -615,57 +547,65 @@ A few highlight groups are available for customizing the look of Portal.
 <details open>
 <summary>Type Definitions</summary>
 
-### `Portal.SearchOptions`
+### `Portal.Options`
 
-Options available for tuning a search query. See the [builtins](#builtin-queries) section for information regarding search option defaults.
+<!-- TODO: explain -->
 
 **Type**: `table`
 
-- **`start`**: `integer`
-- **`direction`**: [`Portal.Direction`](#portaldirection)
-- **`max_results`**: `integer`
-- **`filter`**: [`Portal.SearchPredicate`](#portalsearchpredicate)
-- **`slots`**: [`Portal.SearchPredicate[]`](#portalsearchpredicate) | `nil`
+- **`labels?`**: `string[]` (default: `settings.labels`)
+- **`select_first?`**: `boolean` (default: `settings.select_first`)
+- **`win_opts?`**: `boolean` (default: `settings.win_opts`)
+- **`search?`**: [`Portal.SearchOptions`](#portalsearchoptions)
 
-### `Portal.Direction`
+### `Portal.SearchOptions`
 
-Used for indicating whether a search should be performed forwards or backwards.
+<!-- TODO: explain -->
 
-**Type**: `enum`
+**Type**: `table`
 
-- **`"forward"`**
-- **`"backward"`**
+- **`slots?`**: [`Portal.Predicate[]`](#portalpredicate) (default: `#settings.slots`)
+- Extends [`Portal.QueryOptions`](#portalqueryoptions)
 
-### `Portal.SearchPredicate`
+### `Portal.QueryOptions`
 
-A [predicate](#portalpredicate) where the argument provided is an instance of [`Portal.Content`](#portalcontent).
+<!-- TODO: explain -->
+
+**Type**: `table`
+
+- **`start?`**: `integer` the abolute starting position (default: `1`)
+- **`skip?`**: `integer` (default: `0`)
+- **`reverse?`**: `boolean` (default: `false`)
+- **`lookback?`**: `integer` (default: `settings.lookback`)
+- **`limit?`**: `integer` (default: `#settings.labels`)
+- **`filter?`**: [`Portal.Predicate`](#portalpredicate) (default: `#settings.filter`)
+
+### `Portal.Predicate`
+
+<!-- TODO: explain -->
 
 **Type**: `fun(c: Portal.Content): boolean`
 
-### `Portal.Query`
+Reference:
 
-Named tuple of `(source, slots)`. Used as the input to [`portal#tunnel`](#portaltunnel). When no `slots` are present, the `source` iterator will be simply be collected and presented as the search results.
-
-**Type**: `table`
-
-- **`source`**: [`Portal.Iterator`](#iterators)
-- **`slots`**: [`Portal.SearchPredicate[]`](#portalsearchpredicate) | `nil`
+- [`Portal.Content`](#portalcontent)
 
 ### `Portal.Content`
 
-An object with the fields `(type, buffer, cursor)` and a `:select()` method used for opening and selecting a portal location. Extra data is available in the `extra` field and can be used to aide in filtering, querying, and selecting a portal. See the [builtins](#builtin-queries) section for information on which additional fields are present.
+<!-- TODO: explain -->
 
-**Type**: `object`
+**Type**: `table`
 
 - **`type`**: `string`
-- **`buffer`**: `integer`
+- **`buffer?`**: `integer`
+- **`path?`**: `string`
 - **`cursor`**: `{ row: integer, col: integer }`
+- **`select`**: `fun(c: Portal.Content)`
 - **`extra`**: `table`
-- **`:select()`**
 
 ### `Portal.Window`
 
-A wrapper object around some [`Portal.Content`](#portalcontent).
+A window for some [`Portal.Content`](#portalcontent).
 
 **Type**: `object`
 
@@ -673,16 +613,42 @@ A wrapper object around some [`Portal.Content`](#portalcontent).
 - **`:open()`**
 - **`:close()`**
 
-### `Portal.Predicate`
+### `Portal.Iterable`
 
-Basic function type used for [filtering](#filters) and [matching](#slots) values produced from an [iterator](#iterators).
+**Type**: `table` | `function` | [`Portal.Iter`](#portaliter)
 
-**Type**: `fun(v: any): boolean`
+### `Portal.Generator`
 
-### `Portal.QueryGenerator`
+Generates an iterable which can be consumed by a [`Portal.Query`](#queries). See the [Extensions](#extensions) section for more information.
 
-Generating function which transforms an input set of [`Portal.SearchOptions`](#portalsearchoptions) into a proper [`Portal.Query`](#portalquery).
+**Type**: `fun(): Portal.Iterable, Portal.QueryOptions?`
 
-**Type**: `fun(o: Portal.SearchOptions, s: Portal.Settings): Portal.Query`
+Reference:
+
+- [`Portal.Iterable`](#portaliterable)
+- [`Portal.QueryOptions`](#portalqueryoptions)
+
+### `Portal.Transformer`
+
+Transforms an enumerated (and extended) result into a [`Portal.Content`](#portalcontent). See the [Extensions](#extensions) section for more information.
+
+**Type**: `fun(i: integer, r: Portal.ExtendedResult): Portal.Content?`
+
+Reference:
+
+- `Portal.ExtendedResult`: [`Portal.ExtendedResult`](#portalextendedresult)
+- [`Portal.Content`](#portalcontent)
+
+### `Portal.ExtendedResult`
+
+**Type**: `table`
+
+- **`result`**: `Portal.Result`
+- **`opts`**: [`Portal.QueryOptions`](#portalqueryoptions)
+
+Reference:
+
+- `Portal.Result`: `any`
+- [`Portal.Content`](#portalcontent)
 
 </details>
