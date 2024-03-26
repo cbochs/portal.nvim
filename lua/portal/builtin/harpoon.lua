@@ -28,7 +28,6 @@ return require("portal.extension").register({
 
         ---@type Portal.Content
         local content = {
-            type = "harpoon",
             path = mark.value,
             cursor = mark.cursor or { mark.context.row or 1, mark.context.col or 0 },
             extra = {

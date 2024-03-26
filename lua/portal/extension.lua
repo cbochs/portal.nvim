@@ -25,6 +25,7 @@ function Extension.register(extension)
         transform = function(...)
             local content = extension.transform(...)
             if content then
+                content.type = extension.name
                 content.select = extension.select
                 return content
             end

@@ -57,7 +57,6 @@ return require("portal.extension").register({
 
         ---@type Portal.Content
         local content = {
-            type = "changelist",
             buffer = 0,
             cursor = { result.item.lnum, result.item.col },
             extra = {

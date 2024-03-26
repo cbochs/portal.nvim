@@ -25,10 +25,10 @@ Query.__index = Query
 ---@field opts Portal.QueryOptions
 
 ---@class Portal.Content
----@field type string
+---@field type? string
 ---@field buffer? integer
 ---@field path? string
----@field cursor integer[] (1, 0)-indexed cursor position
+---@field cursor? integer[] (1, 0)-indexed cursor position
 ---@field select? fun(c: Portal.Content)
 ---@field extra? table
 
