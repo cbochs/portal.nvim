@@ -120,7 +120,7 @@ function Query:search()
     end
 
     if opts.limit then
-        iter:take(opts.limi)
+        iter:take(opts.limit)
     end
 
     return iter
