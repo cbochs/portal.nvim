@@ -42,7 +42,7 @@ local DEFAULT_SETTINGS = {
         style = "minimal",
         noautocmd = true,
 
-        ---@type string | fun(c: Portal.Content): string | nil
+        ---@type fun(c: Portal.Content): string | nil
         title = function(content)
             local title = vim.fs.basename(content.path or vim.api.nvim_buf_get_name(content.buffer))
             if title == "" then
