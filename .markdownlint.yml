@@ -1,0 +1,14 @@
+MD013:
+  line_length: 1000
+
+MD033:
+  allowed_elements:
+    - "a"
+    - "b"
+    - "br"
+    - "details"
+    - "img"
+    - "summary"
+    - "table"
+    - "td"
+    - "tr"
