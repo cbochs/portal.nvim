@@ -17,7 +17,7 @@ Query.__index = Query
 
 ---@alias Portal.Iterable table | function | Portal.Iter
 ---@alias Portal.Generator fun(): Portal.Iterable, Portal.QueryOptions?
----@alias Portal.Transformer fun(i: integer, r: Portal.Result): Portal.Content?
+---@alias Portal.Transformer fun(i: integer, r: Portal.ExtendedResult): Portal.Content?
 ---@alias Portal.Result any
 
 ---@class Portal.ExtendedResult
@@ -115,7 +115,7 @@ function Query:search()
     end
 
     if default_filter then
-        iter:filter(defaults.filter)
+        iter:filter(default_filter)
     end
 
     if opts.filter then
