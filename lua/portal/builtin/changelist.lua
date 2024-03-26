@@ -5,10 +5,9 @@ return require("portal.extension").register({
     generate = function()
         local Iter = require("portal.iterator")
 
-        local changelist, position = unpack(vim.fn.getchangelist())
+        local changelist, position = unpack(vim.fn.getchangelist(0))
 
         ---@class Portal.ChangelistItem
-        ---@field bufnr integer
         ---@field lnum integer
         ---@field col integer
 
@@ -59,7 +58,7 @@ return require("portal.extension").register({
         ---@type Portal.Content
         local content = {
             type = "changelist",
-            buffer = result.item.bufnr,
+            buffer = 0,
             cursor = { result.item.lnum, result.item.col },
             extra = {
                 reverse = opts.reverse,
