@@ -9,7 +9,7 @@ setmetatable(Builtin, {
             return rawget(t, name)
         end
 
-        ---@type Portal.Generator
+        ---@type Portal.ExtendedGenerator
         local generator
         if pcall(require, ("portal.builtin.%s"):format(name)) then
             -- Portal provides this as a builtin
@@ -29,15 +29,7 @@ setmetatable(Builtin, {
 
             ---@param opts? Portal.QueryOptions
             ---@return Portal.Query
-            prepare = function(opts)
-                return Query.new(generator):prepare(opts)
-            end,
-
-            ---@deprecated
-            ---@param opts? Portal.QueryOptions
-            ---@return Portal.Query
             query = function(opts)
-                vim.notify("Portal: 'query' has been renamed to 'prepare'", vim.log.levels.WARN)
                 return Query.new(generator):prepare(opts)
             end,
 
