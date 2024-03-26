@@ -6,8 +6,6 @@ local Extension = {}
 ---@field transform Portal.Transformer
 ---@field select fun(c: Portal.Content)
 
----@alias Portal.Result any
-
 ---@type table<string, Portal.Extension>
 Extension.extensions = {}
 
