@@ -4,14 +4,19 @@ local Window = require("portal.window")
 
 local Search = {}
 
----The maximum number of results to return or a list of predicates to match
----or "fill". By default, uses the number of labels as a maximum number of
----results. See the Slots section for more information.
----@alias Portal.Slots integer | Portal.Predicate | Portal.Predicate[]
+---@class Portal.SearchOptions: Portal.QueryOptions
+---@field slots? Portal.Predicate | Portal.Predicate[]
 
----@param slots Portal.Predicate[]
+---@alias Portal.Predicate fun(c: Portal.Content): boolean
+
+---@param slots Portal.Predicate | Portal.Predicate[]
 ---@return function
 local function match_slots(slots)
+    -- Wrap a single slot predicate as a list
+    if type(slots) == "function" then
+        slots = { slots }
+    end
+
     return function(filled, content)
         for i, predicate in ipairs(slots) do
             if not filled[i] and predicate(content) then
@@ -23,38 +28,40 @@ local function match_slots(slots)
     end
 end
 
----@param queries Portal.Query[]
----@param slots? Portal.Slots
----@param opts? Portal.QueryOptions
+---@param queries Portal.Query | Portal.Query[]
+---@param opts? Portal.SearchOptions
 ---@return table
-function Search.search(queries, slots, opts)
+function Search.search(queries, opts)
     vim.validate({
         queries = { queries, "table" },
-        slots = { slots, { "number", "function", "table", "nil" } },
     })
 
-
-    -- stylua: ignore
-    local iter = Iter.iter(queries)
-        :map(Query.search)
-        :map(Iter.totable)
-        :flatten()
-
-    if opts then
-        for _, query in ipairs(queries) do
-            query:prepare(opts)
-        end
+    -- Wrap a single query as a list
+    if getmetatable(queries) == Query then
+        queries = { queries }
     end
 
-    -- Wrap a single slot predicate as a list
-    if type(slots) == "function" then
-        slots = { slots }
+    opts = opts or {}
+    local slots = opts.slots
+    local limit = opts.limit
+
+    if slots then
+        opts.limit = nil
     end
 
-    if type(slots) == "table" then
+    local query = Query.new(function()
+        -- stylua: ignore
+        return Iter.iter(queries)
+            :map(Query.search)
+            :map(Iter.totable)
+            :flatten()
+    end)
+
+    local iter = query:prepare(opts):search()
+    if slots then
         return iter:fold({}, match_slots(slots))
-    elseif type(slots) == "number" then
-        return iter:take(slots):totable()
+    elseif limit then
+        return iter:take(limit):totable()
     else
         return iter:totable()
     end
