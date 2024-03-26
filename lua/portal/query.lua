@@ -7,7 +7,7 @@ local Iter = require("portal.iterator")
 ---@field transform fun(i: integer, r: Portal.Result): Portal.Content
 
 ---@class Portal.Query
----@field generator Portal.ExtendedGenerator
+---@field generator Portal.Generator
 ---@field opts? Portal.QueryOptions
 local Query = {}
 Query.__index = Query
@@ -17,6 +17,7 @@ Query.__index = Query
 ---@field skip? integer
 ---@field reverse? boolean
 ---@field lookback? integer maximum number of searched items
+---@field limit? integer maximum number of returned results
 ---@field filter? Portal.Predicate
 
 ---@param opts Portal.QueryOptions
@@ -30,13 +31,6 @@ local function extend_result(opts)
     end
 end
 
----@param _ integer
----@param extended_result Portal.ExtendedResult
----@return Portal.Result
-local function unextend_result(_, extended_result)
-    return extended_result.result
-end
-
 local function passthrough()
     return true
 end
@@ -44,17 +38,14 @@ end
 ---@param generator Portal.Generator
 ---@return Portal.Query
 function Query.new(generator)
-    ---@diagnostic disable-next-line: cast-local-type
-    generator = type(generator) == "table" and generator
-        or {
-            generate = generator,
-            transform = unextend_result,
-        }
-
     return setmetatable({
         generator = generator,
         opts = nil,
     }, Query)
+end
+
+function Query:is_extended()
+    return type(self.generator) == "table"
 end
 
 ---@param opts? Portal.QueryOptions
@@ -66,16 +57,27 @@ end
 
 ---@return Portal.Iter
 function Query:search()
-    local iter, defaults = self.generator.generate()
+    local iter, defaults
+    if self:is_extended() then
+        iter, defaults = self.generator.generate()
+    else
+        iter, defaults = self.generator()
+    end
+
+    defaults = defaults or {}
+
+    -- We don't want the default filter to be applied twice. Store it here and
+    -- clear it from the defaults table so that it doesn't get added to the opts
+    local default_filter = defaults.filter
+    defaults.filter = nil
 
     defaults = vim.tbl_deep_extend("keep", defaults or {}, {
         start = 1,
         skip = 0,
         reverse = false,
-        filter = passthrough,
     })
 
-    local opts = vim.tbl_deep_extend("keep", self.opts or {}, defaults or {})
+    local opts = vim.tbl_deep_extend("keep", self.opts or {}, defaults)
 
     -- Assume: iterator must be a double-ended (ListIter) to reverse
     if opts.reverse then
@@ -88,6 +90,8 @@ function Query:search()
     -- Clamp the starting position to the beginning of the results
     opts.start = math.max(1, opts.start)
 
+    -- Prepare iterator
+
     if opts.reverse then
         iter:rev()
     end
@@ -96,14 +100,28 @@ function Query:search()
         iter:take(opts.lookback)
     end
 
-    -- Prepare iterator
+    -- stylua: ignore
     iter:skip(opts.start - 1)
         :skip(opts.skip)
-        :map(extend_result(opts))
-        :enumerate()
-        :map(self.generator.transform)
-        :filter(defaults.filter)
-        :filter(opts.filter)
+
+    if self:is_extended() then
+        -- stylua: ignore
+        iter:map(extend_result(opts))
+            :enumerate()
+            :map(self.generator.transform)
+    end
+
+    if default_filter then
+        iter:filter(defaults.filter)
+    end
+
+    if opts.filter then
+        iter:filter(opts.filter)
+    end
+
+    if opts.limit then
+        iter:take(opts.limi)
+    end
 
     return iter
 end
