@@ -85,13 +85,7 @@ require("portal").setup({
     ---@type boolean
     select_first = false,
 
-    ---The maximum number of results to return or a list of predicates to match
-    ---or "fill". By default, uses the number of labels as a maximum number of
-    ---results. See the Slots section for more information.
-    ---@type Portal.Slots | nil
-    slots = nil,
-
-    ---The default filter to be applied to every search result.
+    ---The default filter to be applied to a Portal search
     ---@type Portal.Predicate | nil
     filter = nil,
 
@@ -99,9 +93,14 @@ require("portal").setup({
     ---@type integer
     lookback = 100,
 
+    ---An exact set of results to search for.
+    ---See :h portal.nvim-slots for more information.
+    ---@type Portal.Predicate[] | nil
+    slots = nil,
+
     ---Window options for Portal windows
     ---@type vim.api.keyset.win_config
-    win_opts = {
+    window_options = {
         width = 80,
         height = 3,
 
@@ -113,10 +112,8 @@ require("portal").setup({
         style = "minimal",
         noautocmd = true,
 
-        ---@type fun(c: Portal.Content): string | nil
+        ---@type fun(c: Portal.Content): string | stirng | nil
         title = nil,
-
-        title_pos = "center",
     },
 })
 ```
