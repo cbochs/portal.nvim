@@ -42,10 +42,8 @@ function Search.search(queries, opts)
     end
 
     opts = opts or {}
-    local slots = opts.slots
-    local limit = opts.limit
 
-    if slots then
+    if opts.slots then
         opts.limit = nil
     end
 
@@ -58,10 +56,8 @@ function Search.search(queries, opts)
     end)
 
     local iter = query:prepare(opts):search()
-    if slots then
-        return iter:fold({}, match_slots(slots))
-    elseif limit then
-        return iter:take(limit):totable()
+    if opts.slots then
+        return iter:fold({}, match_slots(opts.slots))
     else
         return iter:totable()
     end
