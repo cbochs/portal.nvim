@@ -22,8 +22,8 @@ local DEFAULT_SETTINGS = {
     ---@type integer
     lookback = 100,
 
-    ---A
-    ---See the Slots section for more information.
+    ---An exact set of results to search for.
+    ---See :h portal.nvim-slots for more information.
     ---@type Portal.Predicate[] | nil
     slots = nil,
 
