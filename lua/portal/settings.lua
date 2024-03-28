@@ -14,13 +14,7 @@ local DEFAULT_SETTINGS = {
     ---@type boolean
     select_first = false,
 
-    ---The maximum number of results to return or a list of predicates to match
-    ---or "fill". By default, uses the number of labels as a maximum number of
-    ---results. See the Slots section for more information.
-    ---@type Portal.Slots | nil
-    slots = nil,
-
-    ---The default filter to be applied to every search result.
+    ---The default filter to be applied to a Portal search
     ---@type Portal.Predicate | nil
     filter = nil,
 
@@ -28,9 +22,14 @@ local DEFAULT_SETTINGS = {
     ---@type integer
     lookback = 100,
 
+    ---A
+    ---See the Slots section for more information.
+    ---@type Portal.Predicate[] | nil
+    slots = nil,
+
     ---Window options for Portal windows
     ---@type vim.api.keyset.win_config
-    win_opts = {
+    window_options = {
         width = 80,
         height = 3,
 
@@ -50,37 +49,8 @@ local DEFAULT_SETTINGS = {
             end
             return ("[%s] %s"):format(content.type, title)
         end,
-
-        title_pos = "center",
     },
 }
-
-local function termcode_for(key)
-    return vim.api.nvim_replace_termcodes(key, true, false, true)
-end
-
---- @param keys table
-local function replace_termcodes(keys)
-    local resolved_keys = {}
-
-    for key_or_index, key_or_flag in pairs(keys) do
-        -- Table style: { "a", "b", "c" }. In this case, key_or_flag is the key
-        if type(key_or_index) == "number" then
-            table.insert(resolved_keys, termcode_for(key_or_flag))
-            goto continue
-        end
-
-        -- Table style: { ["<esc>"] = true }. In this case, key_or_index is the key
-        if type(key_or_index) == "string" and key_or_flag == true then
-            table.insert(resolved_keys, termcode_for(key_or_index))
-            goto continue
-        end
-
-        ::continue::
-    end
-
-    return resolved_keys
-end
 
 ---@return Portal.Settings
 function Settings.new()
@@ -93,7 +63,6 @@ end
 ---@param opts? Portal.Settings
 function Settings:update(opts)
     self.inner = vim.tbl_deep_extend("force", self.inner, opts or {})
-    self.inner.labels = replace_termcodes(self.inner.labels)
 end
 
 ---A global instance of the Portal settings
