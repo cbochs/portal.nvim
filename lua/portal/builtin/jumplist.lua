@@ -30,13 +30,15 @@ return require("portal.extension").register({
         jumplist = Iter.iter(jumplist)
             :enumerate()
             :map(extend_jumplist)
-            :totable()
 
         local defaults = {
             start = position,
             reverse = true,
-            filter = function(content)
-                return content.extra.dist ~= 0 and vim.api.nvim_buf_is_valid(content.buffer)
+
+            ---@param result Portal.JumplistResult
+            ---@return boolean
+            filter = function(result)
+                return result.dist ~= 0 and vim.api.nvim_buf_is_valid(result.item.bufnr)
             end,
         }
 

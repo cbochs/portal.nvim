@@ -5,10 +5,16 @@ return require("portal.extension").register({
     generate = function()
         local quickfix = vim.fn.getqflist()
 
-        ---@type Portal.QueryOptions
+        ---@class Portal.QuickfixItem
+        ---@field bufnr integer
+        ---@field lnum integer
+        ---@field col integer
+
         local defaults = {
-            filter = function(content)
-                return vim.api.nvim_buf_is_valid(content.buffer)
+            ---@param item Portal.QuickfixItem
+            ---@return boolean
+            filter = function(item)
+                return vim.api.nvim_buf_is_valid(item.bufnr)
             end,
         }
 
