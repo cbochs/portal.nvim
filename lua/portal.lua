@@ -145,12 +145,15 @@ function Portal.initialize()
         function(opts)
             local builtin = require("portal.builtin")[opts.fargs[1]]
             if not builtin then
-                error(("'%s' is not a valid Portal builtin"):format(builtin))
+                return vim.notify(("'%s' is not a valid Portal builtin"):format(builtin), vim.log.levels.ERROR)
             end
 
             local direction = opts.fargs[2]
             if not vim.tbl_contains({ "forward", "backward" }, direction) then
-                error(("'%s' is not a valid direction. Use either 'forward' or 'backward'"):format(direction))
+                return vim.notify(
+                    ("'%s' is not a valid direction. Use either 'forward' or 'backward'"):format(direction),
+                    vim.log.levels.ERROR
+                )
             end
 
             local reverse = direction == "backward"
