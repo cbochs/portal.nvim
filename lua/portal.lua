@@ -12,6 +12,10 @@ end
 ---@field win_opts? vim.api.keyset.win_config
 ---@field search? Portal.SearchOptions
 
+local function termcode_for(key)
+    return vim.api.nvim_replace_termcodes(key, true, false, true)
+end
+
 ---@param windows Portal.Window[]
 ---@return Portal.Window | nil selected_window
 local function select(windows)
@@ -29,6 +33,11 @@ local function select(windows)
             return window
         end
     end
+
+    local quit_keys = { "q", termcode_for("<esc>"), termcode_for("<c-c>") }
+    if vim.tbl_contains(quit_keys, char) then
+        return
+    end
 end
 
 ---@param queries Portal.Query[]
@@ -39,7 +48,7 @@ function Portal.tunnel(queries, opts)
     opts = vim.tbl_deep_extend("keep", opts or {}, {
         labels = Settings.labels,
         select_first = Settings.select_first,
-        win_opts = Settings.win_opts,
+        win_opts = Settings.window_options,
         search = {
             filter = Settings.filter,
             limit = #Settings.labels,

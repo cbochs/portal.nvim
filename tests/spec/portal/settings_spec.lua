@@ -23,9 +23,7 @@ describe("settings", function()
             noautocmd = true,
 
             -- Exclude default title function from test
-            title = settings.win_opts.title,
-
-            title_pos = "center",
-        }, settings.win_opts)
+            title = settings.window_options.title,
+        }, settings.window_options)
     end)
 end)

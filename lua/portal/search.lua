@@ -120,9 +120,6 @@ function Search.portals(results, labels, win_opts)
 
         if type(win_opts.title) == "function" then
             win_opts.title = win_opts.title(result)
-        else
-            win_opts.title = nil
-            win_opts.title_pos = nil
         end
 
         local window = Window.new(result, labels[i], win_opts)
