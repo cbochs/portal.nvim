@@ -52,7 +52,7 @@ function Portal.tunnel(queries, opts)
         vim.notify("Portal: empty search results")
     end
 
-    if Settings.select_first and #results == 1 then
+    if opts.select_first and #results == 1 then
         results[1]:select()
         return
     end
