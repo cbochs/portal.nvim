@@ -118,10 +118,6 @@ function Search.portals(results, labels, win_opts)
         win_opts = vim.deepcopy(win_opts)
         win_opts.row = row_offset + (cur_row - 1) * (win_opts.height + 2)
 
-        if type(win_opts.title) == "function" then
-            win_opts.title = win_opts.title(result)
-        end
-
         local window = Window.new(result, labels[i], win_opts)
 
         table.insert(windows, window)

@@ -43,10 +43,22 @@ local DEFAULT_SETTINGS = {
 
         ---@type fun(c: Portal.Content): string | nil
         title = function(content)
-            local title = vim.fs.basename(content.path or vim.api.nvim_buf_get_name(content.buffer))
-            if title == "" then
-                title = "content"
+            local title = ""
+            if content.path then
+                ---@diagnostic disable-next-line: cast-local-type
+                title = vim.fs.basename(content.path)
+            elseif content.buffer then
+                local path = vim.api.nvim_buf_get_name(content.buffer)
+                local filetype = vim.api.nvim_get_option_value("filetype", { buf = content.buffer })
+                if path ~= "" then
+                    title = vim.fs.basename(path)
+                elseif filetype ~= "" then
+                    title = filetype
+                else
+                    title = "[No Name]"
+                end
             end
+
             return ("[%s] %s"):format(content.type, title)
         end,
     },

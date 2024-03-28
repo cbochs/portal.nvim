@@ -25,6 +25,18 @@ function Window.new(content, label, win_opts)
     }, Window)
 end
 
+---Create a valid nvim api window configuration
+---@return vim.api.keyset.win_config win_opts
+function Window:window_options()
+    local opts = vim.tbl_deep_extend("keep", self.win_opts, {})
+
+    if type(opts.title) == "function" then
+        opts.title = opts.title(self.content)
+    end
+
+    return opts
+end
+
 ---@return boolean
 function Window:is_open()
     return self.win_id ~= nil and vim.api.nvim_win_is_valid(self.win_id)
@@ -62,6 +74,7 @@ function Window:open()
         --
 
         local shortmess = vim.go.shortmess
+
         vim.opt.shortmess:append("A")
         pcall(vim.fn.bufload, self.buf_id)
         vim.opt.shortmess = shortmess
@@ -72,7 +85,7 @@ function Window:open()
     end
 
     -- Create window
-    self.win_id = vim.api.nvim_open_win(self.buf_id, false, self.win_opts)
+    self.win_id = vim.api.nvim_open_win(self.buf_id, false, self:window_options())
 
     -- Setup window highlights
     vim.api.nvim_set_option_value(
