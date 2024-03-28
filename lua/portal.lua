@@ -23,20 +23,22 @@ local function select(windows)
         return
     end
 
-    local ok, char = pcall(vim.fn.getcharstr)
-    if not ok then
-        return
-    end
-
-    for _, window in ipairs(windows) do
-        if window.label == char then
-            return window
+    while true do
+        local ok, char = pcall(vim.fn.getcharstr)
+        if not ok then
+            return
         end
-    end
 
-    local quit_keys = { "q", termcode_for("<esc>"), termcode_for("<c-c>") }
-    if vim.tbl_contains(quit_keys, char) then
-        return
+        for _, window in ipairs(windows) do
+            if window.label == char then
+                return window
+            end
+        end
+
+        local quit_keys = { "q", termcode_for("<esc>"), termcode_for("<c-c>") }
+        if vim.tbl_contains(quit_keys, char) then
+            return
+        end
     end
 end
 
