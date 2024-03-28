@@ -405,6 +405,8 @@ This can be extended to any kind of list, whether it be the [`:h jumplist`](http
 
 Reference:
 
+- [`Portal.Iter`](#portaliter)
+- [`Portal.Iterable`](#portaliterable)
 - [`Portal.Generator`](#portalgenerator)
 - [`Portal.Transformer`](#portaltransformer)
 - [`Portal.QueryOptions`](#portalqueryoptions)
@@ -609,6 +611,22 @@ A window for some [`Portal.Content`](#portalcontent).
 - **`:select()`**
 - **`:open()`**
 - **`:close()`**
+
+### `Portal.Iter`
+
+The [`:h vim.iter`](https://neovim.io/doc/user/lua.html#vim.iter) does not exist in Neovim < 0.10. While Portal still maintains it's own iterator module, it has been mostly replaced with a (temporary) reimplementation of `vim.iter`. When Neovim 0.10 is released this module will be deleted and replaced with `vim.iter`. Until then, this will suffice.
+
+**Type**: `object`
+
+- **`:map(fn: fun(...): ...): Portal.Iter`**
+- **`:filter(fn: fun(...): boolean): Portal.Iter`**
+- **`:rev(): Portal.Iter`**
+- **`:take(n: integer): Portal.Iter`**
+- **`:skip(n: integer): Portal.Iter`**
+- **`:enumerate(): Portal.Iter`**
+- **`:flatten(depth: integer): Portal.Iter`**
+- **`:totable(): table`** collect elements
+- **`:fold(init: T, fun(acc: T, ...): T): T`**
 
 ### `Portal.Iterable`
 
