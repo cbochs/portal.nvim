@@ -1,71 +1,78 @@
----@type Portal.QueryGenerator
-local function generate(opts, settings)
-    local Content = require("portal.content")
-    local Iterator = require("portal.iterator")
-    local Search = require("portal.search")
+return require("portal.extension").register({
+    name = "jumplist",
 
-    local jumplist, start = unpack(vim.fn.getjumplist())
+    ---@return Portal.Result[] results, Portal.QueryOptions defaults
+    generate = function()
+        local Iter = require("portal.iterator")
 
-    if start == #jumplist then
-        table.insert(jumplist, {})
-    end
+        local jumplist, position = unpack(vim.fn.getjumplist())
 
-    opts = vim.tbl_extend("force", {
-        start = start + 1,
-        direction = "backward",
-        max_results = #settings.labels,
-    }, opts or {})
+        ---@cast jumplist vim.fn.getjumplist.ret.item[]
+        ---@cast position integer
 
-    if settings.max_results then
-        opts.max_results = math.min(opts.max_results, settings.max_results)
-    end
+        -- Current position is 0-indexed, convert to a 1-indexed table index
+        position = position + 1
 
-    -- stylua: ignore
-    local iter = Iterator:new(jumplist)
-        :start_at(opts.start)
-        :skip(1)
-        :take(settings.lookback)
+        ---@param index integer
+        ---@param item vim.fn.getjumplist.ret.item
+        ---@return Portal.JumplistResult
+        local function extend_jumplist(index, item)
+            ---@class Portal.JumplistResult
+            local result = {
+                item = item,
+                dist = math.abs(index - position),
+            }
 
-    if opts.direction == Search.direction.backward then
-        iter = iter:reverse()
-    end
+            return result
+        end
 
-    iter = iter:map(function(v, i)
-        return Content:new({
-            type = "jumplist",
-            buffer = v.bufnr,
-            cursor = { row = v.lnum, col = v.col },
-            callback = function(content)
-                local keycode = vim.api.nvim_replace_termcodes("<c-o>", true, false, true)
-                if content.extra.direction == "forward" then
-                    keycode = vim.api.nvim_replace_termcodes("<c-i>", true, false, true)
-                end
-                vim.api.nvim_feedkeys(content.extra.distance .. keycode, "n", false)
+        -- stylua: ignore
+        jumplist = Iter.iter(jumplist)
+            :enumerate()
+            :map(extend_jumplist)
+
+        local defaults = {
+            start = position,
+            reverse = true,
+
+            ---@param result Portal.JumplistResult
+            ---@return boolean
+            filter = function(result)
+                return result.dist ~= 0 and vim.api.nvim_buf_is_valid(result.item.bufnr)
             end,
+        }
+
+        return jumplist, defaults
+    end,
+
+    ---@param _ integer
+    ---@param extended_result Portal.ExtendedResult
+    ---@return Portal.Content
+    transform = function(_, extended_result)
+        ---@type Portal.JumplistResult
+        local result = extended_result.result
+        local opts = extended_result.opts
+
+        ---@type Portal.Content
+        local content = {
+            buffer = result.item.bufnr,
+            cursor = { result.item.lnum, result.item.col },
             extra = {
-                direction = opts.direction,
-                distance = math.abs(opts.start - i),
+                reverse = opts.reverse,
+                dist = result.dist,
             },
-        })
-    end)
+        }
 
-    iter = iter:filter(function(v)
-        return vim.api.nvim_buf_is_valid(v.buffer)
-    end)
-    if settings.filter then
-        iter = iter:filter(settings.filter)
-    end
-    if opts.filter then
-        iter = iter:filter(opts.filter)
-    end
-    if not opts.slots then
-        iter = iter:take(opts.max_results)
-    end
+        return content
+    end,
 
-    return {
-        source = iter,
-        slots = opts.slots,
-    }
-end
+    ---@param content Portal.Content
+    select = function(content)
+        -- stylua: ignore
+        local keycode = content.extra.reverse
+            and vim.api.nvim_replace_termcodes("<c-o>", true, false, true)
+            or vim.api.nvim_replace_termcodes("<c-i>", true, false, true)
 
-return generate
+        vim.api.nvim_feedkeys(content.extra.dist .. keycode, "n", false)
+    end,
+})
