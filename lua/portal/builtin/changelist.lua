@@ -34,13 +34,15 @@ return require("portal.extension").register({
         changelist = Iter.iter(changelist)
             :enumerate()
             :map(extend_changelist)
-            :totable()
 
         local defaults = {
             start = position,
             reverse = true,
-            filter = function(content)
-                return content.extra.dist ~= 0 and vim.api.nvim_buf_is_valid(content.buffer)
+
+            ---@param result Portal.ChangelistResult
+            ---@return boolean
+            filter = function(result)
+                return result.dist ~= 0
             end,
         }
 

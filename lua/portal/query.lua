@@ -84,7 +84,7 @@ function Query:search()
 
     -- Assume: iterator must be a double-ended (ListIter) to reverse
     if opts.reverse then
-        opts.start = iter:len() - opts.start
+        opts.start = iter:len() - (opts.start - 1)
 
         -- Clamp the starting position to the end of the results
         opts.start = math.min(iter:len(), opts.start)
@@ -107,15 +107,15 @@ function Query:search()
     iter:skip(opts.start - 1)
         :skip(opts.skip)
 
+    if default_filter then
+        iter:filter(default_filter)
+    end
+
     if self.transformer then
         -- stylua: ignore
         iter:map(extend_result(opts))
             :enumerate()
             :map(self.transformer)
-    end
-
-    if default_filter then
-        iter:filter(default_filter)
     end
 
     if opts.filter then
