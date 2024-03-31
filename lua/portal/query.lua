@@ -97,11 +97,6 @@ function Query:search()
 
     local opts = vim.tbl_deep_extend("keep", self.opts or {}, defaults)
 
-    vim.print({
-        opts = self.opts,
-        defaults = defaults,
-    })
-
     if opts.start then
         -- Assumption: iterator must be a double-ended (ListIter) to reverse
         if opts.reverse then
