@@ -1,9 +1,8 @@
-local Iter = require("portal.iterator")
-local Query = require("portal.query")
 local Portal = require("portal")
+local Query = require("portal.query")
 
 local function generator()
-    return Iter.iter({ 1, 2, 3 })
+    return { 1, 2, 3 }
 end
 
 describe("portal", function()

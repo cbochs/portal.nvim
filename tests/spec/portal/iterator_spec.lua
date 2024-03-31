@@ -1,6 +1,5 @@
 local Iter = require("portal.iterator")
 
--- TODO: create a list of expectations and generate tests
 describe("iterator", function()
     it("handles an empty list", function()
         assert.is_nil(Iter.iter({}):next())

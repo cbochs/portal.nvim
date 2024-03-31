@@ -27,7 +27,7 @@ setmetatable(Builtin, {
         local builtin = setmetatable({
             extension = extension,
 
-            ---@param opts? Portal.QueryOptions
+            ---@param opts? Portal.SearchOptions
             ---@return Portal.Query
             query = function(opts)
                 return Query.new(extension.generate, extension.transform):prepare(opts)
@@ -48,15 +48,15 @@ setmetatable(Builtin, {
 
             ---@param opts? Portal.Options
             tunnel_forward = function(opts)
-                local query = Query.new(extension.generate, extension.transform)
                 opts = vim.tbl_deep_extend("force", opts or {}, { search = { reverse = false } })
+                local query = Query.new(extension.generate, extension.transform)
                 require("portal").tunnel(query, opts)
             end,
 
             ---@param opts? Portal.Options
             tunnel_backward = function(opts)
-                local query = Query.new(extension.generate, extension.transform)
                 opts = vim.tbl_deep_extend("force", opts or {}, { search = { reverse = true } })
+                local query = Query.new(extension.generate, extension.transform)
                 require("portal").tunnel(query, opts)
             end,
         }, {

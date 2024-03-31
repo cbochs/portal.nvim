@@ -3,26 +3,28 @@ local Iter = require("portal.iterator")
 ---@class Portal.Query
 ---@field generator Portal.Generator
 ---@field transformer Portal.Transformer
----@field opts? Portal.QueryOptions
+---@field opts? Portal.SearchOptions
 local Query = {}
 Query.__index = Query
 
----@class Portal.QueryOptions
+---@class Portal.SearchOptions
 ---@field start? integer the absolute starting position
 ---@field skip? integer
 ---@field reverse? boolean
 ---@field lookback? integer maximum number of searched items
 ---@field limit? integer maximum number of returned results
 ---@field filter? Portal.Predicate
+---@field slots? Portal.Predicate | Portal.Predicate[]
 
 ---@alias Portal.Iterable table | function | Portal.Iter
----@alias Portal.Generator fun(): Portal.Iterable, Portal.QueryOptions?
+---@alias Portal.Predicate fun(...): boolean
+---@alias Portal.Generator fun(): Portal.Iterable, Portal.SearchOptions?
 ---@alias Portal.Transformer fun(i: integer, r: Portal.ExtendedResult): Portal.Content?
 ---@alias Portal.Result any
 
 ---@class Portal.ExtendedResult
 ---@field result Portal.Result
----@field opts Portal.QueryOptions
+---@field opts Portal.SearchOptions
 
 ---@class Portal.Content
 ---@field type? string
@@ -32,7 +34,26 @@ Query.__index = Query
 ---@field select? fun(c: Portal.Content)
 ---@field extra? table
 
----@param opts Portal.QueryOptions
+---@param slots Portal.Predicate | Portal.Predicate[]
+---@return function
+local function match_slots(slots)
+    -- Wrap a single slot predicate as a list
+    if type(slots) == "function" then
+        slots = { slots }
+    end
+
+    return function(filled, content)
+        for i, predicate in ipairs(slots) do
+            if not filled[i] and predicate(content) then
+                filled[i] = content
+                break
+            end
+        end
+        return filled
+    end
+end
+
+---@param opts Portal.SearchOptions
 ---@return fun(r: Portal.Result): Portal.ExtendedResult
 local function extend_result(opts)
     return function(result)
@@ -54,14 +75,14 @@ function Query.new(generator, transformer)
     }, Query)
 end
 
----@param opts? Portal.QueryOptions
+---@param opts? Portal.SearchOptions
 ---@return Portal.Query
 function Query:prepare(opts)
     self.opts = vim.tbl_deep_extend("force", self.opts or {}, opts or {})
     return self
 end
 
----@return Portal.Iter
+---@return table
 function Query:search()
     local results, defaults = self.generator()
 
@@ -74,24 +95,25 @@ function Query:search()
     local default_filter = defaults.filter
     defaults.filter = nil
 
-    defaults = vim.tbl_deep_extend("keep", defaults or {}, {
-        start = 1,
-        skip = 0,
-        reverse = false,
-    })
-
     local opts = vim.tbl_deep_extend("keep", self.opts or {}, defaults)
 
-    -- Assume: iterator must be a double-ended (ListIter) to reverse
-    if opts.reverse then
-        opts.start = iter:len() - (opts.start - 1)
+    vim.print({
+        opts = self.opts,
+        defaults = defaults,
+    })
 
-        -- Clamp the starting position to the end of the results
-        opts.start = math.min(iter:len(), opts.start)
+    if opts.start then
+        -- Assumption: iterator must be a double-ended (ListIter) to reverse
+        if opts.reverse then
+            opts.start = iter:len() - (opts.start - 1)
+
+            -- Clamp the starting position to the end of the results
+            opts.start = math.min(iter:len(), opts.start)
+        end
+
+        -- Clamp the starting position to the beginning of the results
+        opts.start = math.max(1, opts.start)
     end
-
-    -- Clamp the starting position to the beginning of the results
-    opts.start = math.max(1, opts.start)
 
     -- Prepare iterator
 
@@ -103,9 +125,13 @@ function Query:search()
         iter:take(opts.lookback)
     end
 
-    -- stylua: ignore
-    iter:skip(opts.start - 1)
-        :skip(opts.skip)
+    if opts.start then
+        iter:skip(opts.start - 1)
+    end
+
+    if opts.skip then
+        iter:skip(opts.skip)
+    end
 
     if default_filter then
         iter:filter(default_filter)
@@ -122,11 +148,13 @@ function Query:search()
         iter:filter(opts.filter)
     end
 
-    if opts.limit then
-        iter:take(opts.limit)
+    if opts.slots then
+        return iter:fold({}, match_slots(opts.slots))
+    elseif opts.limit then
+        return iter:take(opts.limit):totable()
+    else
+        return iter:totable()
     end
-
-    return iter
 end
 
 return Query

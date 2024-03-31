@@ -12,36 +12,6 @@ end
 ---@field win_opts? vim.api.keyset.win_config
 ---@field search? Portal.SearchOptions
 
-local function termcode_for(key)
-    return vim.api.nvim_replace_termcodes(key, true, false, true)
-end
-
----@param windows Portal.Window[]
----@return Portal.Window | nil selected_window
-local function select(windows)
-    if vim.tbl_isempty(windows) then
-        return
-    end
-
-    while true do
-        local ok, char = pcall(vim.fn.getcharstr)
-        if not ok then
-            return
-        end
-
-        for _, window in ipairs(windows) do
-            if window.label == char then
-                return window
-            end
-        end
-
-        local quit_keys = { "q", termcode_for("<esc>"), termcode_for("<c-c>") }
-        if vim.tbl_contains(quit_keys, char) then
-            return
-        end
-    end
-end
-
 ---@param queries Portal.Query[]
 ---@param opts? Portal.Options
 function Portal.tunnel(queries, opts)
@@ -72,7 +42,7 @@ function Portal.tunnel(queries, opts)
 
     Portal.open(windows)
 
-    local selected = select(windows)
+    local selected = Portal.select(windows)
     if selected ~= nil then
         selected:select()
     end
@@ -84,8 +54,22 @@ end
 ---@param opts? Portal.SearchOptions
 ---@return Portal.Content[]
 function Portal.search(queries, opts)
-    local Search = require("portal.search")
-    return Search.search(queries, opts)
+    local Query = require("portal.query")
+    local Iter = require("portal.iterator")
+
+    -- A single query should just be searched with the provided options
+    if getmetatable(queries) == Query then
+        return queries:prepare(opts):search()
+    end
+
+    local query = Query.new(function()
+        -- stylua: ignore
+        return Iter.iter(queries)
+            :map(Query.search)
+            :flatten()
+    end)
+
+    return query:prepare(opts):search()
 end
 
 ---@param results Portal.Content[]
@@ -100,6 +84,36 @@ function Portal.portals(results, labels, win_opts)
     win_opts = win_opts or Settings.win_opts
 
     return Search.portals(results, labels, win_opts)
+end
+
+local function termcode_for(key)
+    return vim.api.nvim_replace_termcodes(key, true, false, true)
+end
+
+---@param windows Portal.Window[]
+---@return Portal.Window | nil
+function Portal.select(windows)
+    if vim.tbl_isempty(windows) then
+        return
+    end
+
+    while true do
+        local ok, char = pcall(vim.fn.getcharstr)
+        if not ok then
+            return
+        end
+
+        for _, window in ipairs(windows) do
+            if window.label == char then
+                return window
+            end
+        end
+
+        local quit_keys = { "q", termcode_for("<esc>"), termcode_for("<c-c>") }
+        if vim.tbl_contains(quit_keys, char) then
+            return
+        end
+    end
 end
 
 ---@param windows Portal.Window[]
@@ -157,8 +171,7 @@ function Portal.initialize()
             end
 
             local reverse = direction == "backward"
-
-            builtin.tunnel({ query = { reverse = reverse } })
+            builtin.tunnel({ search = { reverse = reverse } })
         end,
         {
             desc = "Portal",
