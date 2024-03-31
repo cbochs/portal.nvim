@@ -84,7 +84,7 @@ end
 
 ---@return integer
 function ListIter:len()
-    return self._tail - self._head
+    return math.abs(self._tail - self._head)
 end
 
 ---@param fn fun(...): ...
