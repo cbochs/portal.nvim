@@ -1,364 +1,282 @@
-local log = require("portal.log")
+---@brief
+---
+---[vim.iter()]() does not exist in Neovim < 0.10. This module moves away from
+---Portal's original iterator module to a (temporary) reimplementation of
+---vim.iter. When Neovim 0.10 is released this module should be deleted and
+---replaced with vim.iter. Until then, this will suffice.
 
----@class Portal.Iterator
----@field iterable table
----@field step integer
----@field start_index integer
----@field explicit_start boolean
-local Iterator = {}
-Iterator.__index = Iterator
-
----@alias Portal.Predicate fun(value: any):boolean
-
----@param iterable? table
----@return Portal.Iterator
-function Iterator:new(iterable)
-    local iterator = {}
-
-    if iterable then
-        iterator = {
-            iterable = iterable,
-            step = 1,
-            start_index = 1,
-            explicit_start = false,
-        }
-    end
-
-    setmetatable(iterator, self)
-    return iterator
+---@class Portal.Iter
+---@field _table table
+---@field _head number
+---@field _tail number
+local ListIter = {}
+ListIter.__index = ListIter
+ListIter.__call = function(self)
+    return self:next()
 end
 
----@param index? integer
-function Iterator:next(index)
-    if not self.iterable then
-        return nil
+--- Packed tables use this as their metatable
+local packedmt = {}
+
+local function unpack(t)
+    if type(t) == "table" and getmetatable(t) == packedmt then
+        return _G.unpack(t, 1, t.n)
+    end
+    return t
+end
+
+local function pack(...)
+    local n = select("#", ...)
+    if n > 1 then
+        return setmetatable({ n = n, ... }, packedmt)
+    end
+    return ...
+end
+
+local function sanitize(t)
+    if type(t) == "table" and getmetatable(t) == packedmt then
+        -- Remove length tag
+        t.n = nil
+    end
+    return t
+end
+
+---@param tbl table | function | Portal.Iter
+---@return Portal.Iter
+function ListIter.new(tbl)
+    if getmetatable(tbl) == ListIter then
+        ---@cast tbl Portal.Iter
+        return tbl
     end
 
-    if not index then
-        index = self.start_index - self.step
-    end
-    index = index + self.step
+    return setmetatable({
+        _table = tbl,
+        _head = 1,
+        _tail = #tbl + 1,
+    }, ListIter)
+end
 
-    local value = self.iterable[index]
-    if value then
-        return index, value
+---@return Portal.Iter
+function ListIter.iter(tbl)
+    return ListIter.new(tbl)
+end
+
+---@return any
+function ListIter:next()
+    if self._head ~= self._tail then
+        local inc = self._head < self._tail and 1 or -1
+        local val = self._table[self._head]
+
+        self._head = self._head + inc
+
+        return unpack(val)
     end
 end
 
-function Iterator:iter()
-    return self.next, self, nil
+function ListIter:inspect()
+    vim.print({
+        table = self._table,
+        head = self._head,
+        tail = self._tail,
+    })
+    return self
+end
+
+---@return integer
+function ListIter:len()
+    return math.abs(self._tail - self._head)
+end
+
+---@param fn fun(...): ...
+---@return Portal.Iter
+function ListIter:map(fn)
+    local inc = self._head < self._tail and 1 or -1
+    local num = self._head
+
+    for i = self._head, self._tail - inc, inc do
+        local val = pack(fn(unpack(self._table[i])))
+        if val ~= nil then
+            self._table[num] = val
+            num = num + inc
+        end
+    end
+
+    self._tail = num
+    return self
+end
+
+---@param fn fun(...): boolean
+---@return Portal.Iter
+function ListIter:filter(fn)
+    local inc = self._head < self._tail and 1 or -1
+    local num = self._head
+
+    for i = self._head, self._tail - inc, inc do
+        local val = self._table[i]
+        if fn(unpack(val)) then
+            self._table[num] = val
+            num = num + inc
+        end
+    end
+
+    self._tail = num
+    return self
 end
 
 ---@generic T
----@return T[]
-function Iterator:collect()
-    local values = {}
-    for _, value in self:iter() do
-        table.insert(values, value)
+---
+---@param init T
+---@param fn fun(acc: T, ...): T
+---@return T
+function ListIter:fold(init, fn)
+    local acc = init
+    local inc = self._head < self._tail and 1 or -1
+    for i = self._head, self._tail - inc, inc do
+        acc = fn(acc, unpack(self._table[i]))
     end
-    return values
+    return acc
+end
+
+---@return Portal.Iter
+function ListIter:rev()
+    local inc = self._head < self._tail and 1 or -1
+    self._head, self._tail = self._tail - inc, self._head - inc
+    return self
+end
+
+---@param n number
+---@return Portal.Iter
+function ListIter:take(n)
+    local inc = self._head < self._tail and 1 or -1
+    local cmp = self._head < self._tail and math.min or math.max
+    self._tail = cmp(self._tail, self._head + n * inc)
+    return self
+end
+
+---@param n number
+---@return Portal.Iter
+function ListIter:skip(n)
+    local inc = self._head < self._tail and n or -n
+    local cmp = self._head < self._tail and math.min or math.max
+    self._head = cmp(self._tail, self._head + inc)
+    return self
+end
+
+---@return Portal.Iter
+function ListIter:enumerate()
+    local i = 0
+    local function enumerate(...)
+        i = i + 1
+        return i, ...
+    end
+    return self:map(enumerate)
+end
+
+---@return any
+function ListIter:peek()
+    if self._head ~= self._tail then
+        return self._table[self._head]
+    end
+end
+
+---@param v table
+---@param max_depth number
+---@param depth number
+---@param result table
+---@return table|nil flattened
+local function flatten(v, max_depth, depth, result)
+    if depth < max_depth and type(v) == "table" then
+        local i = 0
+        for _ in pairs(v) do
+            i = i + 1
+
+            if v[i] == nil then
+                -- short-circuit: this is not a list like table
+                return nil
+            end
+
+            if flatten(v[i], max_depth, depth + 1, result) == nil then
+                return nil
+            end
+        end
+    else
+        result[#result + 1] = v
+    end
+
+    return result
+end
+
+---@param depth? number
+---@return Portal.Iter
+function ListIter:flatten(depth)
+    depth = depth or 1
+
+    local inc = self._head < self._tail and 1 or -1
+    local target = {}
+
+    for i = self._head, self._tail - inc, inc do
+        local flattened = flatten(self._table[i], depth, 0, {})
+
+        -- exit early if we try to flatten a dict-like table
+        if flattened == nil then
+            error("flatten() requires a list-like table")
+        end
+
+        for _, v in pairs(flattened) do
+            target[#target + 1] = v
+        end
+    end
+
+    self._head = 1
+    self._tail = #target + 1
+    self._table = target
+
+    return self
+end
+
+local function totable(iter)
+    local t = {}
+
+    while true do
+        local args = pack(iter:next())
+        if args == nil then
+            break
+        end
+
+        t[#t + 1] = sanitize(args)
+    end
+    return t
 end
 
 ---@return table
-function Iterator:collect_table()
-    local values = {}
-    for _, value in self:iter() do
-        values[value[1]] = value[2]
+function ListIter:totable()
+    if self._head >= self._tail then
+        return totable(self)
     end
-    return values
-end
 
----@param reducer fun(acc: any, val: any, i?: integer): any
----@param initial_state any
----@return any
-function Iterator:reduce(reducer, initial_state)
-    local values = initial_state
-    for i, value in self:iter() do
-        values = reducer(values, value, i)
-    end
-    return values
-end
+    local needs_sanitize = getmetatable(self._table[1]) == packedmt
 
-function Iterator:flatten()
-    local values = {}
-    for _, value in self:iter() do
-        vim.list_extend(values, value)
-    end
-    return values
-end
+    -- Reindex and sanitize.
+    local len = self._tail - self._head
 
----@param start_iter Portal.Iterator
----@return Portal.Iterator
-local function root_iter(start_iter)
-    local current_iter = start_iter
-    while true do
-        if not current_iter.iterator then
-            if current_iter.iterable then
-                return current_iter
-            else
-                log.error("At root iterator, but could not find iterable.")
-            end
+    if needs_sanitize then
+        for i = 1, len do
+            self._table[i] = sanitize(self._table[self._head - 1 + i])
         end
-        current_iter = current_iter.iterator
-    end
-end
-
----@return integer
-function Iterator:size()
-    local iter = root_iter(self)
-    return #iter.iterable
-end
-
----@return integer
-function Iterator:step_size()
-    local iter = root_iter(self)
-    return iter.step
-end
-
----@param n integer
----@return Portal.Iterator
-function Iterator:start_at(n)
-    assert(n, "Iterator.start_at: start index cannot be nil.")
-    local iter = root_iter(self)
-    iter.start_index = n
-    iter.explicit_start = true
-    return self
-end
-
----@return Portal.Iterator
-function Iterator:reverse()
-    local iter = root_iter(self)
-    iter.step = -iter.step
-
-    -- Only change the start index if it is the default
-    if not iter.explicit_start then
-        if iter.start_index == 1 then
-            iter.start_index = #iter.iterable
-        else
-            iter.start_index = 1
+    else
+        for i = 1, len do
+            self._table[i] = self._table[self._head - 1 + i]
         end
     end
 
-    return self
-end
-
----@class Portal.RepeatAdapter
----@field value any
-local Repeat = Iterator:new()
-Repeat.__index = Repeat
-
-function Repeat:new(value)
-    local rrepeat = { value = value }
-    setmetatable(rrepeat, self)
-    return rrepeat
-end
-
-function Repeat:next(index)
-    return (index or 0) + 1, vim.deepcopy(self.value)
-end
-
--- luacheck: ignore
-function Iterator:rrepeat(value)
-    return Repeat:new(value)
-end
-
----@class Portal.WrapAdapter
----@field iterator Portal.Iterator
-local Wrap = Iterator:new()
-Wrap.__index = Wrap
-
-function Wrap:new(iterator)
-    local wrap = { iterator = iterator }
-    setmetatable(wrap, self)
-    return wrap
-end
-
-function Wrap:next(index)
-    if index == 1 and self:step_size() < 0 then
-        index = self:size() + 1
-    elseif index == self:size() and self:step_size() > 0 then
-        index = 0
-    end
-    return self.iterator:next(index)
-end
-
-function Iterator:wrap()
-    return Wrap:new(self)
-end
-
----@class Portal.SkipAdapter
----@field iterator Portal.Iterator
----@field n integer
-local Skip = Iterator:new()
-Skip.__index = Skip
-
-function Skip:new(iterator, n)
-    assert(n and n >= 0, "Iterator.skip: 'n' must be a non-negative integer.")
-    local skip = { iterator = iterator, n = n }
-    setmetatable(skip, self)
-    return skip
-end
-
-function Skip:next(index)
-    while true do
-        local new_index, value = self.iterator:next(index)
-        index = new_index
-        if index == nil then
-            return nil, nil
-        end
-        if self.n == 0 then
-            return index, value
-        end
-        self.n = self.n - 1
-    end
-end
-
-function Iterator:skip(n)
-    return Skip:new(self, n)
-end
-
----@class Portal.StepByAdapter
----@field iterator Portal.Iterator
----@field n integer
-local StepBy = Iterator:new()
-StepBy.__index = StepBy
-
-function StepBy:new(iterator, n)
-    assert(n and n > 0, "Iterator.step_by: 'n' must be a positive integer")
-    local step_by = { iterator = iterator, n = n, count = -1 }
-    setmetatable(step_by, self)
-    return step_by
-end
-
-function StepBy:next(index)
-    while true do
-        local new_index, value = self.iterator:next(index)
-        index = new_index
-        if index == nil then
-            return nil, nil
-        end
-        self.count = (self.count + 1) % self.n
-        if self.count == 0 then
-            return index, value
-        end
-    end
-end
-
----@param n integer
----@return Portal.Iterator
-function Iterator:step_by(n)
-    return StepBy:new(self, n)
-end
-
----@class Portal.FilterAdapter
----@field iterator Portal.Iterator
----@field predicate Portal.Predicate
-local Filter = Iterator:new()
-Filter.__index = Filter
-
----@param iterator Portal.Iterator
----@param predicate Portal.Predicate
----@return Portal.Iterator
-function Filter:new(iterator, predicate)
-    assert(predicate, "Iterator.filter: predicate function cannot be nil.")
-    local filter = { iterator = iterator, predicate = predicate }
-    setmetatable(filter, self)
-    return filter
-end
-
----@param index? integer
-function Filter:next(index)
-    while true do
-        local new_index, value = self.iterator:next(index)
-        index = new_index
-        if index == nil then
-            return nil, nil
-        end
-        if self.predicate(value) then
-            return index, value
-        end
-    end
-end
-
----@param predicate Portal.Predicate
----@return Portal.Iterator
-function Iterator:filter(predicate)
-    return Filter:new(self, predicate)
-end
-
----@class Portal.TakeAdapter
----@field iterator Portal.Iterator
----@field n integer
-local Take = Iterator:new()
-Take.__index = Take
-
----@param iterator Portal.Iterator
----@param n integer
----@return Portal.Iterator
-function Take:new(iterator, n)
-    assert(n and n >= 0, "Iterator.take: 'n' must be a non-negative integer.")
-    local take = { iterator = iterator, n = n }
-    setmetatable(take, self)
-    return take
-end
-
----@param index? integer
-function Take:next(index)
-    if self.n == 0 then
-        return nil, nil
+    for i = len + 1, table.maxn(self._table) do
+        self._table[i] = nil
     end
 
-    self.n = self.n - 1
+    self._head = 1
+    self._tail = len + 1
 
-    local new_index, value = self.iterator:next(index)
-    index = new_index
-    if index ~= nil then
-        return index, value
-    end
+    return self._table
 end
 
----@param n? integer
----@return Portal.Iterator
-function Iterator:take(n)
-    return Take:new(self, n or 1)
-end
-
----@class Portal.MapAdapter
----@field iterator Portal.Iterator
----@field f fun(v: any, i: integer): any
-local Map = Iterator:new()
-Map.__index = Map
-
----@param iterator Portal.Iterator
----@param f fun(value: any): any
----@return Portal.Iterator
-function Map:new(iterator, f)
-    assert(f, "Iterator.map: map function cannot be nil.")
-    local map = { iterator = iterator, f = f }
-    setmetatable(map, self)
-    return map
-end
-
----@param index? any
-function Map:next(index)
-    while true do
-        local new_index, value = self.iterator:next(index)
-        index = new_index
-        if index == nil then
-            return nil, nil
-        end
-
-        local mapped_value = self.f(value, index)
-        if mapped_value then
-            return index, mapped_value
-        end
-    end
-end
-
----@param f fun(value: any): any
----@return Portal.Iterator
-function Iterator:map(f)
-    return Map:new(self, f)
-end
-
-return Iterator
+return ListIter

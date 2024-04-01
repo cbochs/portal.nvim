@@ -1,113 +1,120 @@
-local log = require("portal.log")
-
 ---@class Portal.Window
----@field label string
 ---@field content Portal.Content
----@field options Portal.WindowOptions
----@field state Portal.WindowState
+---@field label string
+---@field buf_id integer
+---@field ext_id integer
+---@field win_id integer
+---@field win_opts vim.api.keyset.win_config
 local Window = {}
 Window.__index = Window
 
----@class Portal.WindowOptions
----@field title string
----@field relative string
----@field width integer
----@field height integer
----@field row integer
----@field col integer
----@field border string | table
----@field noautocmd boolean
+-- Create global namespace for Portal windows
+local WINDOW_NS = vim.api.nvim_create_namespace("portal")
 
----@class Portal.WindowState
----@field window integer | any
----@field buffer integer | any
----@field extmark integer | any
----@field cursor integer[]
-
-local namespace = vim.api.nvim_create_namespace("portal")
-
-vim.api.nvim_set_hl(0, "PortalLabel", { link = "Search", default = true })
-vim.api.nvim_set_hl(0, "PortalTitle", { link = "FloatTitle", default = true })
-vim.api.nvim_set_hl(0, "PortalBorder", { link = "FloatBorder", default = true })
-vim.api.nvim_set_hl(0, "PortalNormal", { link = "NormalFloat", default = true })
-
----@param label string
 ---@param content Portal.Content
----@param options Portal.WindowOptions
+---@param label string
+---@param win_opts vim.api.keyset.win_config
 ---@return Portal.Window
-function Window:new(label, content, options)
-    assert(vim.api.nvim_buf_is_valid(content.buffer), ("Portal: invalid buffer %s"):format(content.buffer))
+function Window.new(content, label, win_opts)
+    assert(content.buffer or content.path, "Portal: content must have either a buffer or path")
 
-    local window = {
-        label = label,
+    return setmetatable({
         content = content,
-        options = options,
-        state = nil,
-    }
+        label = label,
+        win_opts = win_opts,
+    }, Window)
+end
 
-    setmetatable(window, self)
-    return window
+---Create a valid nvim api window configuration
+---@return vim.api.keyset.win_config win_opts
+function Window:window_options()
+    local opts = vim.tbl_deep_extend("keep", self.win_opts, {})
+
+    if type(opts.title) == "function" then
+        opts.title = opts.title(self.content)
+    end
+
+    return opts
+end
+
+---@return boolean
+function Window:is_open()
+    return self.win_id ~= nil and vim.api.nvim_win_is_valid(self.win_id)
+end
+
+---@return boolean
+function Window:is_closed()
+    return not self:is_open()
+end
+
+function Window:select()
+    self.content.select(self.content)
 end
 
 function Window:open()
-    if self.state then
-        log.warn("Window.open: window is already open.")
+    if self:is_open() then
         return
     end
 
-    self.state = {}
+    -- Create and load the window buffer
+    if self.content.buffer then
+        self.buf_id = self.content.buffer
+    elseif self.content.path then
+        self.buf_id = vim.fn.bufadd(self.content.path)
+    else
+        error("Portal: expected content to contain either a buffer or path")
+    end
 
-    self.state.buffer = self.content.buffer
-
-    if not vim.api.nvim_buf_is_loaded(self.state.buffer) then
+    if not vim.api.nvim_buf_is_loaded(self.buf_id) then
         -- There are various reasons "bufload" can fail. For example, if a swap
-        -- file exists for the buffer and a prompt is brought up.
+        -- file exists for the buffer and a prompt is brought up. Even if
+        -- "bufload" fails, the buffer may still be loaded.
+        --
         -- Reference: https://github.com/cbochs/portal.nvim/issues/20
-        local ok, reason = pcall(vim.fn.bufload, self.state.buffer)
+        --
 
-        if not ok then
-            log.warn(("Window.open: unable to load buffer, reason: %s"):format(reason))
-        end
-        if not vim.api.nvim_buf_is_loaded(self.state.buffer) then
-            log.error(("Window.open: failed to load buffer %s"):format(self.state.buffer))
+        local shortmess = vim.go.shortmess
+
+        vim.opt.shortmess:append("A")
+        pcall(vim.fn.bufload, self.buf_id)
+        vim.opt.shortmess = shortmess
+
+        if not vim.api.nvim_buf_is_loaded(self.buf_id) then
+            error(string.format("Portal: failed to load: %s", self.content.buffer or self.content.path))
         end
     end
 
-    self.state.window = vim.api.nvim_open_win(self.state.buffer, false, self.options)
+    -- Create window
+    self.win_id = vim.api.nvim_open_win(self.buf_id, false, self:window_options())
 
-    vim.api.nvim_win_set_option(
-        self.state.window,
+    -- Setup window highlights
+    vim.api.nvim_set_option_value(
         "winhighlight",
         table.concat({
             ("%s:%s"):format("FloatTitle", "PortalTitle"),
             ("%s:%s"):format("FloatBorder", "PortalBorder"),
             ("%s:%s"):format("NormalFloat", "PortalNormal"),
-        }, ",")
+        }, ","),
+        { win = self.win_id }
     )
 
-    self.state.cursor = self.content.cursor
-    self.state.cursor = { self.content.cursor.row, self.content.cursor.col }
-    local total_lines = vim.api.nvim_buf_line_count(self.state.buffer)
-    if self.state.cursor[1] > total_lines then
-        self.state.cursor[1] = total_lines
-        self.state.cursor[2] = 0
-    end
+    -- Place content cursor
+    local line_count = vim.api.nvim_buf_line_count(self.buf_id)
+    local cursor = self.content.cursor or { 1, 0 }
 
-    vim.api.nvim_win_set_cursor(self.state.window, self.state.cursor)
-end
+    vim.api.nvim_win_set_cursor(self.win_id, {
+        math.min(cursor[1], line_count),
+        cursor[2],
+    })
 
-function Window:add_label()
-    if not self.state then
-        log.error("Window.label: window is not open.")
-    end
-
-    local cursor = { self.state.cursor[1] - 1, self.state.cursor[2] }
-    local row = cursor[1]
-    local col = cursor[2]
+    -- Create the window label
+    local api_cursor = { self.content.cursor[1] - 1, self.content.cursor[2] } -- (0, 0)-indexed cursor
     local id = nil
+    local row = api_cursor[1]
+    local col = api_cursor[2]
     local virt_text = { { (" %s "):format(self.label), "PortalLabel" } }
 
-    local extmarks = vim.api.nvim_buf_get_extmarks(self.state.buffer, namespace, cursor, cursor, { details = true })
+    local extmarks = vim.api.nvim_buf_get_extmarks(self.buf_id, WINDOW_NS, api_cursor, api_cursor, { details = true })
     if not vim.tbl_isempty(extmarks) then
         local extmark = extmarks[1]
         id = extmark[1]
@@ -116,7 +123,7 @@ function Window:add_label()
         virt_text = vim.list_extend(extmark[4].virt_text, virt_text)
     end
 
-    self.state.extmark = vim.api.nvim_buf_set_extmark(self.state.buffer, namespace, row, col, {
+    self.ext_id = vim.api.nvim_buf_set_extmark(self.buf_id, WINDOW_NS, row, col, {
         id = id,
         virt_text = virt_text,
         virt_text_pos = "overlay",
@@ -125,31 +132,22 @@ function Window:add_label()
     })
 end
 
-function Window:has_label(label)
-    return self.label == label
-end
-
-function Window:select()
-    if not self.state then
-        log.warn("Window.select: window is not open.")
-        return
-    end
-    self.content:select()
-end
-
 function Window:close()
-    if not self.state then
-        log.warn("Window.close: window is not open.")
+    if self:is_closed() then
         return
     end
-    if vim.api.nvim_win_is_valid(self.state.window) then
-        vim.api.nvim_win_close(self.state.window, true)
+
+    if vim.api.nvim_buf_is_valid(self.buf_id) then
+        vim.api.nvim_buf_clear_namespace(self.buf_id, WINDOW_NS, 0, -1)
     end
-    if vim.api.nvim_buf_is_valid(self.state.buffer) then
-        -- vim.api.nvim_buf_del_extmark(self.state.buffer, namespace, self.state.extmark)
-        vim.api.nvim_buf_clear_namespace(self.state.buffer, namespace, 0, -1)
+
+    if vim.api.nvim_win_is_valid(self.win_id) then
+        vim.api.nvim_win_close(self.win_id, true)
     end
-    self.state = nil
+
+    self.buf_id = nil
+    self.ext_id = nil
+    self.win_id = nil
 end
 
 return Window

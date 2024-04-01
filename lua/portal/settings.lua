@@ -1,98 +1,101 @@
----@type Portal.Settings
+---@class Portal.Settings
 local Settings = {}
+Settings.__index = function(tbl, key)
+    return Settings[key] or tbl.inner[key]
+end
 
 ---@class Portal.Settings
 local DEFAULT_SETTINGS = {
-    ---@type "debug" | "info" | "warn" | "error"
-    log_level = "warn",
-
-    ---The base filter applied to every search.
-    ---@type Portal.SearchPredicate | nil
-    filter = nil,
-
-    ---The maximum number of results for any search.
-    ---@type integer | nil
-    max_results = nil,
-
-    ---The maximum number of items that can be searched.
-    ---@type integer
-    lookback = 100,
-
-    ---An ordered list of keys for labelling portals.
-    ---Labels will be applied in order, or to match slotted results.
+    ---Ordered list of keys for labelling portals
     ---@type string[]
     labels = { "j", "k", "h", "l" },
 
-    ---Select the first portal when there is only one result.
+    ---Select the first portal when there is only one result
+    ---@type boolean
     select_first = false,
 
-    ---Keys used for exiting portal selection. Disable with [{key}] = false
-    ---to `false`.
-    ---@type table<string, boolean>
-    escape = {
-        ["<esc>"] = true,
-    },
+    ---The default filter to be applied to a Portal search
+    ---@type Portal.Predicate | nil
+    filter = nil,
 
-    ---The raw window options used for the portal window
+    ---The maximum number of results to consider when performing a Portal query
+    ---@type integer
+    lookback = 100,
+
+    ---An exact set of results to search for.
+    ---See :h portal.nvim-slots for more information.
+    ---@type Portal.Predicate[] | nil
+    slots = nil,
+
+    ---Window options for Portal windows
+    ---@type vim.api.keyset.win_config
     window_options = {
-        relative = "cursor",
         width = 80,
         height = 3,
+
+        relative = "cursor",
         col = 2,
+
         focusable = false,
         border = "single",
+        style = "minimal",
         noautocmd = true,
+
+        ---@type fun(c: Portal.Content): string | nil
+        title = function(content)
+            local title = ""
+            if content.path then
+                ---@diagnostic disable-next-line: cast-local-type
+                title = vim.fs.basename(content.path)
+            elseif content.buffer then
+                local path = vim.api.nvim_buf_get_name(content.buffer)
+                local filetype = vim.api.nvim_get_option_value("filetype", { buf = content.buffer })
+                if path ~= "" then
+                    title = vim.fs.basename(path)
+                elseif filetype ~= "" then
+                    title = filetype
+                else
+                    title = "[No Name]"
+                end
+            end
+
+            return ("[%s] %s"):format(content.type, title)
+        end,
     },
 }
 
-local function termcode_for(key)
-    return vim.api.nvim_replace_termcodes(key, true, false, true)
+---@return Portal.Settings
+function Settings.new()
+    return setmetatable({
+        inner = vim.deepcopy(DEFAULT_SETTINGS),
+    }, Settings)
 end
 
---- @param keys table
-local function replace_termcodes(keys)
-    local resolved_keys = {}
+-- Update settings in-place
+---@param opts? Portal.Settings
+function Settings:update(opts)
+    self.inner = vim.tbl_deep_extend("force", self.inner, opts or {})
+end
 
-    for key_or_index, key_or_flag in pairs(keys) do
-        -- Table style: { "a", "b", "c" }. In this case, key_or_flag is the key
-        if type(key_or_index) == "number" then
-            table.insert(resolved_keys, termcode_for(key_or_flag))
-            goto continue
+---A global instance of the Portal settings
+---@type Portal.Settings
+local settings
+
+---A wrapper around Settings to enable directly indexing the global instance
+local SettingsMod = {}
+
+---@return Portal.Settings
+function SettingsMod.new()
+    return Settings.new()
+end
+
+setmetatable(SettingsMod, {
+    __index = function(_, key)
+        if not settings then
+            settings = Settings.new()
         end
-
-        -- Table style: { ["<esc>"] = true }. In this case, key_or_index is the key
-        if type(key_or_index) == "string" and key_or_flag == true then
-            table.insert(resolved_keys, termcode_for(key_or_index))
-            goto continue
-        end
-
-        ::continue::
-    end
-
-    return resolved_keys
-end
-
---- @type Portal.Settings
-local _settings = DEFAULT_SETTINGS
-_settings.escape = replace_termcodes(_settings.escape)
-_settings.labels = replace_termcodes(_settings.labels)
-
----@param overrides? Portal.Settings
-function Settings.update(overrides)
-    _settings = vim.tbl_deep_extend("force", DEFAULT_SETTINGS, overrides or {})
-    _settings.escape = replace_termcodes(_settings.escape)
-    _settings.labels = replace_termcodes(_settings.labels)
-end
-
---- @return Portal.Settings
-function Settings.as_table()
-    return vim.tbl_deep_extend("keep", _settings, {})
-end
-
-setmetatable(Settings, {
-    __index = function(_, index)
-        return _settings[index]
+        return settings[key]
     end,
 })
 
-return Settings
+return SettingsMod

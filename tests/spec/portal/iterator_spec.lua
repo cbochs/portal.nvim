@@ -1,160 +1,77 @@
-local Iterator = require("portal.iterator")
+local Iter = require("portal.iterator")
 
--- TODO: create a list of expectations and generate tests
 describe("iterator", function()
     it("handles an empty list", function()
-        assert.is_nil(Iterator:new():next())
+        assert.is_nil(Iter.iter({}):next())
     end)
 
-    it("acts as a stateless iterator", function()
-        local iter = Iterator:new({ "a", "b", "c" })
-        assert.are.same({ 2, "b" }, { iter:next(1) })
-        assert.are.same({ 1, "a" }, { iter:next(0) })
-        assert.are.same({ 3, "c" }, { iter:next(2) })
+    it("acts as a iterator", function()
+        local iter = Iter.iter({ "a", "b", "c" })
+        assert.are.same({ "a" }, { iter:next() })
+        assert.are.same({ "b" }, { iter:next() })
+        assert.are.same({ "c" }, { iter:next() })
     end)
 
     it("can be iterated", function()
         local list = { "a", "b", "c" }
-        for i, v in Iterator:new(list):iter() do
+        for i, v in Iter.iter(list):iter() do
             assert.equals(list[i], v)
         end
     end)
 
     it("can be collected into a list", function()
-        assert.are.same({ "a", "b" }, Iterator:new({ "a", "b" }):collect())
-    end)
-
-    it("can be collected into a table", function()
-        assert.are.same(
-            { a = 1, b = 2 },
-            Iterator:new({
-                { "a", 1 },
-                { "b", 2 },
-            }):collect_table()
-        )
+        assert.are.same({ "a", "b" }, Iter.iter({ "a", "b" }):totable())
     end)
 
     it("can be reduced into a table", function()
         assert.are.same(
             { a = 1, b = 2 },
-            Iterator:new({
+            Iter.iter({
                 { "a", 1 },
                 { "b", 2 },
-            }):reduce(function(acc, v, _)
+            }):fold({}, function(acc, v, _)
                 acc[v[1]] = v[2]
                 return acc
-            end, {})
+            end)
         )
     end)
 
     it("can be flattened", function()
-        local iter = Iterator:new({ { 1, 2 }, { 2, 3 } })
-        assert.are.same({ 1, 2, 2, 3 }, iter:flatten())
+        local iter = Iter.iter({ { 1, 2 }, { 2, 3 } })
+        assert.are.same({ 1, 2, 2, 3 }, iter:flatten():totable())
     end)
 
-    it("can start at an arbitraty index", function()
-        local iter = Iterator:new({ 1, 2, 3, 4, 5, 6 }):start_at(5)
-        assert.are.same({ 5, 6 }, iter:collect())
-    end)
-
-    it("can chain anything", function()
-        -- stylua: ignore
-        local iter = Iterator:new({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 })
-            :filter(function(v) return v % 2 == 0 end)
-            :map(function(v) return v + 1 end)
-            :reverse()
-            :step_by(2)
-            :take(2)
-        assert.are.same({ 11, 7 }, iter:collect())
-    end)
-
-    describe("#reverse", function()
+    describe("#rev", function()
         it("can be iterated in reverse", function()
-            local iter = Iterator:new({ "a", "b", "c" }):reverse()
-            assert.are.same({ "c", "b", "a" }, iter:collect())
-        end)
-
-        it("can be iterated in reverse from the start", function()
-            local iter = Iterator:new({ "a", "b", "c" }):start_at(1):reverse()
-            assert.are.same({ "a" }, iter:collect())
-        end)
-
-        it("can be iterated in reverse starting at 1 and skipping 1", function()
-            local iter = Iterator:new({ "a", "b", "c" }):start_at(1):skip(1):reverse()
-            assert.are.same({}, iter:collect())
+            local iter = Iter.iter({ "a", "b", "c" }):rev()
+            assert.are.same({ "c", "b", "a" }, iter:totable())
         end)
 
         it("can be reversed an even number of times", function()
-            local iter = Iterator:new({ "a", "b", "c" }):reverse():reverse():reverse():reverse()
-            assert.are.same({ "a", "b", "c" }, iter:collect())
+            local iter = Iter.iter({ "a", "b", "c" }):rev():rev():rev():rev()
+            assert.are.same({ "a", "b", "c" }, iter:totable())
         end)
 
         it("can be reversed an odd number of times", function()
-            local iter = Iterator:new({ "a", "b", "c" }):reverse():reverse():reverse()
-            assert.are.same({ "c", "b", "a" }, iter:collect())
-        end)
-    end)
-
-    describe("#rrepeat", function()
-        it("repeats forever", function()
-            local iter = Iterator:rrepeat(1):take(3)
-            assert.are.same({ 1, 1, 1 }, iter:collect())
-        end)
-
-        it("repeats anything", function()
-            local iter = Iterator:rrepeat({}):take(3)
-            assert.are.same({ {}, {}, {} }, iter:collect())
-        end)
-    end)
-
-    describe("#wrap", function()
-        it("loops an iterator from the beginning going forward", function()
-            local iter = Iterator:new({ 1, 2 }):wrap():take(4)
-            assert.are.same({ 1, 2, 1, 2 }, iter:collect())
-        end)
-
-        it("loops an iterator from the end going backward", function()
-            local iter = Iterator:new({ 1, 2 }):reverse():wrap():take(4)
-            assert.are.same({ 2, 1, 2, 1 }, iter:collect())
-        end)
-
-        it("wraps an iterator from the middle going forward", function()
-            local iter = Iterator:new({ 1, 2, 3 }):start_at(2):wrap():take(6)
-            assert.are.same({ 2, 3, 1, 2, 3, 1 }, iter:collect())
-        end)
-
-        it("wraps an iterator from the middle going backward", function()
-            local iter = Iterator:new({ 1, 2, 3 }):reverse():start_at(2):wrap():take(6)
-            assert.are.same({ 2, 1, 3, 2, 1, 3 }, iter:collect())
-        end)
-
-        it("wraps an iterator forever", function()
-            local iter = Iterator:new({ 1 }):wrap():take(10)
-            assert.are.same({ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, iter:collect())
+            local iter = Iter.iter({ "a", "b", "c" }):rev():rev():rev()
+            assert.are.same({ "c", "b", "a" }, iter:totable())
         end)
     end)
 
     describe("#skip", function()
         it("skips the first n items", function()
-            local iter = Iterator:new({ 1, 2, 3 }):skip(2)
-            assert.are.same({ 3 }, iter:collect())
+            local iter = Iter.iter({ 1, 2, 3, 4 }):skip(2)
+            assert.are.same({ 3, 4 }, iter:totable())
         end)
 
         it("skips the first n items in reverse", function()
-            local iter = Iterator:new({ 1, 2, 3 }):skip(2):reverse()
-            assert.are.same({ 1 }, iter:collect())
+            local iter = Iter.iter({ 1, 2, 3, 4 }):skip(2):rev()
+            assert.are.same({ 4, 3 }, iter:totable())
         end)
 
         it("skips all items", function()
-            local iter = Iterator:new({ 1 }):skip(100)
-            assert.are.same({}, iter:collect())
-        end)
-    end)
-
-    describe("#step_by", function()
-        it("steps over the iterator", function()
-            local iter = Iterator:new({ 0, 1, 2, 3, 4 }):step_by(3)
-            assert.are.same({ 0, 3 }, iter:collect())
+            local iter = Iter.iter({ 1 }):skip(100)
+            assert.are.same({}, iter:totable())
         end)
     end)
 
@@ -162,15 +79,15 @@ describe("iterator", function()
         it("filters an iterator", function()
             -- stylua: ignore
             local filter = function(i) return i % 2 == 0 end
-            local iter = Iterator:new({ 0, 1, 2, 3, 4 }):filter(filter)
-            assert.are.same({ 0, 2, 4 }, iter:collect())
+            local iter = Iter.iter({ 1, 2, 3, 4 }):filter(filter)
+            assert.are.same({ 2, 4 }, iter:totable())
         end)
     end)
 
     describe("#take", function()
         it("takes only n values", function()
-            local iter = Iterator:new({ 0, 1, 2, 3, 4 }):take(2)
-            assert.are.same({ 0, 1 }, iter:collect())
+            local iter = Iter.iter({ 1, 2, 3, 4 }):take(2)
+            assert.are.same({ 1, 2 }, iter:totable())
         end)
     end)
 
@@ -178,15 +95,15 @@ describe("iterator", function()
         it("maps the values", function()
             -- stylua: ignore
             local map = function(v) return v * 2 end
-            local iter = Iterator:new({ 0, 1, 2 }):map(map)
-            assert.are.same({ 0, 2, 4 }, iter:collect())
+            local iter = Iter.iter({ 0, 1, 2 }):map(map)
+            assert.are.same({ 0, 2, 4 }, iter:totable())
         end)
 
         it("skips nil values", function()
             -- stylua: ignore
             local map = function(v) if v > 0 then return v * 2 end end
-            local iter = Iterator:new({ 0, 1, 2 }):map(map)
-            assert.are.same({ 2, 4 }, iter:collect())
+            local iter = Iter.iter({ 0, 1, 2 }):map(map)
+            assert.are.same({ 2, 4 }, iter:totable())
         end)
     end)
 end)

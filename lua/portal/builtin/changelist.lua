@@ -1,71 +1,82 @@
----@type Portal.QueryGenerator
-local function generate(opts, settings)
-    local Content = require("portal.content")
-    local Iterator = require("portal.iterator")
-    local Search = require("portal.search")
+return require("portal.extension").register({
+    name = "changelist",
 
-    local changelist, start = unpack(vim.fn.getchangelist())
+    ---@return Portal.Result[] results, Portal.QueryOptions defaults
+    generate = function()
+        local Iter = require("portal.iterator")
 
-    if start == #changelist then
-        table.insert(changelist, {})
-    end
+        local changelist, position = unpack(vim.fn.getchangelist(0))
 
-    opts = vim.tbl_extend("force", {
-        start = start + 1,
-        direction = "backward",
-        max_results = #settings.labels,
-    }, opts or {})
+        ---@class Portal.ChangelistItem
+        ---@field lnum integer
+        ---@field col integer
 
-    if settings.max_results then
-        opts.max_results = math.min(opts.max_results, settings.max_results)
-    end
+        ---@cast changelist Portal.ChangelistItem[]
+        ---@cast position integer
 
-    -- stylua: ignore
-    local iter = Iterator:new(changelist)
-        :start_at(opts.start)
-        :skip(1)
-        :take(settings.lookback)
+        -- Current position is 0-indexed, convert to a 1-indexed table index
+        position = position + 1
 
-    if opts.direction == Search.direction.backward then
-        iter = iter:reverse()
-    end
+        ---@param index integer
+        ---@param item Portal.ChangelistItem
+        ---@return Portal.ChangelistResult
+        local function extend_changelist(index, item)
+            ---@class Portal.ChangelistResult
+            local result = {
+                item = item,
+                dist = math.abs(index - position),
+            }
 
-    iter = iter:map(function(v, i)
-        return Content:new({
-            type = "changelist",
-            buffer = 0,
-            cursor = { row = v.lnum, col = v.col },
-            callback = function(content)
-                local keycode = vim.api.nvim_replace_termcodes("g;", true, false, true)
-                if content.extra.direction == "forward" then
-                    keycode = vim.api.nvim_replace_termcodes("g,", true, false, true)
-                end
-                vim.api.nvim_feedkeys(content.extra.distance .. keycode, "n", false)
+            return result
+        end
+
+        -- stylua: ignore
+        changelist = Iter.iter(changelist)
+            :enumerate()
+            :map(extend_changelist)
+
+        local defaults = {
+            start = position,
+            reverse = true,
+
+            ---@param result Portal.ChangelistResult
+            ---@return boolean
+            filter = function(result)
+                return result.dist ~= 0
             end,
+        }
+
+        return changelist, defaults
+    end,
+
+    ---@param _ integer
+    ---@param extended_result Portal.ExtendedResult
+    ---@return Portal.Content
+    transform = function(_, extended_result)
+        ---@type Portal.ChangelistResult
+        local result = extended_result.result
+        local opts = extended_result.opts
+
+        ---@type Portal.Content
+        local content = {
+            buffer = 0,
+            cursor = { result.item.lnum, result.item.col },
             extra = {
-                direction = opts.direction,
-                distance = math.abs(opts.start - i),
+                reverse = opts.reverse,
+                dist = result.dist,
             },
-        })
-    end)
+        }
 
-    iter = iter:filter(function(v)
-        return vim.api.nvim_buf_is_valid(v.buffer)
-    end)
-    if settings.filter then
-        iter = iter:filter(settings.filter)
-    end
-    if opts.filter then
-        iter = iter:filter(opts.filter)
-    end
-    if not opts.slots then
-        iter = iter:take(opts.max_results)
-    end
+        return content
+    end,
 
-    return {
-        source = iter,
-        slots = opts.slots,
-    }
-end
+    ---@param content Portal.Content
+    select = function(content)
+        -- stylua: ignore
+        local keycode = content.extra.reverse
+            and vim.api.nvim_replace_termcodes("g;", true, false, true)
+            or vim.api.nvim_replace_termcodes("g,", true, false, true)
 
-return generate
+        vim.api.nvim_feedkeys(content.extra.dist .. keycode, "n", false)
+    end,
+})
