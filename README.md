@@ -345,23 +345,16 @@ Close a given list of portal (windows). Preferred over a for-loop as it forces a
 
 A **portal** is a labelled floating window showing a snippet of some buffer. The label indicates a key that can be used to navigate directly to the buffer location. A portal may also contain additional information, such as the buffer's name or the result's index.
 
-<img width="1043" alt="portal_screenshot" src="https://user-images.githubusercontent.com/2467016/222313082-8ae51576-5497-40e8-88d9-466ca504e22d.png">
+<img width="1080" alt="portal_screenshot" src="https://user-images.githubusercontent.com/2467016/222313082-8ae51576-5497-40e8-88d9-466ca504e22d.png">
 
 ## Search
 
-Each search begins with a [query](#queries) (or list of queries), and an optional set set of [search options](#portalsearchoptions) to use while performing the search. Once you h
-
-The next stage after building a query is performing a search.
-
-in building a query is specifying a set of options to refine your search results. This can be in the form of
-
-During a search, a **filter** may be applied to remove any unwanted results from being displayed. More specifically, a filter is a [predicate](#portalpredicate) function which accepts some value and returns `true` or `false`, indicating whether that value should be kept or discarded.
+Each search begins with a [query](#queries) (or list of queries), and an optional set set of [search options](#portalsearchoptions) to use while performing the search. Each query can be searched by iteself, or Portal also supports searching multiple queries at once with [`Portal.search`](#portalsearch).
 
 <details>
 <summary><b>Examples</b></summary>
 
 ```lua
-
 -- Search for jumplist items in the same buffer
 require("portal.builtin").jumplist.search({
     filter = function(v) return v.buffer == vim.fn.bufnr() end
@@ -372,23 +365,25 @@ require("portal.builtin").quickfix.search({
     filter = function(v) return vim.api.nvim_buf_get_option(v.buffer, "modified") end
 })
 
--- Search
+-- Search multiple queries
 local queries = {
     require("portal.query").new(function() return { 1, 2, 3 } end),
     require("portal.query").new(function() return { 7, 8, 9 } end),
 }
+
+require("portal").search(queries)
 ```
 
 </details>
 
 ### Queries
 
-A query is a relatively simple concept. It accepts a function that _generates_ results (some iterable) and returns an _iterator_ over those results. In fact, let's see just how that works:
+A query is a relatively simple construct. It accepts a function that _generates_ results (some iterable) and returns an _iterator_ over those results. In fact, let's see just how that works:
 
 ```lua
 local Query = require("portal.query")
 
-Query.new(function() return { 0, 2, 4 })
+Query.new(function() return { 0, 2, 4 }) -- provide generating function
     :prepare({ limit = 2 }) -- provide query options
     :search() -- create an iterator over the results
     :totable() -- collect the results
@@ -432,24 +427,41 @@ require("portal.builtin").jumplist.query()
 <details>
 <summary><b>Examples</b></summary>
 
+Match a list of predicates
+
 ```lua
--- Create search queries
 local queries = {
     require("portal.query").new(function() return { 1, 2, 3 } end),
     require("portal.query").new(function() return { 7, 8, 9 } end),
 }
 
--- Define slot
-require("portal").search(queries, {
-    slots = {
-        function(v) return v > 1 end,
-        function(v) return v > 5 end,
-        function(v) return v > 8 end,
-    }
-})
+local slots = {
+    function(v) return v > 1 end,
+    function(v) return v > 5 end,
+    function(v) return v > 8 end,
+}
 
-
+local results = require("portal").search(queries, { slots = slots })
 -- Returns { 2, 7, 9 }
+```
+
+Match by some key in a result
+
+```lua
+local queries = {
+    require("portal.builtin").quickfix.query(),
+    require("portal.builtin").jumplist.query()
+}
+
+local slots = {
+    -- Exact
+    { type = "quickfix" },
+
+    -- One-of
+    { type = { "quickfix", "jumplist" } },
+}
+
+local results = require("portal").search(queries, { slots = slots })
 ```
 
 </details>
@@ -524,6 +536,7 @@ require("portal.extension").register({
     ---@param content Portal.Content
     select = function(content)
         vim.api.nvim_win_set_buf(0, content.buffer)
+        vim.api.nvim_win_set_cursor(0, content.cursor)
     end
 })
 ````
@@ -577,7 +590,7 @@ A few highlight groups are available for customizing the look of Portal.
 - **`reverse?`**: `boolean` (default: `false`)
 - **`lookback?`**: `integer` (default: `settings.lookback`)
 - **`limit?`**: `integer` (default: `#settings.labels`)
-- **`filter?`**: [`Portal.Predicate`](#portalpredicate) (default: `#settings.filter`)
+- **`filter?`**: [`Portal.Predicate`](#portalpredicate) (default: `settings.filter`)
 
 ### `Portal.Predicate`
 
