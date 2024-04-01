@@ -2,53 +2,44 @@ name: ci
 
 on:
   push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.actor }}
+  cancel-in-progress: true
 
 jobs:
-  check-style:
+  style:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: JohnnyMorganz/stylua-action@v2
+      - uses: actions/checkout@v4
+      - uses: JohnnyMorganz/stylua-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          version: v0.16.1
+          version: latest
           args: --check .
 
-  check-lint:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: lunarmodules/luacheck@v1
 
-  run-tests:
+  test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        neovim_version: ["v0.9.5", "nightly"]
     steps:
-    - uses: actions/checkout@v3
-    - name: install neovim
-      shell: bash
-      run: |
-        wget -q https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.deb -O /tmp/nvim.deb
-        sudo dpkg -i /tmp/nvim.deb
-    - name: run tests
-      run: |
-        nvim --version
-        make test
-
-  generate-vimdoc:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: kdheepak/panvimdoc@main
+      - uses: actions/checkout@v4
+      - uses: rhysd/action-setup-vim@v1
         with:
-          vimdoc: portal.nvim
-          version: "Neovim >= v0.8.0"
-          demojify: true
-          docmappingprojectname: false
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: 'chore(docs): auto generate vimdoc'
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          neovim: true
+          version: ${{ matrix.neovim_version }}
+      - run: make test
