@@ -3,28 +3,27 @@ local Iter = require("portal.iterator")
 ---@class Portal.Query
 ---@field generator Portal.Generator
 ---@field transformer Portal.Transformer
----@field opts? Portal.SearchOptions
+---@field opts? Portal.QueryOptions
 local Query = {}
 Query.__index = Query
 
----@class Portal.SearchOptions
+---@class Portal.QueryOptions
 ---@field start? integer the absolute starting position
 ---@field skip? integer
 ---@field reverse? boolean
 ---@field lookback? integer maximum number of searched items
 ---@field limit? integer maximum number of returned results
 ---@field filter? Portal.Predicate
----@field slots? Portal.Predicate | Portal.Predicate[]
 
 ---@alias Portal.Iterable table | function | Portal.Iter
 ---@alias Portal.Predicate fun(...): boolean
----@alias Portal.Generator fun(): Portal.Iterable, Portal.SearchOptions?
+---@alias Portal.Generator fun(): Portal.Iterable, Portal.QueryOptions?
 ---@alias Portal.Transformer fun(i: integer, r: Portal.ExtendedResult): Portal.Content?
 ---@alias Portal.Result any
 
 ---@class Portal.ExtendedResult
 ---@field result Portal.Result
----@field opts Portal.SearchOptions
+---@field opts Portal.QueryOptions
 
 ---@class Portal.Content
 ---@field type? string
@@ -34,26 +33,7 @@ Query.__index = Query
 ---@field select? fun(c: Portal.Content)
 ---@field extra? table
 
----@param slots Portal.Predicate | Portal.Predicate[]
----@return function
-local function match_slots(slots)
-    -- Wrap a single slot predicate as a list
-    if type(slots) == "function" then
-        slots = { slots }
-    end
-
-    return function(filled, content)
-        for i, predicate in ipairs(slots) do
-            if not filled[i] and predicate(content) then
-                filled[i] = content
-                break
-            end
-        end
-        return filled
-    end
-end
-
----@param opts Portal.SearchOptions
+---@param opts Portal.QueryOptions
 ---@return fun(r: Portal.Result): Portal.ExtendedResult
 local function extend_result(opts)
     return function(result)
@@ -75,14 +55,14 @@ function Query.new(generator, transformer)
     }, Query)
 end
 
----@param opts? Portal.SearchOptions
+---@param opts? Portal.QueryOptions
 ---@return Portal.Query
 function Query:prepare(opts)
     self.opts = vim.tbl_deep_extend("force", self.opts or {}, opts or {})
     return self
 end
 
----@return table
+---@return Portal.Iter
 function Query:search()
     local results, defaults = self.generator()
 
@@ -143,13 +123,11 @@ function Query:search()
         iter:filter(opts.filter)
     end
 
-    if opts.slots then
-        return iter:fold({}, match_slots(opts.slots))
-    elseif opts.limit then
-        return iter:take(opts.limit):totable()
-    else
-        return iter:totable()
+    if opts.limit then
+        iter:take(opts.limit)
     end
+
+    return iter
 end
 
 return Query

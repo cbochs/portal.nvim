@@ -12,6 +12,9 @@ end
 ---@field win_opts? vim.api.keyset.win_config
 ---@field search? Portal.SearchOptions
 
+---@class Portal.SearchOptions : Portal.QueryOptions
+---@field slots? Portal.Predicate | Portal.Predicate[]
+
 ---@param queries Portal.Query[]
 ---@param opts? Portal.Options
 function Portal.tunnel(queries, opts)
@@ -57,19 +60,120 @@ function Portal.search(queries, opts)
     local Query = require("portal.query")
     local Iter = require("portal.iterator")
 
-    -- A single query should just be searched with the provided options
-    if getmetatable(queries) == Query then
-        return queries:prepare(opts):search()
+    opts = opts or {}
+
+    if opts.slots then
+        opts.limit = nil
     end
 
-    local query = Query.new(function()
-        -- stylua: ignore
-        return Iter.iter(queries)
-            :map(Query.search)
-            :flatten()
-    end)
+    ---@type Portal.Iter
+    local iter
 
-    return query:prepare(opts):search()
+    -- A single query should just be searched with the provided options
+    if getmetatable(queries) == Query then
+        iter = queries:prepare(opts):search()
+    else
+        local query = Query.new(function()
+            -- stylua: ignore
+            return Iter.iter(queries)
+                :map(Query.search)
+                :map(Iter.totable)
+                :flatten()
+        end)
+
+        iter = query:prepare(opts):search()
+    end
+
+    ---@type Portal.Content[]
+    local results = iter:totable()
+
+    if opts.slots then
+        return Portal.match(results, opts.slots)
+    else
+        return results
+    end
+end
+
+local function is_match(result, predicate)
+    if type(predicate) == "function" then
+        return predicate(result)
+    end
+
+    for key, value in pairs(predicate) do
+        if type(value) == "function" and not value(result[key]) then
+            if not value(result[key]) then
+                return false
+            end
+        elseif type(value) == "table" then
+            if not vim.tbl_contains(value, result[key]) then
+                return false
+            end
+        elseif result[key] ~= value then
+            return false
+        end
+    end
+
+    return true
+end
+
+---Match a set of results to a list of slots.
+---
+---Slots can match a single item
+---
+---```lua
+---Portal.match(results, function(c)
+---    return c.buffer ~= vim.api.nvim_current_buf()
+---end)
+---```
+---
+---Slots can match multiple items
+---
+---```lua
+---Portal.match(results, {
+---    function(c) return c.type == "jumplist" end,
+---    function(c) return c.type == "quickfix" end
+---})
+---```
+---
+---Slots can match key-value pairs
+---
+---```lua
+---Portal.match(results, {
+---    -- Exact
+---    { type = "grapple" },
+---
+---    -- One of
+---    { type = { "jumplist", "quickfix" } },
+---
+---    -- Predicate
+---    { buffer = function(b) return vim.api.nvim_buf_is_valid(b) end }
+---})
+---```
+---
+---@param results any[]
+---@param slots function | table
+---@return Portal.Content[]
+function Portal.match(results, slots)
+    local Iter = require("portal.iterator")
+
+    -- Wrap a single slot predicate as a list
+    if type(slots) == "function" or not vim.tbl_islist(slots) then
+        slots = { slots }
+    end
+
+    ---@cast slots Portal.Predicate[] | Portal.Content[]
+
+    local function match_slots(filled, content)
+        for i, predicate in ipairs(slots) do
+            if not filled[i] and is_match(content, predicate) then
+                filled[i] = content
+                break
+            end
+        end
+        return filled
+    end
+
+    return Iter.iter(results):fold({}, match_slots)
 end
 
 ---@param results Portal.Content[]

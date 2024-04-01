@@ -27,7 +27,7 @@ setmetatable(Builtin, {
         local builtin = setmetatable({
             extension = extension,
 
-            ---@param opts? Portal.SearchOptions
+            ---@param opts? Portal.QueryOptions
             ---@return Portal.Query
             query = function(opts)
                 return Query.new(extension.generate, extension.transform):prepare(opts)

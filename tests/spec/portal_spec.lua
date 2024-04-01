@@ -22,4 +22,62 @@ describe("portal", function()
             )
         end)
     end)
+
+    describe("#match", function()
+        it("matches a single predicate", function()
+            assert.are.same(
+                { [1] = 2 },
+                Portal.match({ 1, 2, 3 }, function(v)
+                    return v == 2
+                end)
+            )
+        end)
+
+        it("matches multiple predicates", function()
+            -- stylua: ignore
+            assert.are.same(
+                { [1] = 2, [2] = 1  },
+                Portal.match({ 1, 2, 3 }, {
+                    function(v) return v == 2 end,
+                    function(v) return v == 1 end
+                })
+            )
+        end)
+
+        it("matches with holes", function()
+            -- stylua: ignore
+            assert.are.same(
+                { [1] = 2, [2] = nil, [3] = 1  },
+                Portal.match({ 1, 2, 3 }, {
+                    function(v) return v == 2 end,
+                    function(v) return v == 100 end, -- will not match
+                    function(v) return v == 1 end
+                })
+            )
+        end)
+
+        it("matches a table exactly", function()
+            assert.are.same(
+                { [1] = { type = "b", name = "bob" } },
+                Portal.match({
+                    { type = "a", name = "alice" },
+                    { type = "b", name = "bob" },
+                }, {
+                    { type = "b" },
+                })
+            )
+        end)
+
+        it("matches a table one-of", function()
+            assert.are.same(
+                { [1] = { type = "b", name = "bob" } },
+                Portal.match({
+                    { type = "a", name = "alice" },
+                    { type = "b", name = "bob" },
+                }, {
+                    { type = { "a", "b" }, name = "bob" },
+                })
+            )
+        end)
+    end)
 end)
