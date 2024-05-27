@@ -23,6 +23,7 @@ Window.__index = Window
 ---@field buffer integer | any
 ---@field extmark integer | any
 ---@field cursor integer[]
+---@field ns integer
 
 local namespace = vim.api.nvim_create_namespace("portal")
 
@@ -74,7 +75,8 @@ function Window:open()
     end
 
     self.state.window = vim.api.nvim_open_win(self.state.buffer, false, self.options)
-
+    self.state.ns = vim.api.nvim_create_namespace("")
+    vim.api.nvim__win_add_ns(self.state.window, self.state.ns)
     vim.api.nvim_win_set_option(
         self.state.window,
         "winhighlight",
@@ -107,7 +109,7 @@ function Window:add_label()
     local id = nil
     local virt_text = { { (" %s "):format(self.label), "PortalLabel" } }
 
-    local extmarks = vim.api.nvim_buf_get_extmarks(self.state.buffer, namespace, cursor, cursor, { details = true })
+    local extmarks = vim.api.nvim_buf_get_extmarks(self.state.buffer, self.state.ns, cursor, cursor, { details = true })
     if not vim.tbl_isempty(extmarks) then
         local extmark = extmarks[1]
         id = extmark[1]
@@ -116,12 +118,13 @@ function Window:add_label()
         virt_text = vim.list_extend(extmark[4].virt_text, virt_text)
     end
 
-    self.state.extmark = vim.api.nvim_buf_set_extmark(self.state.buffer, namespace, row, col, {
+    self.state.extmark = vim.api.nvim_buf_set_extmark(self.state.buffer, self.state.ns, row, col, {
         id = id,
         virt_text = virt_text,
         virt_text_pos = "overlay",
         strict = false,
         spell = false,
+        scoped = true,
     })
 end
 
@@ -147,6 +150,7 @@ function Window:close()
     end
     if vim.api.nvim_buf_is_valid(self.state.buffer) then
         -- vim.api.nvim_buf_del_extmark(self.state.buffer, namespace, self.state.extmark)
+        vim.api.nvim_buf_clear_namespace(self.state.buffer, self.state.ns, 0, -1)
         vim.api.nvim_buf_clear_namespace(self.state.buffer, namespace, 0, -1)
     end
     self.state = nil
