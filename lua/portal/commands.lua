@@ -1,5 +1,7 @@
 local Commands = {}
 
+local default_direction = require("portal.settings").command_default_direction
+
 function Commands.create()
     vim.api.nvim_create_user_command("Portal", function(opts)
         local builtin = require("portal.builtin")[opts.fargs[1]]
@@ -7,7 +9,7 @@ function Commands.create()
             error(("'%s' is not a valid Portal builtin"):format(builtin))
         end
 
-        local direction = opts.fargs[2]
+        local direction = opts.fargs[2] or default_direction
         if not vim.tbl_contains({ "forward", "backward" }, direction) then
             error(("'%s' is not a valid direction. Use either 'forward' or 'backward'"):format(direction))
         end

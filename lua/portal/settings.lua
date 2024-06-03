@@ -43,6 +43,7 @@ local DEFAULT_SETTINGS = {
         border = "single",
         noautocmd = true,
     },
+    command_default_direction= "forward"
 }
 
 local function termcode_for(key)
