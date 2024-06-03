@@ -1,5 +1,21 @@
 local Commands = {}
 
+---@return table
+local builtins = function()
+    local builtins = {
+        "changelist",
+        "jumplist",
+        "quickfix",
+    }
+    if package.loaded["grapple"] then
+        table.insert(builtins, "grapple")
+    end
+    if package.loaded["harpoon"] then
+        table.insert(builtins, "harpoon")
+    end
+    return builtins
+end
+
 function Commands.create()
     vim.api.nvim_create_user_command("Portal", function(opts)
         local builtin = require("portal.builtin")[opts.fargs[1]]
@@ -21,13 +37,7 @@ function Commands.create()
             local n = #line_split - 2
 
             if n == 0 then
-                local builtins = {
-                    "changelist",
-                    "grapple",
-                    "harpoon",
-                    "jumplist",
-                    "quickfix",
-                }
+                local builtins = builtins()
 
                 return vim.tbl_filter(function(val)
                     return vim.startswith(val, line_split[2])
